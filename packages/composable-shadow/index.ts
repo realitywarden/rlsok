@@ -9,6 +9,7 @@ import {
 export * from './schema';
 export { validateGoal } from './goals';
 import { validateGoal } from './goals';
+import { pathInterfaceType } from './contracts';
 
 export function approveProfile(input: unknown, actor: string, expiresAt: string, now = new Date()): Approval {
   const profile = profileSchema.parse(input);
@@ -32,15 +33,18 @@ function configuration(p: Profile, path: Path, observation: Observation | undefi
   return executionConfigurationV2Schema.parse({
     schemaVersion: 2, identity: { device: p.robot.deviceId, robot: p.robot.model },
     semanticContract: {
-      command: { interfaceType: actual?.actionType ?? path.actionType, endpoint: actual?.endpoint ?? path.endpoint },
+      command: { interfaceType: pathInterfaceType(actual ?? path), endpoint: actual?.endpoint ?? path.endpoint },
       controller: { implementation: p.robot.controller, version: 'composable-shadow/v1' },
-      jointCommandMapping: p.jointOrder.map((joint, commandIndex) => ({ joint, commandIndex }))
+      // v2 names command channels as joints; reuse the existing Husarion Twist convention.
+      jointCommandMapping: (path.adapter === 'topic_twist' ? ['linear.x', 'linear.y', 'linear.z', 'angular.x', 'angular.y', 'angular.z'] : p.jointOrder).map((joint, commandIndex) => ({ joint, commandIndex }))
     },
     provenance: [
       { kind: 'content', sourceIdentity: 'composition', purpose: 'controller_configuration', contentSha256: profileHash(p) },
       { kind: 'content', sourceIdentity: 'interface', purpose: 'controller_configuration', contentSha256: actual?.interfaceSha256 ?? path.interfaceSha256 },
       { kind: 'content', sourceIdentity: 'ros-environment', purpose: 'other', contentSha256: hashObject(observation?.environment ?? p.environment) },
-      ...facts
+      ...facts,
+      ...(path.adapter === 'topic_twist' ? [{ kind: 'content' as const, sourceIdentity: 'topic-subscriber', purpose: 'controller_configuration' as const,
+        contentSha256: hashObject(actual && 'subscriber' in actual ? actual.subscriber : path.subscriber) }] : [])
     ],
     observation: { observedAt: observation?.observedAt ?? now, environment: {
       rosDistro: observation?.environment.rosDistro ?? p.environment.rosDistro,
@@ -76,10 +80,20 @@ export async function evaluateProfile(input: {
   for (const path of p.paths) {
     const checks = [...common];
     const actual = o.paths.find(item => item.id === path.id);
-    check(checks, 'action.server', actual?.serverCount === 1, 'action_server_missing_or_ambiguous');
-    check(checks, 'action.endpoint', actual?.endpoint === path.endpoint, 'action_endpoint_mismatch');
-    check(checks, 'action.type', actual?.actionType === path.actionType, 'action_type_mismatch');
-    check(checks, 'action.definition', actual?.interfaceSha256 === path.interfaceSha256, 'action_definition_mismatch');
+    if (path.adapter === 'topic_twist') {
+      const topic = actual && 'subscriber' in actual ? actual : undefined;
+      check(checks, 'topic.subscription', topic?.subscriberCount === 1, 'topic_subscription_missing_or_ambiguous');
+      check(checks, 'topic.subscriber', topic?.subscriber.name === path.subscriber.name && topic?.subscriber.namespace === path.subscriber.namespace, 'topic_subscriber_mismatch');
+      check(checks, 'topic.endpoint', topic?.endpoint === path.endpoint, 'topic_endpoint_mismatch');
+      check(checks, 'topic.type', topic?.messageType === path.messageType, 'topic_type_mismatch');
+      check(checks, 'topic.definition', topic?.interfaceSha256 === path.interfaceSha256, 'topic_definition_mismatch');
+    } else {
+      const action = actual && 'actionType' in actual ? actual : undefined;
+      check(checks, 'action.server', action?.serverCount === 1, 'action_server_missing_or_ambiguous');
+      check(checks, 'action.endpoint', action?.endpoint === path.endpoint, 'action_endpoint_mismatch');
+      check(checks, 'action.type', action?.actionType === path.actionType, 'action_type_mismatch');
+      check(checks, 'action.definition', action?.interfaceSha256 === path.interfaceSha256, 'action_definition_mismatch');
+    }
     for (const id of path.checks) {
       const expected = p.facts.find(f => f.id === id)!;
       const observed = o.facts.find(f => f.id === id);
@@ -101,11 +115,11 @@ export async function evaluateProfile(input: {
       apiVersion: 'realitywarden.io/v1alpha1', kind: 'ExecutablePolicy',
       metadata: { name: `${p.id}.${path.id}`, releaseId: `${p.id}.${path.id}.${a.profileSha256.slice(0, 16)}`, createdAt: a.approvedAt },
       model: { artifact: 'profile.json', sha256: profileDigest, framework: 'ros2', policyType: `shadow/${path.adapter}`, codeRevision: 'composable-shadow/v1' },
-      actionContract: { representation: path.adapter === 'joint_trajectory' ? 'trajectory' : path.adapter === 'tp_program' ? 'program' : path.adapter,
-        dimension: path.adapter === 'joint_trajectory' ? p.jointOrder.length : path.adapter === 'cartesian_pose' ? 7 : path.adapter === 'cartesian_delta' ? 6 : 1,
+      actionContract: { representation: path.adapter === 'topic_twist' ? 'twist' : path.adapter === 'joint_trajectory' ? 'trajectory' : path.adapter === 'tp_program' ? 'program' : path.adapter,
+        dimension: path.adapter === 'joint_trajectory' ? p.jointOrder.length : path.adapter === 'cartesian_pose' ? 7 : ['cartesian_delta', 'topic_twist'].includes(path.adapter) ? 6 : 1,
         jointOrder: path.adapter === 'joint_trajectory' ? p.jointOrder : [],
-        units: { position: path.adapter === 'joint_trajectory' ? 'radian' : path.adapter === 'cartesian_pose' ? 'meter' : path.adapter === 'cartesian_delta' ? 'millimeter' : 'none',
-          velocity: path.adapter === 'joint_trajectory' ? 'radian_per_second' : path.adapter === 'cartesian_delta' ? 'mm_per_second' : 'none' },
+        units: { position: path.adapter === 'joint_trajectory' ? 'radian' : ['cartesian_pose', 'topic_twist'].includes(path.adapter) ? 'meter' : path.adapter === 'cartesian_delta' ? 'millimeter' : 'none',
+          velocity: path.adapter === 'joint_trajectory' ? 'radian_per_second' : path.adapter === 'cartesian_delta' ? 'mm_per_second' : path.adapter === 'topic_twist' ? 'linear:m/s;angular:rad/s' : 'none' },
         normalizerSha256: hashObject(path.fields), preprocessorSha256: hashObject(path.adapter), postprocessorSha256: hashObject('zero-dispatch') },
       robot: { profileId: p.id, profileSha256: profileDigest, urdfSha256: p.robot.urdfSha256, controllerType: p.robot.controller, controllerConfigSha256: binding },
       runtimePolicy: { policySha256: profileDigest, maxStateAgeMs: p.maxObservationAgeMs, maxConfigurationAgeMs: p.maxObservationAgeMs, failClosed: true },
@@ -137,7 +151,9 @@ export async function evaluateProfile(input: {
     const evidence: EvidenceBundle = { apiVersion: 'realitywarden.io/v1alpha1', kind: 'EvidenceBundle',
       releaseId: spec.metadata.releaseId, executablePolicyHash: identity, createdAt: timestamp, entries, testReportSha256: spec.evidence.testReportSha256 };
     const decision = entries[0]!.evidence;
-    results.push({ pathId: path.id, adapter: path.adapter, decision: decision.decision === 'allowed' ? 'WOULD_ALLOW' : 'WOULD_BLOCK',
+    results.push({ pathId: path.id, adapter: path.adapter, endpoint: path.endpoint,
+      interfaceType: pathInterfaceType(path), ...(path.adapter === 'topic_twist' ? { subscriber: path.subscriber, commandFrame: path.commandFrame } : {}),
+      decision: decision.decision === 'allowed' ? 'WOULD_ALLOW' : 'WOULD_BLOCK',
       reason: checks.find(c => !c.passed)?.reason ?? decision.decisionReason, checks,
       expectedConfigurationDigest: binding, observedConfigurationDigest: observedConfig ? configurationDigest(observedConfig) : null,
       assessment, release: spec, evidence });
@@ -151,7 +167,9 @@ export async function evaluateProfile(input: {
     limitations: [
       'Shadow evaluation only: no hardware dispatch or production execution permit.',
       'Local approval and observation files are operator-supplied, not authenticated Cloud approval or hardware attestation.',
-      'Graph discovery confirms visible server nodes, not physical robot identity or all possible execution paths.',
+      'Graph discovery confirms visible server/subscriber metadata, not physical robot identity, QoS delivery, controller readiness or all execution paths.',
+      'Topic proposals are supplied local message examples; no live messages are intercepted, forwarded or published. Other nodes can still command a robot: use an isolated simulation.',
+      'Twist uses the operator-declared command frame; only TwistStamped includes a checked frame ID. Limits, collision checks and readiness remain the existing controller responsibility.',
       'File hashes prove local file content; timestamped JSON facts require a trusted read-only exporter of active controller state.',
       'Goal adapters check declared fields and configuration eligibility, not complete ROS serialization or physical motion safety.'
     ]

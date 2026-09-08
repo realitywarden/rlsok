@@ -1,5 +1,7 @@
 # Composable ROS 2 Shadow evaluations
 
+For required inputs, offline use, standard velocity topics and readable before/after reports, start with [your first local evaluation](local-shadow-first-evaluation.md).
+
 One runtime combines reusable goal adapters, action endpoints, and selected
 configuration checks. Each operator supplies a profile rather than a private
 fork. The first example covers the reported FANUC M-10iA / R-30iA Mate,

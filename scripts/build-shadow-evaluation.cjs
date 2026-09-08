@@ -59,13 +59,13 @@ const copy = (source, target) => {
     fs.writeFileSync(path.join(stage, 'bin/rlsok'), '#!/bin/sh\nset -eu\ncase "${1:-}" in profile|verify-evidence|--version|-V|version) ;; *) echo "Local Shadow evaluation: use profile help, profile commands, or verify-evidence." >&2; exit 2 ;; esac\nSELF=$(readlink -f -- "$0")\nROOT=$(CDPATH= cd -- "$(dirname -- "$SELF")/.." && pwd)\nexec "$ROOT/bin/node" "$ROOT/lib/rlsok/dist/apps/cli/rlsok.js" "$@"\n');
     fs.writeFileSync(path.join(stage, 'VERSION'), version + '\n');
     fs.writeFileSync(path.join(stage, 'SOURCE_COMMIT'), sourceCommit + '\n');
-    fs.writeFileSync(path.join(stage, 'README.md'), '# RLSOK local Shadow evaluation\n\nStart with [the self-service guide](docs/fanuc-shadow-self-service.md).\n\nThis prerelease is for local, self-attested zero-dispatch evaluation. Humble, private interfaces, installation and physical FANUC operation have not been validated for this release. See BUILD-MANIFEST.json.\n');
+    fs.writeFileSync(path.join(stage, 'README.md'), '# RLSOK local Shadow evaluation\n\nStart with [the first-evaluation guide](docs/local-shadow-first-evaluation.md).\n\nThis prerelease is for local, self-attested zero-dispatch evaluation. Humble, private interfaces, installation and physical FANUC operation have not been validated for this release. See BUILD-MANIFEST.json.\n');
     const build = { schemaVersion: 1, version, sourceCommit,
       sourceUrl: `https://github.com/realitywarden/rlsok/commit/${sourceCommit}`,
       builtAt: new Date().toISOString(), buildHost: `${process.platform}-${process.arch}`,
       node: { version: '22.22.0', url: nodeUrl, archiveSha256: nodeSha256 }, dependencies,
       scope: 'local-self-attested-shadow-evaluation', cloudUploaded: false,
-      validation: { typescriptBuild: 'completed', localTests: 'not_run', githubActions: 'not_run', installedBundle: 'not_run', humble: 'not_validated', privateInterfaces: 'unknown', physicalRobot: 'not_validated' } };
+      validation: { typescriptBuild: 'completed', localTests: 'see_committed_release_notes', validationRecord: `docs/releases/v${version}.md`, githubActions: 'not_run', installedBundle: 'not_run', humble: 'not_validated', privateInterfaces: 'unknown', physicalRobot: 'not_validated' } };
     json(path.join(stage, 'BUILD-MANIFEST.json'), build);
     const response = await fetch(nodeUrl, { signal: AbortSignal.timeout(120000) });
     if (!response.ok) throw new Error(`node_download_http_${response.status}`);
@@ -77,7 +77,8 @@ const copy = (source, target) => {
       [path.join(__dirname, 'archive-shadow-evaluation.py'), stage, path.join(temporary, nodeName), nodeSha256, path.join(output, archiveName)], { stdio: 'inherit' });
     run('git', ['archive', '--format=tar.gz', `--prefix=rlsok-source-${version}/`, `--output=${path.join(output, `rlsok-source-${version}.tar.gz`)}`, sourceCommit]);
     copy(path.join(root, 'packaging/install-shadow.sh'), path.join(output, 'install-shadow.sh'));
-    copy(path.join(root, 'docs/fanuc-shadow-self-service.md'), path.join(output, 'START-HERE.md'));
+    copy(path.join(root, 'docs/local-shadow-first-evaluation.md'), path.join(output, 'START-HERE.md'));
+    copy(path.join(root, 'docs/fanuc-shadow-self-service.md'), path.join(output, 'INSTALLATION.md'));
     copy(path.join(root, 'docs/interface-onboarding.md'), path.join(output, 'INTERFACE-ONBOARDING.md'));
     run(process.execPath, [path.join(__dirname, 'generate-sbom.cjs')]);
     run(process.execPath, [path.join(__dirname, 'license-inventory.cjs')]);

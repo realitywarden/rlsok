@@ -34,7 +34,7 @@ export function createFanucFixture(now = new Date()): { profile: Profile; observ
   return { profile,
     observation: { schemaVersion: 1, profileId: profile.id, observedAt: timestamp, collector: 'fixture/v1', environment: { ...profile.environment },
       facts: profile.facts.map(f => ({ id: f.id, kind: f.kind, value: f.expected, observedAt: timestamp })),
-      paths: profile.paths.map(p => ({ id: p.id, endpoint: p.endpoint, actionType: p.actionType, interfaceSha256: p.interfaceSha256, serverCount: 1 })) },
+      paths: profile.paths.filter(p => p.adapter !== 'topic_twist').map(p => ({ id: p.id, endpoint: p.endpoint, actionType: p.actionType, interfaceSha256: p.interfaceSha256, serverCount: 1 })) },
     proposals: { schemaVersion: 1, proposals: [
       { id: 'fixture-trajectory', pathId: 'trajectory', goal: { trajectory: { joint_names: [...profile.jointOrder], points: [{ positions: [0, 0, 0, 0, 0, 0], time_from_start: { sec: 1, nanosec: 0 } }] } } },
       { id: 'fixture-cartesian', pathId: 'cartesian', goal: { target: {
@@ -65,7 +65,7 @@ export function createFanucPublicFixture(now = new Date()) {
     delta_x_mm: 1, delta_y_mm: 0, delta_z_mm: 0, delta_w_deg: 0, delta_p_deg: 0, delta_r_deg: 0, velocity_mm_s: 1
   } };
   fixture.observation.profileId = fixture.profile.id;
-  fixture.observation.paths = fixture.profile.paths.map(p => ({ id: p.id, endpoint: p.endpoint, actionType: p.actionType, interfaceSha256: p.interfaceSha256, serverCount: 1 }));
+  fixture.observation.paths = fixture.profile.paths.filter(p => p.adapter !== 'topic_twist').map(p => ({ id: p.id, endpoint: p.endpoint, actionType: p.actionType, interfaceSha256: p.interfaceSha256, serverCount: 1 }));
   return fixture;
 }
 

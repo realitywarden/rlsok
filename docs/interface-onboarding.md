@@ -1,7 +1,7 @@
 # Configure and reuse your ROS 2 interface setup
 
-Evaluation release: **v1.5.0-shadow.2**. This workflow discovers local graph
-metadata, lets you map supported action meanings, and exports files the local
+Evaluation release: **v1.5.0-shadow.3**. This workflow discovers local graph
+metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
 
@@ -16,17 +16,17 @@ your installed interface workspace. Use an isolated or simulated graph.
 rlsok profile discover --output catalog.json
 ```
 
-The command observes visible action server nodes for three seconds and records
+The command observes visible action servers and topic subscriptions for three seconds and records
 the actual ROS distro, RMW implementation, domain, endpoint names, server-node
-counts and installed Goal/Result/Feedback definition fingerprints. It creates
+counts, subscriber identities/counts and installed message or Goal/Result/Feedback definition fingerprints. It creates
 no action client, command publisher or service request. DDS discovery traffic
-is still required. It does not discover topic/service commands or make calls to
+is still required. It does not subscribe to messages, discover service commands or make calls to
 controller exports. Missing installed definitions remain visible as unavailable.
 Conflicting graph identities/types fail discovery; endpoints with multiple
 visible server nodes cannot be selected. Counts cannot distinguish multiple
 same-name servers inside a single node.
 
-Limits: 128 endpoints, 4096 unambiguous graph node identities, a 1 MiB catalog,
+Limits: 128 action endpoints and 128 topic endpoints, 4096 unambiguous graph node identities, a 1 MiB catalog,
 512 message definitions and 8192 fields per installed interface. Narrow the
 isolated ROS domain if these limits are exceeded. Output files must be new.
 The catalog contains private names and definitions; handle it accordingly.
@@ -37,16 +37,18 @@ Open **<https://rlsok.com/connect>** and import `catalog.json`.
 Choose the paths to evaluate and select the meaning for each path. The page
 does not infer custom semantics from a message name. Confirm the conventions
 from your actual interface documentation, map fields using the installed Goal
-field suggestions, and paste one actual example Goal object per path.
+or Message field suggestions, and paste one actual example Goal or message object per path.
+For velocity topics, explicitly select the intended receiving node; a logger is not necessarily the command boundary. Duplicate subscriptions on that node are rejected.
 
 | Adapter | Accepted meaning and layout | Limits |
 | --- | --- | --- |
 | Joint trajectory | `control_msgs/action/FollowJointTrajectory`; mapped joint-name and point arrays; exact robot joint order; radians; increasing time | Point fields remain standard ROS `positions`, optional vectors and `time_from_start`; custom action types or point layouts are unsupported |
 | Absolute Cartesian | XYZ meters; normalized quaternion X/Y/Z/W; frame string | Explicit component pointers support renamed/nested fields; no Euler or unit conversion |
 | Relative Cartesian | XYZ millimeters; W/P/R degrees; positive mm/s velocity; frame string | Explicit per-component bounds and field mappings; never treated as an absolute pose |
+| Velocity topic | `geometry_msgs/msg/Twist` or `TwistStamped`; fixed linear/angular XYZ in m/s and rad/s; explicit receiver and command frame | Checks finite vectors, plus frame ID and timestamp structure for stamped messages; no velocity safety bounds or live forwarding |
 | TP program | Exact string selector; explicit program allowlist | Does not inspect program contents or side effects |
 
-Pointers use RFC 6901 syntax relative to the Goal object, for example
+Pointers use RFC 6901 syntax relative to the Goal or Message object, for example
 `/target/pose/position/x`. Suggestions stop at 512 entries / 16 levels and use
 index `0` for sequences. A manually entered pointer is checked against the full
 installed definition. Arrays can use numeric component indices. The validator
@@ -61,7 +63,7 @@ selecting a similar-looking adapter does not make them compatible.
 ## 3. Supply your real configuration baseline
 
 Enter your configuration/device IDs, robot model, controller implementation,
-joint order and observation freshness window. Choose the real robot-description
+joint order (actions only) and observation freshness window. Choose the real robot-description
 file. Add the relevant calibration/configuration files or timestamped JSON
 exports. Files are limited to 8 MiB each and 24 MiB total in the browser.
 
@@ -84,7 +86,7 @@ an observation or replace stale timestamps merely to get a passing decision.
 
 Review runs the same portable profile/goal/onboarding validators distributed in
 the evaluation package. It binds selected paths to the catalog fingerprints,
-requires an unambiguous visible server node, verifies required fields and goal
+requires an unambiguous visible server node or selected topic subscription, verifies required fields and goal
 coverage, and checks the robot description is a declared fact for every path.
 It does not use the catalog as a fresh observation or approve robot motion.
 
@@ -112,7 +114,7 @@ stale controller exports through the actual read-only source. Use new output
 names for subsequent captures, approvals and reports; the CLI does not overwrite
 evidence. Any profile, mapping, expected baseline, endpoint or allowlist change
 requires a new local approval. Local operator names are not authenticated by
-Cloud. Inspect individual checks in `report/report.json` and follow the existing
+Cloud. Read the human-readable `report/report.md` and inspect individual checks in `report/report.json` and follow the existing
 Evidence verification procedure in [the full guide](composable-shadow.md).
 
 **Save reusable settings** writes `connection.json`, including private Goal data,
@@ -145,8 +147,4 @@ and connection contracts are also version 1. The Linux evaluation and npm
 tarball include the collector, validators, generated schemas and this guide.
 Stable Runtime remains v1.4.5; Cloud/API/schema and Windows updates are separate.
 
-This release received targeted source/contract/diff review and delivery builds.
-No local tests, GitHub Actions, ROS/Humble execution, installer execution, private
-customer integration or physical robot validation was run. A website screenshot
-does not prove workflow execution or customer acceptance. Evaluation covers
-declared paths and mapped fields only; it is not functional-safety software.
+See [the first-evaluation guide](local-shadow-first-evaluation.md) for required inputs, offline use, result meaning and a same-approval before/after comparison. Validation scope is recorded in [the release notes](releases/v1.5.0-shadow.3.md). No private customer integration or physical robot validation is claimed.

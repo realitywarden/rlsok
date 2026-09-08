@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """Collect a local, read-only ROS 2 Shadow observation (Python 3.10+).
 
-No action client, command publisher, or service request is created. Humble's
+No action client, command publisher, message subscription or service request is created. Humble's
 graph API counts *server nodes*, not multiple same-name servers inside one node.
 This is a graph/file snapshot, not a hardware or remote implementation attestation.
 
 Interface fingerprint v1: SHA-256 of UTF-8 JSON for typeTree, with sorted object
 keys, separators (',', ':'), and ensure_ascii=True. Ordered field arrays preserve
-wire field order. Goal/Result/Feedback and every nested message definition are
+wire field order. Message or Goal/Result/Feedback and every nested definition are
 included, including array, sequence and string bounds. Comments, constants,
 default values and implementation code are intentionally outside this fingerprint.
 
-Humble API references:
+ROS API references:
+https://github.com/ros2/rclpy/blob/jazzy/rclpy/rclpy/node.py
 https://github.com/ros2/rclpy/blob/humble/rclpy/rclpy/action/graph.py
 https://github.com/ros2/rosidl_runtime_py/blob/humble/rosidl_runtime_py/utilities.py
 """
@@ -40,6 +41,8 @@ MAX_DEFINITIONS = 512
 MAX_INTERFACE_FIELDS = 8192
 INTERFACE_ALGORITHM = "rosidl-action-fields-tree/v1"
 ACTION_TYPE = re.compile(r"[a-z][a-z0-9_]*/action/[A-Z][A-Za-z0-9]*\Z")
+MESSAGE_TYPE = re.compile(r"[a-z][a-z0-9_]*/msg/[A-Z][A-Za-z0-9]*\Z")
+NODE_NAME = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 ENDPOINT = re.compile(r"/(?:[A-Za-z_][A-Za-z0-9_]*)(?:/[A-Za-z_][A-Za-z0-9_]*)*\Z")
 TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})\Z")
 
@@ -244,8 +247,8 @@ def collect_fact(fact: dict[str, Any], root: Path, now: Callable[[], str]) -> di
 
 
 def describe_interface(action_type: str, get_action: Callable, get_message: Callable) -> dict[str, Any]:
-    if not isinstance(action_type, str) or not ACTION_TYPE.fullmatch(action_type):
-        raise CollectionError("actionType must be package/action/Type")
+    if not isinstance(action_type, str) or not (ACTION_TYPE.fullmatch(action_type) or MESSAGE_TYPE.fullmatch(action_type)):
+        raise CollectionError("interface type must be package/action/Type or package/msg/Type")
     definitions: dict[str, Any] = {}
     field_count = 0
 
@@ -291,17 +294,20 @@ def describe_interface(action_type: str, get_action: Callable, get_message: Call
                     "maximumSize": slot.maximum_size if kind.startswith("Bounded") else None}
         raise CollectionError(f"unsupported ROS field metadata: {kind}")
 
-    action = get_action(action_type)
-    tree = {
-        "algorithm": INTERFACE_ALGORITHM,
-        "actionType": action_type,
-        "components": {component: message(f"{action_type}_{component}", getattr(action, component), 0)
-                       for component in ("Goal", "Result", "Feedback")},
-        "definitions": definitions,
-    }
+    is_message = MESSAGE_TYPE.fullmatch(action_type) is not None
+    if is_message:
+        tree = {"algorithm": "rosidl-message-fields-tree/v1", "messageType": action_type,
+                "components": {"Message": message(action_type, get_message(action_type), 0)},
+                "definitions": definitions}
+    else:
+        action = get_action(action_type)
+        tree = {"algorithm": INTERFACE_ALGORITHM, "actionType": action_type,
+                "components": {component: message(f"{action_type}_{component}", getattr(action, component), 0)
+                               for component in ("Goal", "Result", "Feedback")},
+                "definitions": definitions}
     encoded = json.dumps(tree, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
                          allow_nan=False).encode("utf-8")
-    return {"actionType": action_type, "interfaceSha256": hashlib.sha256(encoded).hexdigest(),
+    return {"messageType" if is_message else "actionType": action_type, "interfaceSha256": hashlib.sha256(encoded).hexdigest(),
             "typeTree": tree}
 
 
@@ -326,6 +332,7 @@ class RosGraphProvider:
         self.discovery_seconds = discovery_seconds
         self.node = None
         self.executor = None
+        self.graph_ready = False
 
     def __enter__(self) -> RosGraphProvider:
         try:
@@ -380,6 +387,7 @@ class RosGraphProvider:
         deadline = time.monotonic() + self.discovery_seconds
         while time.monotonic() < deadline:
             self.executor.spin_once(timeout_sec=min(0.1, max(0.0, deadline - time.monotonic())))
+        self.graph_ready = True
         nodes = self.node.get_node_names_and_namespaces()
         if len(nodes) > 4096 or len(set(nodes)) != len(nodes):
             raise CollectionError("ROS graph node identities are ambiguous or excessive")
@@ -406,6 +414,41 @@ class RosGraphProvider:
                 result[endpoint] = (types[0], len(types))
         return result
 
+    def topic_subscribers(self, endpoints: set[str] | None) -> dict[str, dict[str, Any]]:
+        if not self.graph_ready:
+            deadline = time.monotonic() + self.discovery_seconds
+            while time.monotonic() < deadline:
+                self.executor.spin_once(timeout_sec=min(0.1, max(0.0, deadline - time.monotonic())))
+            self.graph_ready = True
+        nodes = self.node.get_node_names_and_namespaces()
+        if len(nodes) > 4096 or len(nodes) != len(set(nodes)):
+            raise CollectionError("ROS graph node identities are ambiguous or excessive")
+        result: dict[str, dict[str, Any]] = {}
+        for endpoint, types in self.node.get_topic_names_and_types():
+            if endpoints is not None and endpoint not in endpoints:
+                continue
+            if not ENDPOINT.fullmatch(endpoint):
+                raise CollectionError("invalid topic endpoint")
+            if endpoint in result or len(types) != 1 or not MESSAGE_TYPE.fullmatch(types[0]):
+                raise CollectionError("topic graph has ambiguous types or entries")
+            if len(result) >= 128:
+                raise CollectionError("catalog exceeds 128 topics; use a smaller isolated ROS domain")
+            subscribers: dict[tuple[str, str], int] = {}
+            infos = self.node.get_subscriptions_info_by_topic(endpoint)
+            if len(infos) > 4096:
+                raise CollectionError("too many topic subscriptions")
+            for info in infos:
+                name, namespace = info.node_name, info.node_namespace
+                if (not NODE_NAME.fullmatch(name) or (namespace != "/" and not ENDPOINT.fullmatch(namespace))
+                        or info.topic_type != types[0]):
+                    raise CollectionError("invalid or conflicting subscription metadata")
+                identity = (name, namespace)
+                subscribers[identity] = subscribers.get(identity, 0) + 1
+            result[endpoint] = {"messageType": types[0], "subscribers": [
+                {"name": name, "namespace": namespace, "count": count}
+                for (name, namespace), count in sorted(subscribers.items())]}
+        return result
+
 
 def discover_interfaces(provider: Any) -> dict[str, Any]:
     environment = provider.environment()
@@ -424,8 +467,18 @@ def discover_interfaces(provider: Any) -> dict[str, Any]:
                 descriptions[action_type] = {"unavailable": "Installed action definition could not be read. Source its interface workspace and rediscover."}
         actions.append({"endpoint": endpoint, "actionType": action_type,
                         "serverCount": count, **descriptions[action_type]})
+    topics = []
+    for endpoint, metadata in sorted(provider.topic_subscribers(None).items()):
+        message_type = metadata["messageType"]
+        if message_type not in descriptions:
+            try:
+                description = provider.interfaces.describe(message_type)
+                descriptions[message_type] = {key: description[key] for key in ("interfaceSha256", "typeTree")}
+            except Exception:
+                descriptions[message_type] = {"unavailable": "Installed message definition could not be read. Source its interface workspace and rediscover."}
+        topics.append({"endpoint": endpoint, **metadata, **descriptions[message_type]})
     catalog = {"schemaVersion": 1, "kind": "RlsokInterfaceCatalog", "collector": "ros2-read-only/v1",
-               "observedAt": observed_at, "environment": environment, "actions": actions,
+               "observedAt": observed_at, "environment": environment, "actions": actions, "topics": topics,
                "limitations": ["Local graph metadata only; not hardware identity or remote implementation attestation.",
                                "Counts visible server nodes; same-name servers inside one node cannot be distinguished.",
                                "No action client, command publisher or service request is created.",
@@ -455,7 +508,14 @@ def validate_profile(profile: Any) -> dict[str, Any]:
     for path in profile["paths"]:
         if not ENDPOINT.fullmatch(require_text(path.get("endpoint"), "path.endpoint")):
             raise CollectionError("action endpoint must be a fully qualified ROS name")
-        if not ACTION_TYPE.fullmatch(require_text(path.get("actionType"), "path.actionType")):
+        if path.get("adapter") == "topic_twist":
+            if path.get("messageType") not in ("geometry_msgs/msg/Twist", "geometry_msgs/msg/TwistStamped"):
+                raise CollectionError("unsupported topic message semantics")
+            node = path.get("subscriber", {})
+            if (not isinstance(node, dict) or not NODE_NAME.fullmatch(require_text(node.get("name"), "subscriber.name"))
+                    or (node.get("namespace") != "/" and not ENDPOINT.fullmatch(require_text(node.get("namespace"), "subscriber.namespace")))):
+                raise CollectionError("invalid subscriber identity")
+        elif not ACTION_TYPE.fullmatch(require_text(path.get("actionType"), "path.actionType")):
             raise CollectionError("actionType must be package/action/Type")
     if len({path["endpoint"] for path in profile["paths"]}) != len(profile["paths"]):
         raise CollectionError("profile.paths has duplicate endpoints")
@@ -466,10 +526,24 @@ def collect_observation(profile: dict[str, Any], root: Path, provider: Any,
                         now: Callable[[], str] = utc_now) -> dict[str, Any]:
     validate_profile(profile)
     environment = provider.environment()
-    graph = provider.action_servers({path["endpoint"] for path in profile["paths"]})
+    action_endpoints = {path["endpoint"] for path in profile["paths"] if path.get("adapter") != "topic_twist"}
+    topic_endpoints = {path["endpoint"] for path in profile["paths"] if path.get("adapter") == "topic_twist"}
+    graph = provider.action_servers(action_endpoints) if action_endpoints else {}
+    topics = provider.topic_subscribers(topic_endpoints) if topic_endpoints else {}
     graph_observed_at = now()
     paths: list[dict[str, Any]] = []
     for path in profile["paths"]:
+        if path.get("adapter") == "topic_twist":
+            metadata = topics.get(path["endpoint"])
+            if metadata is None:
+                raise CollectionError(f"topic not observed: {path['id']}")
+            target = path["subscriber"]
+            matches = [node for node in metadata["subscribers"] if node["name"] == target["name"] and node["namespace"] == target["namespace"]]
+            count = sum(node["count"] for node in matches)
+            description = provider.interfaces.describe(metadata["messageType"])
+            paths.append({"id": path["id"], "endpoint": path["endpoint"], "messageType": metadata["messageType"],
+                          "interfaceSha256": description["interfaceSha256"], "subscriber": target, "subscriberCount": count})
+            continue
         if path["endpoint"] not in graph:
             raise CollectionError(f"action server not observed: {path['id']}")
         actual_type, count = graph[path["endpoint"]]

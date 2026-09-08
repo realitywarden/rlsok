@@ -1,7 +1,7 @@
 // Portable onboarding contract. The website vendors this file, contracts.ts and
 // goals.ts byte-for-byte from a versioned Runtime source commit.
 import { z } from 'zod';
-import { atPointer, digest, environmentSchema, profileSchema, proposalBatchSchema, type Path } from './contracts';
+import { atPointer, digest, environmentSchema, messageTypeSchema, subscriberSchema, profileSchema, proposalBatchSchema, type Path } from './contracts';
 import { validateGoal } from './goals';
 
 export type TypeNode =
@@ -21,13 +21,21 @@ const nodeSchema: z.ZodType<TypeNode> = z.lazy(() => z.discriminatedUnion('kind'
   z.object({ kind: z.literal('sequence'), element: nodeSchema, maximumSize: count.nullable() }).strict()
 ]));
 const actionType = z.string().regex(/^[a-z][a-z0-9_]*\/action\/[A-Z][A-Za-z0-9]*$/);
-const treeSchema = z.object({
+const actionTreeSchema = z.object({
   algorithm: z.literal('rosidl-action-fields-tree/v1'), actionType,
   components: z.object({ Goal: nodeSchema, Result: nodeSchema, Feedback: nodeSchema }).strict(),
   definitions: z.record(z.object({ fields: z.array(z.object({
     name: z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/), type: nodeSchema
   }).strict()).max(8192) }).strict())
 }).strict();
+const messageTreeSchema = z.object({
+  algorithm: z.literal('rosidl-message-fields-tree/v1'), messageType: messageTypeSchema,
+  components: z.object({ Message: nodeSchema }).strict(),
+  definitions: z.record(z.object({ fields: z.array(z.object({
+    name: z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/), type: nodeSchema
+  }).strict()).max(8192) }).strict())
+}).strict();
+const treeSchema = z.union([actionTreeSchema, messageTreeSchema]);
 export type TypeTree = z.infer<typeof treeSchema>;
 export const catalogSchema = z.object({
   schemaVersion: z.literal(1), kind: z.literal('RlsokInterfaceCatalog'),
@@ -36,11 +44,23 @@ export const catalogSchema = z.object({
   actions: z.array(z.object({
     endpoint: z.string().regex(/^\/(?:[A-Za-z_][A-Za-z0-9_]*\/)*[A-Za-z_][A-Za-z0-9_]*$/),
     actionType, serverCount: z.number().int().min(1).max(4096),
-    interfaceSha256: digest.optional(), typeTree: treeSchema.optional(), unavailable: bounded.optional()
+    interfaceSha256: digest.optional(), typeTree: actionTreeSchema.optional(), unavailable: bounded.optional()
   }).strict()).max(128),
+  topics: z.array(z.object({
+    endpoint: z.string().regex(/^\/(?:[A-Za-z_][A-Za-z0-9_]*\/)*[A-Za-z_][A-Za-z0-9_]*$/),
+    messageType: messageTypeSchema,
+    subscribers: z.array(subscriberSchema.extend({ count: z.number().int().min(1).max(4096) }).strict()).max(4096),
+    interfaceSha256: digest.optional(), typeTree: messageTreeSchema.optional(), unavailable: bounded.optional()
+  }).strict()).max(128).optional(),
   limitations: z.array(bounded).max(16)
 }).strict();
 export type Catalog = z.infer<typeof catalogSchema>;
+export function catalogInterfaces(catalog: Catalog) {
+  return [
+    ...catalog.actions.map(action => ({ ...action, kind: 'action' as const, interfaceType: action.actionType })),
+    ...(catalog.topics ?? []).map(topic => ({ ...topic, kind: 'topic' as const, interfaceType: topic.messageType }))
+  ];
+}
 export const connectionSchema = z.object({
   schemaVersion: z.literal(1), kind: z.literal('RlsokShadowConnection'),
   catalog: catalogSchema, profile: profileSchema, proposals: proposalBatchSchema
@@ -78,13 +98,17 @@ export async function readCatalog(input: unknown): Promise<Catalog> {
   assertBoundedInput(input);
   const catalog = catalogSchema.parse(input);
   if (new Set(catalog.actions.map(action => action.endpoint)).size !== catalog.actions.length) throw new Error('Duplicate catalog endpoint.');
-  for (const action of catalog.actions) {
+  if (new Set((catalog.topics ?? []).map(topic => topic.endpoint)).size !== (catalog.topics ?? []).length) throw new Error('Duplicate topic endpoint.');
+  for (const topic of catalog.topics ?? []) {
+    if (new Set(topic.subscribers.map(node => `${node.namespace}/${node.name}`)).size !== topic.subscribers.length) throw new Error('Duplicate subscriber identity.');
+  }
+  for (const action of catalogInterfaces(catalog)) {
     if (action.unavailable !== undefined) {
       if (action.typeTree || action.interfaceSha256) throw new Error('Unavailable interface must not contain a usable definition.');
       continue;
     }
     const tree = action.typeTree;
-    if (!tree || !action.interfaceSha256 || tree.actionType !== action.actionType) throw new Error(`Incomplete interface: ${action.endpoint}`);
+    if (!tree || !action.interfaceSha256 || ('actionType' in tree ? tree.actionType : tree.messageType) !== action.interfaceType) throw new Error(`Incomplete interface: ${action.endpoint}`);
     const definitions = Object.values(tree.definitions);
     if (definitions.length > 512 || definitions.reduce((n, definition) => n + definition.fields.length, 0) > 8192) throw new Error('Interface exceeds collector limits.');
     for (const definition of definitions) {
@@ -103,7 +127,7 @@ export async function readCatalog(input: unknown): Promise<Catalog> {
 }
 
 export function goalField(tree: TypeTree, pointer: string): TypeNode | undefined {
-  let node: TypeNode | undefined = tree.components.Goal;
+  let node: TypeNode | undefined = 'Goal' in tree.components ? tree.components.Goal : tree.components.Message;
   for (const token of pointer.slice(1).split('/').map(value => value.replace(/~1/g, '/').replace(/~0/g, '~'))) {
     if (node?.kind === 'message') {
       node = tree.definitions[node.name]?.fields.find(field => field.name === token)?.type;
@@ -128,11 +152,12 @@ export function goalFields(tree: TypeTree): Array<{ pointer: string; kind: strin
       for (let index = 0; index < size; index++) visit(node.element, `${pointer}/${index}`, ancestors, depth + 1);
     }
   }
-  visit(tree.components.Goal, '', [], 0);
+  visit('Goal' in tree.components ? tree.components.Goal : tree.components.Message, '', [], 0);
   return result;
 }
 
 function mappedPointers(path: Path): string[] {
+  if (path.adapter === 'topic_twist') return [path.fields.linear, path.fields.angular, ...(path.messageType === 'geometry_msgs/msg/TwistStamped' ? ['/header/frame_id', '/header/stamp'] : [])];
   if (path.adapter === 'joint_trajectory') return [path.fields.jointNames, path.fields.points];
   if (path.adapter === 'tp_program') return [path.fields.program];
   if (path.adapter === 'cartesian_delta') return [...path.fields.translation, ...path.fields.rotation, path.fields.velocity, path.fields.frame];
@@ -184,9 +209,13 @@ export async function readConnection(input: unknown): Promise<Connection> {
   const urdf = profile.facts.filter(fact => fact.kind === 'file_sha256' && fact.expected === profile.robot.urdfSha256);
   if (!urdf.length) throw new Error('Add the actual robot description file as a checked fact.');
   for (const path of profile.paths) {
-    const action = catalog.actions.find(item => item.endpoint === path.endpoint);
-    if (!action?.typeTree || action.unavailable || action.serverCount !== 1) throw new Error(`Select an available interface with exactly one visible server node: ${path.id}`);
-    if (action.actionType !== path.actionType || action.interfaceSha256 !== path.interfaceSha256) throw new Error(`Catalog binding mismatch: ${path.id}`);
+    const action = catalogInterfaces(catalog).find(item => item.endpoint === path.endpoint && item.kind === (path.adapter === 'topic_twist' ? 'topic' : 'action'));
+    if (!action?.typeTree || action.unavailable) throw new Error(`Select an available interface: ${path.id}`);
+    if (path.adapter === 'topic_twist') {
+      if (action.kind !== 'topic' || action.messageType !== path.messageType ||
+          action.subscribers.find(node => node.name === path.subscriber.name && node.namespace === path.subscriber.namespace)?.count !== 1) throw new Error(`Select exactly one visible subscription on the intended receiving node: ${path.id}`);
+    } else if (action.kind !== 'action' || action.serverCount !== 1 || action.actionType !== path.actionType) throw new Error(`Select an available interface with exactly one visible server node: ${path.id}`);
+    if (action.interfaceSha256 !== path.interfaceSha256) throw new Error(`Catalog binding mismatch: ${path.id}`);
     if (!urdf.some(fact => path.checks.includes(fact.id))) throw new Error(`Robot description must be checked by path: ${path.id}`);
     const pointers = mappedPointers(path);
     if (new Set(pointers).size !== pointers.length) throw new Error(`Mapped fields must be distinct: ${path.id}`);

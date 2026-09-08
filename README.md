@@ -16,12 +16,14 @@ For reusable interface selection and field mapping, open the
 processed in the browser; exported workspaces are consumed by the local CLI.
 
 For the FANUC/Humble composable workflow, download the separate
-[v1.5.0-shadow.2 evaluation package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0-shadow.2)
+[v1.5.0-shadow.3 evaluation package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0-shadow.3)
 and follow the [installation-to-Evidence guide](docs/fanuc-shadow-self-service.md).
 This locally reviewed/built prerelease has not been validated on Humble or a
 physical FANUC. It does not change the stable Cloud or v1.4.5 installer below.
 
-For configurable ROS 2 action graphs, `rlsok profile help` provides a composable
+Start with [inputs, offline use and result interpretation](docs/local-shadow-first-evaluation.md).
+
+For configurable ROS 2 action and Twist topic graphs, `rlsok profile help` provides a composable
 local Shadow workflow with reusable trajectory, Cartesian and program modules.
 See [composable Shadow profiles](docs/composable-shadow.md) for the FANUC/Humble
 example, read-only capture, configuration-drift tests and current support scope.

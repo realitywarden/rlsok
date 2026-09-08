@@ -6,6 +6,7 @@ import { executablePolicySpecSchema } from '../../packages/core/exec-spec';
 import { createFanucFixture, createFanucPublicFixture, fixtureCalibration, fixtureControllerState, fixtureUrdf } from '../../packages/composable-shadow/fixture';
 import { interfaceSchemas } from '../../packages/composable-shadow/json-schema';
 import { readConnection } from '../../packages/composable-shadow/onboarding';
+import { reportMarkdown, compareReports, comparisonMarkdown } from '../../packages/composable-shadow/report';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -16,10 +17,11 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile schema --output <new-directory>
   rlsok profile approve --profile <profile.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
   rlsok profile capture --profile <profile.json> --output <new-observation.json> [--python <python3>]
-  rlsok profile describe-interface --type <package/action/Name> [--python <python3>]
+  rlsok profile describe-interface --type <package/action/Name|package/msg/Name> [--python <python3>]
   rlsok profile fingerprint-controller --input <active-controller-export.json> --output <new-controller-state.json> [--python <python3>]
   rlsok profile verify-assessment --assessment <path.assessment.json> --release <path.release.json>
   rlsok profile shadow --profile <profile.json> --approval <approval.json> --observation <observation.json> --proposals <proposals.json> --output <new-directory>
+  rlsok profile compare --profile <profile.json> --approval <approval.json> --baseline <observation.json> --changed <observation.json> --proposals <proposals.json> --output <new-directory>
   rlsok profile demo --output <new-directory>
 Templates contain synthetic example values. Replace them before local ROS evaluation.
 Approval is a local Shadow baseline, not Cloud approval or permission to move a robot.
@@ -88,6 +90,7 @@ function initialize(output: string, template: string, now = new Date()) {
 }
 function saveReport(directory: string, report: Awaited<ReturnType<typeof evaluateProfile>>): void {
   write(join(directory, 'report.json'), report);
+  writeFileSync(join(directory, 'report.md'), reportMarkdown(report), { flag: 'wx', mode: 0o600 });
   for (const result of report.results) {
     write(join(directory, `${result.pathId}.assessment.json`), result.assessment);
     write(join(directory, `${result.pathId}.release.json`), result.release);
@@ -172,6 +175,21 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     profileSchema.parse(read(o.profile));
     if (existsSync(o.output)) throw new Error('output_already_exists');
     return python(o, ['--profile', resolve(o.profile), '--output', resolve(o.output)]);
+  }
+  if (command === 'compare') {
+    const o = options(rest, ['profile', 'approval', 'baseline', 'changed', 'proposals', 'output'], ['profile', 'approval', 'baseline', 'changed', 'proposals', 'output']);
+    const shared = { profile: read(o.profile), approval: read(o.approval), proposals: read(o.proposals), now: new Date() };
+    const baseline = await evaluateProfile({ ...shared, observation: read(o.baseline) });
+    const changed = await evaluateProfile({ ...shared, observation: read(o.changed) });
+    const comparison = compareReports(baseline, changed);
+    const directory = newDirectory(o.output);
+    saveReport(newDirectory(join(directory, 'baseline')), baseline);
+    saveReport(newDirectory(join(directory, 'changed')), changed);
+    write(join(directory, 'comparison.json'), comparison);
+    writeFileSync(join(directory, 'comparison.md'), comparisonMarkdown(comparison), { flag: 'wx', mode: 0o600 });
+    printReport(join(directory, 'baseline'), baseline); printReport(join(directory, 'changed'), changed);
+    process.stdout.write(`Comparison: ${join(directory, 'comparison.md')}\nReview the exact failed checks; stale/missing data can also block.\n`);
+    return 0;
   }
   if (command === 'shadow') {
     const o = options(rest, ['profile', 'approval', 'observation', 'proposals', 'output'], ['profile', 'approval', 'observation', 'proposals', 'output']);
