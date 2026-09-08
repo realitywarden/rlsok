@@ -80,6 +80,7 @@ const copy = (source, target) => {
     copy(path.join(root, 'docs/local-shadow-first-evaluation.md'), path.join(output, 'START-HERE.md'));
     copy(path.join(root, 'docs/fanuc-shadow-self-service.md'), path.join(output, 'INSTALLATION.md'));
     copy(path.join(root, 'docs/interface-onboarding.md'), path.join(output, 'INTERFACE-ONBOARDING.md'));
+    copy(path.join(root, 'docs/source-shadow-workspaces.md'), path.join(output, 'SOURCE-WORKSPACES.md'));
     run(process.execPath, [path.join(__dirname, 'generate-sbom.cjs')]);
     run(process.execPath, [path.join(__dirname, 'license-inventory.cjs')]);
     for (const name of ['rlsok.cdx.json', 'licenses.json']) copy(path.join(root, 'artifacts', name), path.join(output, name));

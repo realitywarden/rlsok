@@ -425,6 +425,11 @@ class RosGraphProvider:
             raise CollectionError("ROS graph node identities are ambiguous or excessive")
         result: dict[str, dict[str, Any]] = {}
         for endpoint, types in self.node.get_topic_names_and_types():
+            # Action transport feedback/status are not command message inputs.
+            # Feedback uses package/action/Name_FeedbackMessage, not package/msg/Name;
+            # its installed definition is already fingerprinted with the action.
+            if re.search(r"/_action/(?:feedback|status)\Z", endpoint):
+                continue
             if endpoints is not None and endpoint not in endpoints:
                 continue
             if not ENDPOINT.fullmatch(endpoint):
@@ -536,7 +541,10 @@ def collect_observation(profile: dict[str, Any], root: Path, provider: Any,
         if path.get("adapter") == "topic_twist":
             metadata = topics.get(path["endpoint"])
             if metadata is None:
-                raise CollectionError(f"topic not observed: {path['id']}")
+                # A completed graph query found no selected endpoint. Omit it,
+                # letting the evaluator record missing coverage and WOULD_BLOCK.
+                # Never substitute the approved type/hash as observed metadata.
+                continue
             target = path["subscriber"]
             matches = [node for node in metadata["subscribers"] if node["name"] == target["name"] and node["namespace"] == target["namespace"]]
             count = sum(node["count"] for node in matches)
@@ -545,7 +553,7 @@ def collect_observation(profile: dict[str, Any], root: Path, provider: Any,
                           "interfaceSha256": description["interfaceSha256"], "subscriber": target, "subscriberCount": count})
             continue
         if path["endpoint"] not in graph:
-            raise CollectionError(f"action server not observed: {path['id']}")
+            continue
         actual_type, count = graph[path["endpoint"]]
         if not isinstance(count, int) or isinstance(count, bool) or count < 1:
             raise CollectionError(f"invalid action server count: {path['id']}")

@@ -1,12 +1,14 @@
 # Your first local Shadow evaluation
 
-Evaluation version: **v1.5.0-shadow.3**. Start with one command boundary in an isolated simulation. This guide covers the supplied local evaluator; Cloud-managed production authorization is a separate product path.
+Evaluation version: **v1.5.0-shadow.4**. Start with one command boundary in an isolated simulation. This guide covers the supplied local evaluator; Cloud-managed production authorization is a separate product path.
 
 ## What runs, and where
 
 Install the [versioned evaluation bundle](fanuc-shadow-self-service.md) into a separate directory. It contains a Node runtime, the CLI, the read-only Python collector, source materials and docs. It does not install or replace a robot controller. A public source checkout or separate Git branch can be reviewed before use.
 
 The collector joins your chosen ROS domain to inspect graph metadata and installed interface definitions. It reads only the fact files named in your profile. It creates no command publisher, message subscription, action client or control service request. DDS discovery traffic still occurs. Evaluation consumes a local message/Goal example; it does not intercept, replay or forward live teleoperation commands.
+
+The separate `profile export-controller` command reads controller-manager metadata and controller parameters through three read-only ROS services. SO-101/TRIK [source workspaces](source-shadow-workspaces.md) require this export to compare the selected live software binding. It never activates controllers, changes parameters or sends goals; its snapshot does not authenticate hardware or prove future execution state.
 
 Zero RLSOK dispatch does not isolate your robot from other nodes. Keep the first run in Gazebo or another isolated simulator, with no path to physical controllers. Existing control code, clamping, collision checks, limits and emergency stops retain their responsibilities.
 
@@ -84,4 +86,4 @@ Keep evaluation private by default. Agree separately on public notes, repository
 
 ## Current limits
 
-This release supplies reusable tooling and instructions. An individual project's exact graph, custom interfaces, active configuration source and simulator behavior still need to be confirmed with its owner. Synthetic local checks are not customer-specific Gazebo, LeRobot, ROS hardware, or production validation. See [release validation](releases/v1.5.0-shadow.3.md).
+This release supplies reusable tooling and instructions. An individual project's exact graph, custom interfaces, active configuration source and simulator behavior still need to be confirmed with its owner. Synthetic local checks are not customer-specific Gazebo, LeRobot, ROS hardware, or production validation. See [release validation](releases/v1.5.0-shadow.4.md).

@@ -210,8 +210,7 @@ class FactTests(unittest.TestCase):
     def test_absent_server_or_interface_load_failure_is_explicit(self):
         provider = FakeProvider()
         provider.servers.clear()
-        with self.assertRaisesRegex(collect.CollectionError, "not observed"):
-            self.observation(provider)
+        self.assertEqual(self.observation(provider)['paths'], [])
         with patch.object(FakeInterfaces, "describe", side_effect=ImportError("missing custom type")):
             with self.assertRaisesRegex(ImportError, "missing custom type"):
                 self.observation()
@@ -231,11 +230,11 @@ class FactTests(unittest.TestCase):
         config_file.write_text(json.dumps(self.config), encoding="utf-8")
         output = self.root / "observation.json"
         provider = FakeProvider()
-        provider.servers.clear()
+        provider.action_servers = lambda _: (_ for _ in ()).throw(collect.CollectionError('graph query failed'))
         stderr = io.StringIO()
         with patch.object(collect, "RosGraphProvider", return_value=provider), redirect_stderr(stderr):
             self.assertEqual(collect.main(["--profile", str(config_file), "--output", str(output)]), 2)
-        self.assertIn("action server not observed", stderr.getvalue())
+        self.assertIn("graph query failed", stderr.getvalue())
         self.assertFalse(output.exists())
 
     def test_output_cannot_overwrite_fact_or_profile(self):

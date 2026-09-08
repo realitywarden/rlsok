@@ -1,6 +1,6 @@
 # Configure and reuse your ROS 2 interface setup
 
-Evaluation release: **v1.5.0-shadow.3**. This workflow discovers local graph
+Evaluation release: **v1.5.0-shadow.4**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
@@ -147,4 +147,4 @@ and connection contracts are also version 1. The Linux evaluation and npm
 tarball include the collector, validators, generated schemas and this guide.
 Stable Runtime remains v1.4.5; Cloud/API/schema and Windows updates are separate.
 
-See [the first-evaluation guide](local-shadow-first-evaluation.md) for required inputs, offline use, result meaning and a same-approval before/after comparison. Validation scope is recorded in [the release notes](releases/v1.5.0-shadow.3.md). No private customer integration or physical robot validation is claimed.
+See [the first-evaluation guide](local-shadow-first-evaluation.md) for required inputs, offline use, result meaning and a same-approval before/after comparison. Validation scope is recorded in [the release notes](releases/v1.5.0-shadow.4.md). No private customer integration or physical robot validation is claimed.

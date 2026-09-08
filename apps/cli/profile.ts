@@ -7,6 +7,8 @@ import { createFanucFixture, createFanucPublicFixture, fixtureCalibration, fixtu
 import { interfaceSchemas } from '../../packages/composable-shadow/json-schema';
 import { readConnection } from '../../packages/composable-shadow/onboarding';
 import { reportMarkdown, compareReports, comparisonMarkdown } from '../../packages/composable-shadow/report';
+import { prepareSourceWorkspace, refreshSourceWorkspace } from '../../packages/composable-shadow/source-workspace';
+import { sourceRecipes } from '../../packages/composable-shadow/source-recipes';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -14,6 +16,10 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile discover --output <new-catalog.json> [--python <python3>]
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
+  rlsok profile source-recipes
+  rlsok profile export-controller --manager </controller_manager> --controller <name> --node </controller_node> --output <new-state.json> [--python <python3>]
+  rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>]
+  rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>]
   rlsok profile schema --output <new-directory>
   rlsok profile approve --profile <profile.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
   rlsok profile capture --profile <profile.json> --output <new-observation.json> [--python <python3>]
@@ -59,8 +65,8 @@ function collectorScript(): string {
   }
   throw new Error('composable_shadow_collector_missing');
 }
-function python(options: Record<string, string>, args: string[]): number {
-  const result = spawnSync(options.python ?? (process.platform === 'win32' ? 'python' : 'python3'), [collectorScript(), ...args], {
+function python(options: Record<string, string>, args: string[], script = collectorScript()): number {
+  const result = spawnSync(options.python ?? (process.platform === 'win32' ? 'python' : 'python3'), [script, ...args], {
     stdio: 'inherit', timeout: 60_000, windowsHide: true
   });
   if (result.error) throw result.error;
@@ -106,6 +112,29 @@ function printReport(directory: string, report: Awaited<ReturnType<typeof evalua
 export async function runProfileCommand(args: string[]): Promise<number> {
   const [command, ...rest] = args;
   if (!command || ['help', '--help', '-h'].includes(command)) { process.stdout.write(help); return 0; }
+  if (command === 'export-controller') {
+    const o = options(rest, ['manager', 'controller', 'node', 'output', 'python'], ['manager', 'controller', 'node', 'output']);
+    return python(o, ['--manager', o.manager, '--controller', o.controller, '--node', o.node, '--output', resolve(o.output)], join(dirname(collectorScript()), 'controller_state.py'));
+  }
+  if (command === 'source-recipes') {
+    options(rest, [], []);
+    process.stdout.write(`${JSON.stringify(sourceRecipes, null, 2)}\nPublic source mappings only; verify the actual local graph and files.\n`);
+    return 0;
+  }
+  if (command === 'prepare-source') {
+    const o = options(rest, ['recipe', 'source', 'catalog', 'urdf', 'settings', 'example', 'device-id', 'output', 'frame', 'subscriber', 'controller-state'],
+      ['recipe', 'source', 'catalog', 'urdf', 'settings', 'example', 'device-id', 'output']);
+    const directory = await prepareSourceWorkspace({ recipe: o.recipe, source: o.source, catalog: o.catalog, urdf: o.urdf,
+      settings: o.settings, example: o.example, deviceId: o['device-id'], output: o.output, frame: o.frame, subscriber: o.subscriber, controllerState: o['controller-state'] });
+    process.stdout.write(`Source review workspace: ${directory}\nReview all inputs before approving. No observation, approval or robot command was generated.\n`);
+    return 0;
+  }
+  if (command === 'refresh-source') {
+    const o = options(rest, ['workspace', 'source', 'urdf', 'settings', 'controller-state'], ['workspace', 'source', 'urdf', 'settings']);
+    await refreshSourceWorkspace({ workspace: o.workspace, source: o.source, urdf: o.urdf, settings: o.settings, controllerState: o['controller-state'] });
+    process.stdout.write('Local source inputs refreshed. Approved profile and evidence unchanged. Capture a fresh observation next.\n');
+    return 0;
+  }
   if (command === 'discover') {
     const o = options(rest, ['output', 'python'], ['output']);
     if (existsSync(o.output)) throw new Error('output_already_exists');

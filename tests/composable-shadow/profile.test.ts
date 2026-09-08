@@ -219,6 +219,7 @@ for (const defect of ['interface hash', 'endpoint', 'action type', 'multiple ser
     const input = scenario();
     const path = pathFor(input, 'cartesian_pose');
     const observed = input.observation.paths.find(candidate => candidate.id === path.id)!;
+    if (!('actionType' in observed)) throw new Error('action fixture required');
     let reason: string;
     if (defect === 'interface hash') { observed.interfaceSha256 = OTHER_HASH; reason = 'action_definition_mismatch'; }
     else if (defect === 'endpoint') { observed.endpoint = '/unapproved/cartesian'; reason = 'action_endpoint_mismatch'; }

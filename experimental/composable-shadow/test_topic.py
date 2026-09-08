@@ -49,6 +49,16 @@ class TopicTests(unittest.TestCase):
         info = SimpleNamespace(node_name='gait_input', node_namespace='/sim', topic_type='geometry_msgs/msg/Twist')
         self.assertEqual(self.provider([info, info]).topic_subscribers(None)['/sim/cmd_vel']['subscribers'][0]['count'], 2)
 
+    def test_action_transport_topics_do_not_break_command_discovery(self):
+        provider = self.provider()
+        provider.node.get_topic_names_and_types = lambda: [
+            ('/arm_controller/follow_joint_trajectory/_action/feedback', ['control_msgs/action/FollowJointTrajectory_FeedbackMessage']),
+            ('/arm_controller/follow_joint_trajectory/_action/status', ['action_msgs/msg/GoalStatusArray']),
+            ('/sim/cmd_vel', ['geometry_msgs/msg/Twist'])]
+        topics = provider.topic_subscribers(None)
+        self.assertEqual(list(topics), ['/sim/cmd_vel'])
+        self.assertEqual(topics['/sim/cmd_vel']['subscribers'][0]['name'], 'gait_input')
+
     def test_conflicting_types_and_duplicate_node_names_fail(self):
         provider = self.provider()
         provider.node.get_topic_names_and_types = lambda: [('/sim/cmd_vel', ['geometry_msgs/msg/Twist', 'other_msgs/msg/Velocity'])]
@@ -74,6 +84,11 @@ class TopicTests(unittest.TestCase):
             changed = collect.collect_observation(profile, root, self.provider([]), lambda: NOW)
             self.assertNotEqual(changed['facts'][0]['value'], observed['facts'][0]['value'])
             self.assertEqual(changed['paths'][0]['subscriberCount'], 0)
+            absent = self.provider()
+            absent.node.get_topic_names_and_types = lambda: []
+            missing = collect.collect_observation(profile, root, absent, lambda: NOW)
+            self.assertEqual(missing['paths'], [])
+            self.assertEqual(missing['facts'][0]['value'], changed['facts'][0]['value'])
 
     def test_no_command_client_publisher_or_subscription_api(self):
         tree = ast.parse((Path(__file__).parent / 'collect.py').read_text(encoding='utf8'))
