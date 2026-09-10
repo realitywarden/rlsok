@@ -1,0 +1,186 @@
+{
+  "apiVersion": "realitywarden.io/v1alpha1",
+  "kind": "ExecutablePolicy",
+  "metadata": {
+    "name": "hexapod-gait.command",
+    "releaseId": "hexapod-gait.command.47885dbdf42cd2eb",
+    "createdAt": "2026-09-10T09:33:58.044Z"
+  },
+  "model": {
+    "artifact": "profile.json",
+    "sha256": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+    "framework": "ros2",
+    "policyType": "shadow/topic_twist",
+    "codeRevision": "composable-shadow/v1"
+  },
+  "actionContract": {
+    "representation": "twist",
+    "dimension": 6,
+    "jointOrder": [],
+    "units": {
+      "position": "meter",
+      "velocity": "linear:m/s;angular:rad/s"
+    },
+    "normalizerSha256": "9538025abbda86f004ce7ace05d7ef5e4e06831fe640d2ea15b191b11d64a720",
+    "preprocessorSha256": "e1b90ddbe9335e55d12c47b8daf667c42c3d1e8b3e62dd7bc25612a40f4f2b72",
+    "postprocessorSha256": "069983e8c15414354ef53ff2d3eb03d31161f855590e8177edbe21c115c8b914"
+  },
+  "robot": {
+    "profileId": "hexapod-gait",
+    "profileSha256": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+    "urdfSha256": "74125441425764ddde3a9dfe56a943c6af8a32aae071758fb71bef144fcececf",
+    "controllerType": "/cmd_vel",
+    "controllerConfigSha256": "c3af458b043641680b83a148e92fc33fdddc6402c7d2a0b0de8253bb610ea8ce"
+  },
+  "runtimePolicy": {
+    "policySha256": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+    "maxStateAgeMs": 300000,
+    "maxConfigurationAgeMs": 300000,
+    "failClosed": true
+  },
+  "executionConfiguration": {
+    "schemaVersion": 2,
+    "identity": {
+      "device": "isolated-public-hexapod",
+      "robot": "Public hexapod Gazebo gait input"
+    },
+    "semanticContract": {
+      "command": {
+        "interfaceType": "geometry_msgs/msg/Twist",
+        "endpoint": "/cmd_vel"
+      },
+      "controller": {
+        "implementation": "/cmd_vel",
+        "version": "composable-shadow/v1"
+      },
+      "jointCommandMapping": [
+        {
+          "joint": "linear.x",
+          "commandIndex": 0
+        },
+        {
+          "joint": "linear.y",
+          "commandIndex": 1
+        },
+        {
+          "joint": "linear.z",
+          "commandIndex": 2
+        },
+        {
+          "joint": "angular.x",
+          "commandIndex": 3
+        },
+        {
+          "joint": "angular.y",
+          "commandIndex": 4
+        },
+        {
+          "joint": "angular.z",
+          "commandIndex": 5
+        }
+      ]
+    },
+    "provenance": [
+      {
+        "kind": "content",
+        "sourceIdentity": "composition",
+        "purpose": "controller_configuration",
+        "contentSha256": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:active-controller",
+        "purpose": "other",
+        "contentSha256": "e1d671c21773290297c683ebcc6cd7f28aadb155174fd95ab3c9ff6b706529da"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:file-1-gait_node.py",
+        "purpose": "other",
+        "contentSha256": "f94393493d61bda1d4a7dd04f8fd94b3125e245652e561882520c0f8ad4fc289"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:file-2-kinematics.py",
+        "purpose": "other",
+        "contentSha256": "d091360dd9e88c2000ec8a6cedf04eda4c2f662793e1b07524049007d1e95b8b"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:file-3-gait.launch.py",
+        "purpose": "other",
+        "contentSha256": "7f37b7e56d4038bfb1d0ff470ec6b2a638c59938092bc75036dee8d6ff9ccb7d"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:file-4-controllers.yaml",
+        "purpose": "other",
+        "contentSha256": "bd2726748d3b40e0d584e935e15e1855f6153ae96c5c6feae40a7ed39bfba598"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:file-5-gazebo.launch.py",
+        "purpose": "other",
+        "contentSha256": "a9eec8316ffde69c18f56ebd28423661be644c59c8b71c10ef84e38c0d1a50d4"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:file-6-robot.urdf",
+        "purpose": "other",
+        "contentSha256": "74125441425764ddde3a9dfe56a943c6af8a32aae071758fb71bef144fcececf"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:file-7-runtime-settings.json",
+        "purpose": "other",
+        "contentSha256": "5eaea434b626cf3cd80122b73af9ca8db5522b74157901fe32b1f196a28f847d"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "fact:gait-node-settings",
+        "purpose": "other",
+        "contentSha256": "a368e897d12085625ef173d539a55d8adb2b8e1cf39eb4c9acaef90f33a868b3"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "interface",
+        "purpose": "controller_configuration",
+        "contentSha256": "be054e08c58911b4a88f9fc7585da0cde79d5a96b60a09bcf1f7a74273e41a32"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "ros-environment",
+        "purpose": "other",
+        "contentSha256": "76a2089f68a974d7ebb262def05b758682b8bd1b651eb64553330662d5607986"
+      },
+      {
+        "kind": "content",
+        "sourceIdentity": "topic-subscriber",
+        "purpose": "controller_configuration",
+        "contentSha256": "53467f8c4525741c50374814d4fb8633242fbbf0aebd3835c53d72a99ba72b1d"
+      }
+    ],
+    "observation": {
+      "observedAt": "2026-09-10T09:34:38.831Z",
+      "environment": {
+        "rosDistro": "jazzy",
+        "rmwImplementation": "rmw_fastrtps_cpp"
+      }
+    }
+  },
+  "approvedConfigurationDigest": "c3af458b043641680b83a148e92fc33fdddc6402c7d2a0b0de8253bb610ea8ce",
+  "evidence": {
+    "scenarioPackId": "local-composable-shadow/v1",
+    "testReportSha256": "5dfdce65c153e577f842e00b81115f2f3b9df32cdaff6511111176bcfac47b2c",
+    "status": "approved",
+    "approvedBy": "public-gazebo-source-review",
+    "approvedAt": "2026-09-10T09:33:58.044Z"
+  },
+  "deployment": {
+    "allowedDeviceIds": [
+      "isolated-public-hexapod"
+    ],
+    "mode": "shadow",
+    "expiresAt": "2026-09-10T10:33:55.069787+00:00"
+  }
+}

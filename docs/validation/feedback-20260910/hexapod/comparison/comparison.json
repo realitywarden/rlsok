@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "LocalShadowComparison",
+  "profileSha256": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+  "baselineDecision": "WOULD_ALLOW",
+  "changedDecision": "WOULD_BLOCK",
+  "cloudUploaded": false,
+  "hardwareSignalSent": false,
+  "paths": [
+    {
+      "pathId": "command",
+      "baselineDecision": "WOULD_ALLOW",
+      "changedDecision": "WOULD_BLOCK",
+      "baselineObservationSha256": "6ab49aa1cc94ad796758f8659e9771bdf5e6ea9039b033f08fa5fa12bc4431cc",
+      "changedObservationSha256": "2b22092349102226dd82995064687d355dd80e6507cfffe932976b7750715dc5",
+      "changedChecks": [
+        {
+          "id": "fact.gait-node-settings.value",
+          "passed": false,
+          "reason": "fact_mismatch:gait-node-settings"
+        }
+      ]
+    }
+  ]
+}

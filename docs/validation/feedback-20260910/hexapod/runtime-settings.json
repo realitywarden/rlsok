@@ -1,0 +1,8 @@
+{
+  "publicRevision": "656eebab5587977a1f41d44657cb853433927053",
+  "environment": "isolated-gazebo-harmonic",
+  "physicalHardwareStarted": false,
+  "gaitInput": "/cmd_vel",
+  "gaitOutput": "/leg_controller/joint_trajectory",
+  "simulationWorld": "empty.sdf"
+}

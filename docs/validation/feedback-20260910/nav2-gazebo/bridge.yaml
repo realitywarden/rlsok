@@ -1,0 +1,10 @@
+- direction: ROS_TO_GZ
+  gz_topic_name: /model/rlsok_base/cmd_vel
+  gz_type_name: gz.msgs.Twist
+  ros_topic_name: /cmd_vel
+  ros_type_name: geometry_msgs/msg/Twist
+- direction: GZ_TO_ROS
+  gz_topic_name: /model/rlsok_base/odometry
+  gz_type_name: gz.msgs.Odometry
+  ros_topic_name: /odom
+  ros_type_name: nav_msgs/msg/Odometry

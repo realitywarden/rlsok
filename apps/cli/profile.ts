@@ -12,6 +12,7 @@ import { sourceRecipes } from '../../packages/composable-shadow/source-recipes';
 import { compareControllerExports, controllerComparisonMarkdown } from '../../packages/composable-shadow/controller-comparison';
 import { prepareSo101ControllerSwap } from '../../packages/composable-shadow/so101-swap';
 import { compareNav2ReviewInputs, nav2ReviewMarkdown } from '../../packages/composable-shadow/nav2-review';
+import { approveNav2Goal, checkNav2BeforeShadowHandoff } from '../../packages/composable-shadow/nav2-gate';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -21,11 +22,15 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
   rlsok profile compare-nav2 --baseline <nav2-input.json> --changed <nav2-input.json> --output <new-directory>
+  rlsok profile capture-nav2 --manifest <nav2-manifest.json> --output <new-observation.json> [--python <python3>]
+  rlsok profile approve-nav2 --observation <fresh-observation.json> --goal <follow-path-goal.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
+  rlsok profile shadow-nav2 --manifest <nav2-manifest.json> --approval <approval.json> --goal <follow-path-goal.json> --output <new-directory> [--python <python3>]
   rlsok profile compare-controllers --baseline <state.json> --changed <state.json> --output <new-directory>
   rlsok profile prepare-so101-swap --input <ros2_controllers.yaml> --output <new-controllers.yaml>
   rlsok profile export-controller --manager </controller_manager> --controller <name> --node </controller_node> --output <new-state.json> [--python <python3>]
-  rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>]
-  rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>]
+  rlsok profile export-node-settings --node </node> --output <new-settings.json> [--downstream-node </node> --topic </topic> --type <package/msg/Name>] [--python <python3>]
+  rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
+  rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile schema --output <new-directory>
   rlsok profile approve --profile <profile.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
   rlsok profile capture --profile <profile.json> --output <new-observation.json> [--python <python3>]
@@ -118,6 +123,40 @@ function printReport(directory: string, report: Awaited<ReturnType<typeof evalua
 export async function runProfileCommand(args: string[]): Promise<number> {
   const [command, ...rest] = args;
   if (!command || ['help', '--help', '-h'].includes(command)) { process.stdout.write(help); return 0; }
+  if (command === 'export-node-settings') {
+    const o = options(rest, ['node', 'output', 'downstream-node', 'topic', 'type', 'python'], ['node', 'output']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    const link = ['downstream-node', 'topic', 'type'].flatMap(key => o[key] ? [`--${key}`, o[key]] : []);
+    return python(o, ['--node', o.node, '--output', resolve(o.output), ...link], join(dirname(collectorScript()), 'node_settings.py'));
+  }
+  if (command === 'capture-nav2') {
+    const o = options(rest, ['manifest', 'output', 'python'], ['manifest', 'output']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['--manifest', resolve(o.manifest), '--output', resolve(o.output)], join(dirname(collectorScript()), 'nav2_observe.py'));
+  }
+  if (command === 'approve-nav2') {
+    const o = options(rest, ['observation', 'goal', 'actor', 'expires-at', 'output'], ['observation', 'goal', 'actor', 'expires-at', 'output']);
+    write(o.output, approveNav2Goal(read(o.observation), read(o.goal), o.actor, o['expires-at']));
+    process.stdout.write('Reviewed this exact goal and observed Nav2 configuration for local Shadow only.\n');
+    return 0;
+  }
+  if (command === 'shadow-nav2') {
+    const o = options(rest, ['manifest', 'approval', 'goal', 'output', 'python'], ['manifest', 'approval', 'goal', 'output']);
+    const directory = newDirectory(o.output), goal = read(o.goal);
+    const report = await checkNav2BeforeShadowHandoff({ approval: read(o.approval), goal,
+      capture: async () => {
+        const result = spawnSync(o.python ?? (process.platform === 'win32' ? 'python' : 'python3'),
+          [join(dirname(collectorScript()), 'nav2_observe.py'), '--manifest', resolve(o.manifest)],
+          { encoding: 'utf8', timeout: 30000, maxBuffer: 2*1024*1024, windowsHide: true });
+        if (result.error) throw result.error;
+        if (result.status !== 0) throw new Error(`nav2_capture_failed:${result.stderr.slice(-2000)}`);
+        return JSON.parse(result.stdout);
+      }, recordShadowHandoff: checkedGoal => write(join(directory, 'shadow-handoff.json'), {
+        kind: 'RlsokNav2ShadowHandoff', goal: checkedGoal, hardwareDispatch: 'NO', actionGoalsSent: 0, velocityCommandsPublished: 0 }) });
+    write(join(directory, 'report.json'), report);
+    process.stdout.write(`${report.decision}: ${report.reason} | hardware dispatch: NO\n${directory}\n`);
+    return report.decision === 'WOULD_ALLOW' ? 0 : 1;
+  }
   if (command === 'export-controller') {
     const o = options(rest, ['manager', 'controller', 'node', 'output', 'python'], ['manager', 'controller', 'node', 'output']);
     return python(o, ['--manager', o.manager, '--controller', o.controller, '--node', o.node, '--output', resolve(o.output)], join(dirname(collectorScript()), 'controller_state.py'));
@@ -155,16 +194,16 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     return report.result === 'INCOMPLETE' ? 2 : report.result === 'REVIEW_REQUIRED' ? 1 : 0;
   }
   if (command === 'prepare-source') {
-    const o = options(rest, ['recipe', 'source', 'catalog', 'urdf', 'settings', 'example', 'device-id', 'output', 'frame', 'subscriber', 'controller-state'],
+    const o = options(rest, ['recipe', 'source', 'catalog', 'urdf', 'settings', 'example', 'device-id', 'output', 'frame', 'subscriber', 'controller-state', 'node-settings'],
       ['recipe', 'source', 'catalog', 'urdf', 'settings', 'example', 'device-id', 'output']);
     const directory = await prepareSourceWorkspace({ recipe: o.recipe, source: o.source, catalog: o.catalog, urdf: o.urdf,
-      settings: o.settings, example: o.example, deviceId: o['device-id'], output: o.output, frame: o.frame, subscriber: o.subscriber, controllerState: o['controller-state'] });
+      settings: o.settings, example: o.example, deviceId: o['device-id'], output: o.output, frame: o.frame, subscriber: o.subscriber, controllerState: o['controller-state'], nodeSettings: o['node-settings'] });
     process.stdout.write(`Source review workspace: ${directory}\nReview all inputs before approving. No observation, approval or robot command was generated.\n`);
     return 0;
   }
   if (command === 'refresh-source') {
-    const o = options(rest, ['workspace', 'source', 'urdf', 'settings', 'controller-state'], ['workspace', 'source', 'urdf', 'settings']);
-    await refreshSourceWorkspace({ workspace: o.workspace, source: o.source, urdf: o.urdf, settings: o.settings, controllerState: o['controller-state'] });
+    const o = options(rest, ['workspace', 'source', 'urdf', 'settings', 'controller-state', 'node-settings'], ['workspace', 'source', 'urdf', 'settings']);
+    await refreshSourceWorkspace({ workspace: o.workspace, source: o.source, urdf: o.urdf, settings: o.settings, controllerState: o['controller-state'], nodeSettings: o['node-settings'] });
     process.stdout.write('Local source inputs refreshed. Approved profile and evidence unchanged. Capture a fresh observation next.\n');
     return 0;
   }

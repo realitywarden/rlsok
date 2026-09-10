@@ -1,0 +1,45 @@
+{
+  "apiVersion": "realitywarden.io/v1alpha1",
+  "kind": "EvidenceBundle",
+  "releaseId": "hexapod-gait.command.47885dbdf42cd2eb",
+  "executablePolicyHash": "b6417741bd3edb682ce5e327a9a3e52868392362fb066a09f6c82c198e98cf33",
+  "createdAt": "2026-09-10T09:34:38.831Z",
+  "entries": [
+    {
+      "sequence": 0,
+      "previousHash": null,
+      "evidence": {
+        "releaseId": "hexapod-gait.command.47885dbdf42cd2eb",
+        "executablePolicyHash": "b6417741bd3edb682ce5e327a9a3e52868392362fb066a09f6c82c198e98cf33",
+        "modelHash": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+        "actionContractHash": "d645d950c737af13d0164afcdbd6a8bd634246fc331a881a56d23936b5aaf040",
+        "robotProfileHash": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+        "controllerProfileHash": "c3af458b043641680b83a148e92fc33fdddc6402c7d2a0b0de8253bb610ea8ce",
+        "expectedConfigurationDigest": "c3af458b043641680b83a148e92fc33fdddc6402c7d2a0b0de8253bb610ea8ce",
+        "observedConfigurationDigest": "00fab7067f50f5926e973032b3ab2daf3b9c4de7f8563de39e80349f7ddcef9a",
+        "expectedConfigurationSchemaVersion": 2,
+        "observedConfigurationSchemaVersion": 2,
+        "runtimePolicyHash": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+        "deviceId": "isolated-public-hexapod",
+        "proposalId": "reviewed-example",
+        "proposedAction": {
+          "pathId": "command",
+          "adapter": "topic_twist",
+          "goalSha256": "fa1be09d0e6242afda07e70771214f7ba95aeb0eb25eec0bc1f3e786874eb950"
+        },
+        "decision": "blocked",
+        "decisionReason": "shadow:configuration_mismatch",
+        "matchedRuleIds": [
+          "shadow_release_eligibility"
+        ],
+        "stateObservedAt": "2026-09-10T09:34:34.742Z",
+        "decisionMadeAt": "2026-09-10T09:34:38.831Z",
+        "hardwareSignalSent": false,
+        "hardwareSignalState": "not_sent",
+        "executionEvidence": "shadow_not_dispatched"
+      },
+      "hash": "e43685b259afffd6c93cfd3d87d49f158b02011d3d4ed2a71271718b28de0d56"
+    }
+  ],
+  "testReportSha256": "5dfdce65c153e577f842e00b81115f2f3b9df32cdaff6511111176bcfac47b2c"
+}

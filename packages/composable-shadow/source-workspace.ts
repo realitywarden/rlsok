@@ -3,7 +3,7 @@ import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, renameSyn
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { readCatalog, readConnection, type Connection } from './onboarding';
 import { sourceRecipes } from './source-recipes';
-import { readControllerExport, requireControllerBaseline } from './controller-state';
+import { readControllerExport, requireControllerBaseline, readNodeSettingsExport, requireNodeSettingsBaseline } from './controller-state';
 import type { Profile } from './contracts';
 
 const hash = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
@@ -31,7 +31,7 @@ function writeJson(path: string, value: unknown): void {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`, { flag: 'wx', mode: 0o600 });
 }
 
-export interface SourceInputs { recipe: string; source: string; urdf: string; settings: string; controllerState?: string }
+export interface SourceInputs { recipe: string; source: string; urdf: string; settings: string; controllerState?: string; nodeSettings?: string }
 function readInputs(input: SourceInputs): Map<string, Buffer> {
   const recipe = sourceRecipes[input.recipe];
   if (!recipe) throw new Error('unknown_source_recipe');
@@ -49,6 +49,10 @@ function readInputs(input: SourceInputs): Map<string, Buffer> {
     if (!input.controllerState) throw new Error('source_recipe_requires_read_only_controller_state_export');
     result.set('controller-state.json', bytes(input.controllerState));
   } else if (input.controllerState) throw new Error('this_recipe_has_no_reviewed_controller_state_mapping');
+  if (recipe.nodeSettings) {
+    if (!input.nodeSettings) throw new Error('source_recipe_requires_fresh_node_settings_export');
+    result.set('node-settings.json', bytes(input.nodeSettings));
+  } else if (input.nodeSettings) throw new Error('this_recipe_has_no_reviewed_node_settings_mapping');
   return result;
 }
 
@@ -66,8 +70,14 @@ export async function prepareSourceWorkspace(input: SourceInputs & {
     requireControllerBaseline(controllerState, recipe.controllerState!);
     if (JSON.stringify(controllerState.configuration.source.environment) !== JSON.stringify(catalog.environment)) throw new Error('controller_export_environment_differs_from_catalog');
   }
+  const nodeSettings = recipe.nodeSettings ? await readNodeSettingsExport(JSON.parse(files.get('node-settings.json')!.toString('utf8'))) : undefined;
+  if (nodeSettings) {
+    requireNodeSettingsBaseline(nodeSettings, recipe.nodeSettings!);
+    if (JSON.stringify(nodeSettings.configuration.source.environment) !== JSON.stringify(catalog.environment)) throw new Error('node_settings_environment_differs_from_catalog');
+  }
   const facts: Profile['facts'] = [...files].map(([path, data], index) => path === 'controller-state.json'
     ? { id: 'active-controller', kind: 'json_value', path: 'files/controller-state.json', pointer: '/configurationSha256', expected: controllerState!.configurationSha256 }
+    : path === 'node-settings.json' ? { id: 'gait-node-settings', kind: 'json_value', path: 'files/node-settings.json', pointer: '/configurationSha256', expected: nodeSettings!.configurationSha256 }
     : { id: `file-${index + 1}-${basename(path)}`, kind: 'file_sha256', path: `files/${path}`, expected: hash(data) });
   const checks = facts.map(fact => fact.id);
   let selectedPath: Connection['profile']['paths'][number];
@@ -92,9 +102,13 @@ export async function prepareSourceWorkspace(input: SourceInputs & {
       interfaceSha256: topic.interfaceSha256, commandFrame: input.frame,
       fields: { linear: stamped ? '/twist/linear' : '/linear', angular: stamped ? '/twist/angular' : '/angular' }, checks };
   }
-  if (controllerState && selectedPath.adapter === 'topic_twist') {
+  if (controllerState && selectedPath.adapter === 'topic_twist' && !recipe.controllerState?.downstream) {
     const receiver = `${selectedPath.subscriber.namespace === '/' ? '' : selectedPath.subscriber.namespace}/${selectedPath.subscriber.name}`;
     if (controllerState.configuration.source.controllerNode !== receiver) throw new Error('controller_export_node_differs_from_selected_receiver');
+  }
+  if (nodeSettings && selectedPath.adapter === 'topic_twist') {
+    const receiver = `${selectedPath.subscriber.namespace === '/' ? '' : selectedPath.subscriber.namespace}/${selectedPath.subscriber.name}`;
+    if (nodeSettings.configuration.source.node !== receiver) throw new Error('node_settings_source_differs_from_selected_receiver');
   }
   const connection = await readConnection({ schemaVersion: 1, kind: 'RlsokShadowConnection', catalog,
     profile: { schemaVersion: 1, id: input.recipe, mode: 'shadow', environment: catalog.environment,
@@ -114,17 +128,18 @@ export async function prepareSourceWorkspace(input: SourceInputs & {
     referenceRepository: recipe.repository, referenceCommit: recipe.referenceCommit,
     ...(recipe.referenceLaunches ? { referenceLaunches: recipe.referenceLaunches } : {}),
     ...(controllerState ? { controllerStateSource: controllerState.configuration.source } : {}),
+    ...(nodeSettings ? { nodeSettingsSource: nodeSettings.configuration.source } : {}),
     scope: recipe.boundary, files: [...files.keys()].map(path => `files/${path}`) });
-  writeFileSync(join(output, 'README.md'), `# ${input.recipe} local review\n\n${recipe.boundary}\n\nSource mapping reference: https://github.com/${recipe.repository}/tree/${recipe.referenceCommit}\nThe reference commit describes the mapping; it does not assert that your checkout or running robot uses that commit.\n\nReview profile.json, proposals.json, runtime settings, and every copied file before approving. No approval or observation is generated here. The catalog is a discovery snapshot.\n\nBefore each capture, use profile refresh-source with the current source, expanded URDF and operator settings. Refresh only replaces local input copies; it never changes the approved profile or evidence. An incomplete refresh is an error: do not capture until refresh succeeds.\n\nFor SO-101/TRIK, run export-controller before each capture and pass --controller-state to every prepare/refresh. Export timestamps are preserved; copying an old file cannot refresh them. Local source files and operator settings are proxies. The separate export reports the selected ROS software state, not authenticated hardware/firmware. A source-file change alone is not an actual running controller swap. Keep first use isolated from hardware; zero RLSOK dispatch does not stop other nodes.\n\nSee docs/source-shadow-workspaces.md in the installed bundle for commands and per-project prerequisites.\n`, { flag: 'wx', mode: 0o600 });
+  writeFileSync(join(output, 'README.md'), `# ${input.recipe} local review\n\n${recipe.boundary}\n\nSource mapping reference: https://github.com/${recipe.repository}/tree/${recipe.referenceCommit}\nThe reference commit describes the mapping; it does not assert that your checkout or running robot uses that commit.\n\nReview profile.json, proposals.json, runtime settings, and every copied file before approving. No approval or observation is generated here. The catalog is a discovery snapshot.\n\nBefore each capture, use profile refresh-source with the current source, expanded URDF and operator settings. Refresh only replaces local input copies; it never changes the approved profile or evidence. An incomplete refresh is an error: do not capture until refresh succeeds.\n\nFor controller-backed recipes, run export-controller before each capture and pass --controller-state to every prepare/refresh. Hexapod also requires export-node-settings with its downstream JointTrajectory link and --node-settings for every prepare/refresh; see docs/hexapod-observed-shadow.md. Export timestamps are preserved; copying an old file cannot refresh them. Local source files and operator settings are proxies. The separate export reports the selected ROS software state, not authenticated hardware/firmware. A source-file change alone is not an actual running controller swap. Keep first use isolated from hardware; zero RLSOK dispatch does not stop other nodes.\n\nSee docs/source-shadow-workspaces.md in the installed bundle for commands and per-project prerequisites.\n`, { flag: 'wx', mode: 0o600 });
   if (recipe.referenceLaunches) {
-    writeFileSync(join(output, 'LAUNCH-REFERENCE.md'), `# Confirmed simulation baseline\n\nReference: https://github.com/${recipe.repository}/tree/${recipe.referenceCommit}\n\nRun only in the isolated simulation, after reviewing your current configuration. The simulation and gait start separately:\n\n\`\`\`sh\n${recipe.referenceLaunches.join('\n')}\n\`\`\`\n\nThese are baseline reference commands, not proof of the current working tree, active configuration or a completed customer run. Confirm local gait/controller differences before approving. RLSOK neither launches these commands nor publishes motion. Downstream IK, 18 joint outputs and hardware remain outside the selected /cmd_vel input comparison.\n`, { flag: 'wx', mode: 0o600 });
+    writeFileSync(join(output, 'LAUNCH-REFERENCE.md'), `# Confirmed simulation baseline\n\nReference: https://github.com/${recipe.repository}/tree/${recipe.referenceCommit}\n\nRun only in the isolated simulation, after reviewing your current configuration. The simulation and gait start separately:\n\n\`\`\`sh\n${recipe.referenceLaunches.join('\n')}\n\`\`\`\n\nThese are baseline reference commands, not proof of the current working tree, active configuration or a completed customer run. Confirm local gait/controller differences before approving. RLSOK neither launches these commands nor publishes motion. Fresh gait parameters, its selected JointTrajectory connection and the downstream 18-joint controller export are now required. IK correctness, dynamics and physical hardware remain outside the configuration comparison. See docs/hexapod-observed-shadow.md.\n`, { flag: 'wx', mode: 0o600 });
   }
   return output;
 }
 
 export async function refreshSourceWorkspace(input: Omit<SourceInputs, 'recipe'> & { workspace: string }): Promise<void> {
   const root = realpathSync(input.workspace);
-  const marker = json(join(root, 'source-map.json')) as { kind?: string; schemaVersion?: number; recipe?: string; files?: string[]; controllerStateSource?: unknown };
+  const marker = json(join(root, 'source-map.json')) as { kind?: string; schemaVersion?: number; recipe?: string; files?: string[]; controllerStateSource?: unknown; nodeSettingsSource?: unknown };
   if (marker.kind !== 'RlsokSourceWorkspace' || marker.schemaVersion !== 1 || !marker.recipe || !sourceRecipes[marker.recipe]) throw new Error('not_a_source_workspace');
   const connection = await readConnection(json(join(root, 'connection.json')));
   const savedProfile = json(join(root, 'profile.json'));
@@ -135,6 +150,10 @@ export async function refreshSourceWorkspace(input: Omit<SourceInputs, 'recipe'>
     if (JSON.stringify(state.configuration.source) !== JSON.stringify(marker.controllerStateSource)) throw new Error('refresh_requires_the_same_controller_state_source');
     // Inactive, absent or changed bindings must survive refresh so capture can record
     // their actual digest and original observedAt against the unchanged approval.
+  }
+  if (files.has('node-settings.json')) {
+    const state = await readNodeSettingsExport(JSON.parse(files.get('node-settings.json')!.toString('utf8')));
+    if (JSON.stringify(state.configuration.source) !== JSON.stringify(marker.nodeSettingsSource)) throw new Error('refresh_requires_same_node_settings_source');
   }
   const expectedPaths = [...files.keys()].map(path => `files/${path}`);
   if (JSON.stringify(marker.files) !== JSON.stringify(expectedPaths) ||

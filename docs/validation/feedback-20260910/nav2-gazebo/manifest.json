@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "actionEndpoint": "/follow_path",
+  "commandType": "geometry_msgs/msg/Twist",
+  "stages": [
+    {
+      "role": "controller",
+      "node": "/controller_server",
+      "inputTopic": null,
+      "outputTopic": "/cmd_vel_raw",
+      "package": "nav2_controller"
+    },
+    {
+      "role": "smoother",
+      "node": "/velocity_smoother",
+      "inputTopic": "/cmd_vel_raw",
+      "outputTopic": "/cmd_vel_smoothed",
+      "package": "nav2_velocity_smoother"
+    },
+    {
+      "role": "gate",
+      "node": "/collision_monitor",
+      "inputTopic": "/cmd_vel_smoothed",
+      "outputTopic": "/cmd_vel",
+      "package": "nav2_collision_monitor"
+    },
+    {
+      "role": "base",
+      "node": "/rlsok_gz_base",
+      "inputTopic": "/cmd_vel",
+      "outputTopic": null,
+      "package": "ros_gz_bridge",
+      "sourceFiles": [
+        "/mnt/f/xy/rlsok-mail-feedback-20260908/artifacts/nav2-gazebo-20260910-attempt3/bridge.yaml",
+        "/mnt/f/xy/rlsok-mail-feedback-20260908/artifacts/nav2-gazebo-20260910-attempt3/world.sdf"
+      ]
+    }
+  ]
+}

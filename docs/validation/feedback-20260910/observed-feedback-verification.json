@@ -1,0 +1,22 @@
+{
+  "scope": "Targeted source checks and real isolated ROS/Gazebo experiments; not customer acceptance",
+  "sourceFilesSha256": {
+    "packages/composable-shadow/nav2-gate.ts": "ef6100a44b76da549493c22454e2867ea1b800abcf5ded6ee65df598b2bd7b68",
+    "packages/composable-shadow/nav2-review.ts": "b8e8d91301de02bb1e36ba2abeba314089abdf09c2fa838ec8e6bc00a00d3aad",
+    "experimental/composable-shadow/nav2_observe.py": "1c1772349eb44929891c8b755e15e3162e08faadebaa36815d93490887366d84",
+    "experimental/composable-shadow/node_settings.py": "b7ce8229e98c2af2313b40b090f6a9fc31f961ecde9820c3033eb59628577fb2",
+    "experimental/composable-shadow/controller_state.py": "153b8eb3240ee2c459bfdaac7427d4913b0362aada5aaa74bdc5ecdc440d638b",
+    "experimental/composable-shadow/collect.py": "5008b94a7bb4985be4b59823c5b87123c2bbbefd6c0d1a316aaeec9ef52c2ca7",
+    "packages/composable-shadow/source-workspace.ts": "d5b9acae90a30ba67b31b12eddea71edc91555a23a6dea778e0419f47a7f19bb",
+    "packages/composable-shadow/source-recipes.ts": "9b4e7928dba49ca2c1b9d447d458d1dde22979c71b66529fe1ce33568a72276b",
+    "packages/composable-shadow/controller-state.ts": "92ba8f5629ae16495711b9ceb82993ccd7227ede33996398171fa37f81462974",
+    "apps/cli/profile.ts": "a59bd0280fff0ade4bf79fce33f57bdbd2bf432730ad67c9a2b028d9519b9c40"
+  },
+  "nav2GraphCases": 23,
+  "nav2GazeboCases": 12,
+  "typescriptTargetedGroups": 13,
+  "pythonNodeExportTests": 2,
+  "githubActions": "not_run",
+  "fullSuite": "not_run",
+  "sourceHashEncoding": "Git LF-normalized source bytes; line-ending normalization after execution changes no program statements."
+}

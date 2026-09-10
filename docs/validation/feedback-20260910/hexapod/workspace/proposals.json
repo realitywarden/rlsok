@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "proposals": [
+    {
+      "id": "reviewed-example",
+      "pathId": "command",
+      "goal": {
+        "linear": {
+          "x": 0.05,
+          "y": 0,
+          "z": 0
+        },
+        "angular": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+      }
+    }
+  ]
+}

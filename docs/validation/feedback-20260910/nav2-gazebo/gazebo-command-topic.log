@@ -1,0 +1,4 @@
+Publishers [Address, Message Type]:
+  tcp://127.0.0.1:41409, gz.msgs.Twist
+Subscribers [Address, Message Type]:
+  tcp://127.0.0.1:41683, gz.msgs.Twist

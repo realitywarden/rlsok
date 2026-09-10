@@ -1,0 +1,1855 @@
+{
+  "decision": "WOULD_BLOCK",
+  "reason": "nav2_review_required",
+  "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+  "commandSha256": "4f04ce46c7f1d959c7e82fd48064fc142b04ee114a2d971c45f421212d5a3eb2",
+  "report": {
+    "schemaVersion": 1,
+    "kind": "RlsokNav2LocalReview",
+    "result": "REVIEW_REQUIRED",
+    "hardwareDispatch": "NO",
+    "createsApproval": false,
+    "liveGraphVerified": false,
+    "baseline": {
+      "source": "operator-supplied",
+      "observedAt": "2026-09-10T09:19:48.446Z",
+      "configurationSha256": "7740d39cae109dfa779c8c8bdded08128a1f8ef332951c4b8462bb790e947a7c",
+      "commandSha256": "4f04ce46c7f1d959c7e82fd48064fc142b04ee114a2d971c45f421212d5a3eb2",
+      "issues": []
+    },
+    "changed": {
+      "source": "operator-supplied",
+      "observedAt": "2026-09-10T09:20:05.468Z",
+      "configurationSha256": "294fdb064f77ccd95bac94c499428ae9dccba819999f5c7d002c59a201de78f2",
+      "commandSha256": "4f04ce46c7f1d959c7e82fd48064fc142b04ee114a2d971c45f421212d5a3eb2",
+      "issues": []
+    },
+    "differences": [
+      {
+        "group": "smoother",
+        "expected": {
+          "feedback": "OPEN_LOOP",
+          "scale_velocities": false,
+          "smoothing_frequency": 20,
+          "velocity_timeout": 1,
+          "max_velocity": [
+            0.5,
+            0,
+            2.5
+          ],
+          "min_velocity": [
+            -0.5,
+            0,
+            -2.5
+          ],
+          "max_accel": [
+            2.5,
+            0,
+            3.2
+          ],
+          "max_decel": [
+            -2.5,
+            0,
+            -3.2
+          ],
+          "deadband_velocity": [
+            0,
+            0,
+            0
+          ],
+          "timestampConsumed": false
+        },
+        "observed": {
+          "feedback": "OPEN_LOOP",
+          "scale_velocities": false,
+          "smoothing_frequency": 10,
+          "velocity_timeout": 1,
+          "max_velocity": [
+            0.5,
+            0,
+            2.5
+          ],
+          "min_velocity": [
+            -0.5,
+            0,
+            -2.5
+          ],
+          "max_accel": [
+            2.5,
+            0,
+            3.2
+          ],
+          "max_decel": [
+            -2.5,
+            0,
+            -3.2
+          ],
+          "deadband_velocity": [
+            0,
+            0,
+            0
+          ],
+          "timestampConsumed": false
+        }
+      },
+      {
+        "group": "topology",
+        "expected": [
+          {
+            "role": "controller",
+            "node": "/controller_server",
+            "inputTopic": null,
+            "outputTopic": "/cmd_vel_raw",
+            "implementation": "nav2_controller",
+            "version": "1.3.12",
+            "configurationSha256": "996398c0bace7a1527063b9b55226599df82db636427474cd88d0b03315703c8"
+          },
+          {
+            "role": "smoother",
+            "node": "/velocity_smoother",
+            "inputTopic": "/cmd_vel_raw",
+            "outputTopic": "/cmd_vel_smoothed",
+            "implementation": "nav2_velocity_smoother",
+            "version": "1.3.12",
+            "configurationSha256": "4f441e692c016bee8eae1977a6e2d0a8a0b8d007efdab47fe90b51ceabe422c4"
+          },
+          {
+            "role": "gate",
+            "node": "/collision_monitor",
+            "inputTopic": "/cmd_vel_smoothed",
+            "outputTopic": "/cmd_vel",
+            "implementation": "nav2_collision_monitor",
+            "version": "1.3.12",
+            "configurationSha256": "67023f61b3d04bd40679fb13e1f4fce4907739f7cf5c39ab5ae7c906b5fd924a"
+          },
+          {
+            "role": "base",
+            "node": "/rlsok_gz_base",
+            "inputTopic": "/cmd_vel",
+            "outputTopic": null,
+            "implementation": "ros_gz_bridge",
+            "version": "1.0.22",
+            "configurationSha256": "715d225992d79bd099c1669d36a8d793c8c1da9a23a9e0c26cf5fde86f09be6b"
+          }
+        ],
+        "observed": [
+          {
+            "role": "controller",
+            "node": "/controller_server",
+            "inputTopic": null,
+            "outputTopic": "/cmd_vel_raw",
+            "implementation": "nav2_controller",
+            "version": "1.3.12",
+            "configurationSha256": "996398c0bace7a1527063b9b55226599df82db636427474cd88d0b03315703c8"
+          },
+          {
+            "role": "smoother",
+            "node": "/velocity_smoother",
+            "inputTopic": "/cmd_vel_raw",
+            "outputTopic": "/cmd_vel_smoothed",
+            "implementation": "nav2_velocity_smoother",
+            "version": "1.3.12",
+            "configurationSha256": "06441d46e733901541d75a72bc9593e29cf9e8e9d20da4242aa88cc9ed1282bd"
+          },
+          {
+            "role": "gate",
+            "node": "/collision_monitor",
+            "inputTopic": "/cmd_vel_smoothed",
+            "outputTopic": "/cmd_vel",
+            "implementation": "nav2_collision_monitor",
+            "version": "1.3.12",
+            "configurationSha256": "67023f61b3d04bd40679fb13e1f4fce4907739f7cf5c39ab5ae7c906b5fd924a"
+          },
+          {
+            "role": "base",
+            "node": "/rlsok_gz_base",
+            "inputTopic": "/cmd_vel",
+            "outputTopic": null,
+            "implementation": "ros_gz_bridge",
+            "version": "1.0.22",
+            "configurationSha256": "715d225992d79bd099c1669d36a8d793c8c1da9a23a9e0c26cf5fde86f09be6b"
+          }
+        ]
+      }
+    ],
+    "boundary": "Historical comparison of supplied selected facts and an exact local goal sample. MATCH is not execution permission, physical-envelope validation, authenticated ROS topology, a Nav2 adapter or a stop command. OPEN_LOOP is command-space only."
+  },
+  "current": {
+    "schemaVersion": 1,
+    "kind": "RlsokNav2RosObservation",
+    "startedAt": "2026-09-10T09:20:05.468Z",
+    "completedAt": "2026-09-10T09:20:08.421Z",
+    "input": {
+      "schemaVersion": 1,
+      "kind": "RlsokNav2ReviewInput",
+      "distribution": "jazzy",
+      "inputSource": "operator-supplied",
+      "observedAt": "2026-09-10T09:20:05.468Z",
+      "actionEndpoint": "/follow_path",
+      "software": [
+        {
+          "identity": "nav2_collision_monitor",
+          "version": "1.3.12"
+        },
+        {
+          "identity": "nav2_controller",
+          "version": "1.3.12"
+        },
+        {
+          "identity": "nav2_velocity_smoother",
+          "version": "1.3.12"
+        },
+        {
+          "identity": "ros_gz_bridge",
+          "version": "1.0.22"
+        }
+      ],
+      "smoother": {
+        "feedback": "OPEN_LOOP",
+        "scale_velocities": false,
+        "smoothing_frequency": 10,
+        "velocity_timeout": 1,
+        "max_velocity": [
+          0.5,
+          0,
+          2.5
+        ],
+        "min_velocity": [
+          -0.5,
+          0,
+          -2.5
+        ],
+        "max_accel": [
+          2.5,
+          0,
+          3.2
+        ],
+        "max_decel": [
+          -2.5,
+          0,
+          -3.2
+        ],
+        "deadband_velocity": [
+          0,
+          0,
+          0
+        ],
+        "stamp_smoothed_velocity_with_smoothing_time": false,
+        "timestampConsumed": false
+      },
+      "topology": {
+        "selectedPathComplete": true,
+        "stages": [
+          {
+            "role": "controller",
+            "node": "/controller_server",
+            "inputTopic": null,
+            "outputTopic": "/cmd_vel_raw",
+            "implementation": "nav2_controller",
+            "version": "1.3.12",
+            "configurationSha256": "996398c0bace7a1527063b9b55226599df82db636427474cd88d0b03315703c8"
+          },
+          {
+            "role": "smoother",
+            "node": "/velocity_smoother",
+            "inputTopic": "/cmd_vel_raw",
+            "outputTopic": "/cmd_vel_smoothed",
+            "implementation": "nav2_velocity_smoother",
+            "version": "1.3.12",
+            "configurationSha256": "06441d46e733901541d75a72bc9593e29cf9e8e9d20da4242aa88cc9ed1282bd"
+          },
+          {
+            "role": "gate",
+            "node": "/collision_monitor",
+            "inputTopic": "/cmd_vel_smoothed",
+            "outputTopic": "/cmd_vel",
+            "implementation": "nav2_collision_monitor",
+            "version": "1.3.12",
+            "configurationSha256": "67023f61b3d04bd40679fb13e1f4fce4907739f7cf5c39ab5ae7c906b5fd924a"
+          },
+          {
+            "role": "base",
+            "node": "/rlsok_gz_base",
+            "inputTopic": "/cmd_vel",
+            "outputTopic": null,
+            "implementation": "ros_gz_bridge",
+            "version": "1.0.22",
+            "configurationSha256": "715d225992d79bd099c1669d36a8d793c8c1da9a23a9e0c26cf5fde86f09be6b"
+          }
+        ],
+        "edges": [
+          {
+            "publisher": "/controller_server",
+            "subscriber": "/velocity_smoother",
+            "topic": "/cmd_vel_raw",
+            "selectedPublisherCount": 1,
+            "selectedSubscriptionCount": 1,
+            "otherPublisherCount": 0
+          },
+          {
+            "publisher": "/velocity_smoother",
+            "subscriber": "/collision_monitor",
+            "topic": "/cmd_vel_smoothed",
+            "selectedPublisherCount": 1,
+            "selectedSubscriptionCount": 1,
+            "otherPublisherCount": 0
+          },
+          {
+            "publisher": "/collision_monitor",
+            "subscriber": "/rlsok_gz_base",
+            "topic": "/cmd_vel",
+            "selectedPublisherCount": 1,
+            "selectedSubscriptionCount": 1,
+            "otherPublisherCount": 0
+          }
+        ]
+      },
+      "loadedPlugins": {
+        "controller_id": [
+          {
+            "id": "FollowPath",
+            "implementation": "dwb_core::DWBLocalPlanner",
+            "version": "1.3.12",
+            "configurationSha256": "c618770eee5d80413ba60ab96cf780a8ac3fc0eaa2ad440eae86161e41f47b83"
+          },
+          {
+            "id": "Alternative",
+            "implementation": "dwb_core::DWBLocalPlanner",
+            "version": "1.3.12",
+            "configurationSha256": "cef16ce67021ee6d7821cc9324d1f23a13365a7ee10c3459c4afdd95232ade8e"
+          }
+        ],
+        "goal_checker_id": [
+          {
+            "id": "goal_checker",
+            "implementation": "nav2_controller::SimpleGoalChecker",
+            "version": "1.3.12",
+            "configurationSha256": "a370589fdded5839dcbb7a1eee33b8c3a617b774f0b0b68fd8f3b8474dc34430"
+          },
+          {
+            "id": "alternate_goal",
+            "implementation": "nav2_controller::SimpleGoalChecker",
+            "version": "1.3.12",
+            "configurationSha256": "e256cfb2900f96fb72999abe6867146f857b162e02bdac821fdc00cb11f6f345"
+          }
+        ],
+        "progress_checker_id": [
+          {
+            "id": "progress_checker",
+            "implementation": "nav2_controller::SimpleProgressChecker",
+            "version": "1.3.12",
+            "configurationSha256": "31a6050d5efde4e0c193f3ad7f9f96526ae59df0480628da339f4cc856244da9"
+          },
+          {
+            "id": "alternate_progress",
+            "implementation": "nav2_controller::SimpleProgressChecker",
+            "version": "1.3.12",
+            "configurationSha256": "4e1f5b085053da884735ccad38b920f6585d28b0d1a3f5e3934d948a7c9cb2d7"
+          }
+        ]
+      },
+      "goal": {
+        "path": {},
+        "controller_id": "FollowPath",
+        "goal_checker_id": "goal_checker",
+        "progress_checker_id": "progress_checker"
+      },
+      "volatile": {}
+    },
+    "binding": {
+      "environment": {
+        "rosDistro": "jazzy",
+        "rmwImplementation": "rmw_fastrtps_cpp",
+        "domainId": 223
+      },
+      "manifestSha256": "09e525c234556aadedc28defc2617ee4a05c8cefd00321a72cfaca9841ae6d8d",
+      "nodes": {
+        "/controller_server": {
+          "package": "nav2_controller",
+          "commandInputs": [],
+          "configuration": {
+            "parameters": {
+              "/bond_disable_heartbeat_timeout": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.BaseObstacle.class": {
+                "type": 4,
+                "value": "BaseObstacle"
+              },
+              "Alternative.BaseObstacle.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.BaseObstacle.sum_scores": {
+                "type": 1,
+                "value": false
+              },
+              "Alternative.GoalAlign.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "Alternative.GoalAlign.class": {
+                "type": 4,
+                "value": "GoalAlign"
+              },
+              "Alternative.GoalAlign.forward_point_distance": {
+                "type": 3,
+                "value": "0.325"
+              },
+              "Alternative.GoalAlign.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.GoalDist.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "Alternative.GoalDist.class": {
+                "type": 4,
+                "value": "GoalDist"
+              },
+              "Alternative.GoalDist.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.Oscillation.class": {
+                "type": 4,
+                "value": "Oscillation"
+              },
+              "Alternative.Oscillation.oscillation_reset_angle": {
+                "type": 3,
+                "value": "0.2"
+              },
+              "Alternative.Oscillation.oscillation_reset_dist": {
+                "type": 3,
+                "value": "0.05"
+              },
+              "Alternative.Oscillation.oscillation_reset_time": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "Alternative.Oscillation.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.Oscillation.x_only_threshold": {
+                "type": 3,
+                "value": "0.05"
+              },
+              "Alternative.PathAlign.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "Alternative.PathAlign.class": {
+                "type": 4,
+                "value": "PathAlign"
+              },
+              "Alternative.PathAlign.forward_point_distance": {
+                "type": 3,
+                "value": "0.325"
+              },
+              "Alternative.PathAlign.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.PathDist.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "Alternative.PathDist.class": {
+                "type": 4,
+                "value": "PathDist"
+              },
+              "Alternative.PathDist.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.RotateToGoal.class": {
+                "type": 4,
+                "value": "RotateToGoal"
+              },
+              "Alternative.RotateToGoal.lookahead_time": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "Alternative.RotateToGoal.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.RotateToGoal.slowing_factor": {
+                "type": 3,
+                "value": "5.0"
+              },
+              "Alternative.acc_lim_theta": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.acc_lim_x": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.acc_lim_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.angular_granularity": {
+                "type": 3,
+                "value": "0.025"
+              },
+              "Alternative.critics": {
+                "type": 9,
+                "value": [
+                  "RotateToGoal",
+                  "Oscillation",
+                  "BaseObstacle",
+                  "GoalAlign",
+                  "PathAlign",
+                  "PathDist",
+                  "GoalDist"
+                ]
+              },
+              "Alternative.debug_trajectory_details": {
+                "type": 1,
+                "value": false
+              },
+              "Alternative.decel_lim_theta": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "Alternative.decel_lim_x": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "Alternative.decel_lim_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.default_critic_namespaces": {
+                "type": 9,
+                "value": []
+              },
+              "Alternative.discretize_by_time": {
+                "type": 1,
+                "value": false
+              },
+              "Alternative.forward_prune_distance": {
+                "type": 3,
+                "value": "2.0"
+              },
+              "Alternative.include_last_point": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.limit_vel_cmd_in_traj": {
+                "type": 1,
+                "value": false
+              },
+              "Alternative.linear_granularity": {
+                "type": 3,
+                "value": "0.5"
+              },
+              "Alternative.marker_lifetime": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "Alternative.max_speed_xy": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.max_vel_theta": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "Alternative.max_vel_x": {
+                "type": 3,
+                "value": "0.3"
+              },
+              "Alternative.max_vel_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.min_speed_theta": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.min_speed_xy": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.min_vel_x": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.min_vel_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "Alternative.plugin": {
+                "type": 4,
+                "value": "dwb_core::DWBLocalPlanner"
+              },
+              "Alternative.prune_distance": {
+                "type": 3,
+                "value": "2.0"
+              },
+              "Alternative.prune_plan": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.publish_cost_grid_pc": {
+                "type": 1,
+                "value": false
+              },
+              "Alternative.publish_evaluation": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.publish_global_plan": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.publish_local_plan": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.publish_trajectories": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.publish_transformed_plan": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.short_circuit_trajectory_evaluation": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.shorten_transformed_plan": {
+                "type": 1,
+                "value": true
+              },
+              "Alternative.sim_time": {
+                "type": 3,
+                "value": "1.7"
+              },
+              "Alternative.time_granularity": {
+                "type": 3,
+                "value": "0.5"
+              },
+              "Alternative.trajectory_generator_name": {
+                "type": 4,
+                "value": "dwb_plugins::StandardTrajectoryGenerator"
+              },
+              "Alternative.trans_stopped_velocity": {
+                "type": 3,
+                "value": "0.25"
+              },
+              "Alternative.transform_tolerance": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "Alternative.vtheta_samples": {
+                "type": 2,
+                "value": "3"
+              },
+              "Alternative.vx_samples": {
+                "type": 2,
+                "value": "3"
+              },
+              "Alternative.vy_samples": {
+                "type": 2,
+                "value": "1"
+              },
+              "Alternative.xy_goal_tolerance": {
+                "type": 3,
+                "value": "0.25"
+              },
+              "FollowPath.BaseObstacle.class": {
+                "type": 4,
+                "value": "BaseObstacle"
+              },
+              "FollowPath.BaseObstacle.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.BaseObstacle.sum_scores": {
+                "type": 1,
+                "value": false
+              },
+              "FollowPath.GoalAlign.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "FollowPath.GoalAlign.class": {
+                "type": 4,
+                "value": "GoalAlign"
+              },
+              "FollowPath.GoalAlign.forward_point_distance": {
+                "type": 3,
+                "value": "0.325"
+              },
+              "FollowPath.GoalAlign.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.GoalDist.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "FollowPath.GoalDist.class": {
+                "type": 4,
+                "value": "GoalDist"
+              },
+              "FollowPath.GoalDist.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.Oscillation.class": {
+                "type": 4,
+                "value": "Oscillation"
+              },
+              "FollowPath.Oscillation.oscillation_reset_angle": {
+                "type": 3,
+                "value": "0.2"
+              },
+              "FollowPath.Oscillation.oscillation_reset_dist": {
+                "type": 3,
+                "value": "0.05"
+              },
+              "FollowPath.Oscillation.oscillation_reset_time": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "FollowPath.Oscillation.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.Oscillation.x_only_threshold": {
+                "type": 3,
+                "value": "0.05"
+              },
+              "FollowPath.PathAlign.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "FollowPath.PathAlign.class": {
+                "type": 4,
+                "value": "PathAlign"
+              },
+              "FollowPath.PathAlign.forward_point_distance": {
+                "type": 3,
+                "value": "0.325"
+              },
+              "FollowPath.PathAlign.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.PathDist.aggregation_type": {
+                "type": 4,
+                "value": "last"
+              },
+              "FollowPath.PathDist.class": {
+                "type": 4,
+                "value": "PathDist"
+              },
+              "FollowPath.PathDist.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.RotateToGoal.class": {
+                "type": 4,
+                "value": "RotateToGoal"
+              },
+              "FollowPath.RotateToGoal.lookahead_time": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "FollowPath.RotateToGoal.scale": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.RotateToGoal.slowing_factor": {
+                "type": 3,
+                "value": "5.0"
+              },
+              "FollowPath.acc_lim_theta": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.acc_lim_x": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.acc_lim_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.angular_granularity": {
+                "type": 3,
+                "value": "0.025"
+              },
+              "FollowPath.critics": {
+                "type": 9,
+                "value": [
+                  "RotateToGoal",
+                  "Oscillation",
+                  "BaseObstacle",
+                  "GoalAlign",
+                  "PathAlign",
+                  "PathDist",
+                  "GoalDist"
+                ]
+              },
+              "FollowPath.debug_trajectory_details": {
+                "type": 1,
+                "value": false
+              },
+              "FollowPath.decel_lim_theta": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "FollowPath.decel_lim_x": {
+                "type": 3,
+                "value": "-1.0"
+              },
+              "FollowPath.decel_lim_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.default_critic_namespaces": {
+                "type": 9,
+                "value": []
+              },
+              "FollowPath.discretize_by_time": {
+                "type": 1,
+                "value": false
+              },
+              "FollowPath.forward_prune_distance": {
+                "type": 3,
+                "value": "2.0"
+              },
+              "FollowPath.include_last_point": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.limit_vel_cmd_in_traj": {
+                "type": 1,
+                "value": false
+              },
+              "FollowPath.linear_granularity": {
+                "type": 3,
+                "value": "0.5"
+              },
+              "FollowPath.marker_lifetime": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "FollowPath.max_speed_xy": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.max_vel_theta": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "FollowPath.max_vel_x": {
+                "type": 3,
+                "value": "0.4"
+              },
+              "FollowPath.max_vel_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.min_speed_theta": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.min_speed_xy": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.min_vel_x": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.min_vel_y": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "FollowPath.plugin": {
+                "type": 4,
+                "value": "dwb_core::DWBLocalPlanner"
+              },
+              "FollowPath.prune_distance": {
+                "type": 3,
+                "value": "2.0"
+              },
+              "FollowPath.prune_plan": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.publish_cost_grid_pc": {
+                "type": 1,
+                "value": false
+              },
+              "FollowPath.publish_evaluation": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.publish_global_plan": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.publish_local_plan": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.publish_trajectories": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.publish_transformed_plan": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.short_circuit_trajectory_evaluation": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.shorten_transformed_plan": {
+                "type": 1,
+                "value": true
+              },
+              "FollowPath.sim_time": {
+                "type": 3,
+                "value": "1.7"
+              },
+              "FollowPath.time_granularity": {
+                "type": 3,
+                "value": "0.5"
+              },
+              "FollowPath.trajectory_generator_name": {
+                "type": 4,
+                "value": "dwb_plugins::StandardTrajectoryGenerator"
+              },
+              "FollowPath.trans_stopped_velocity": {
+                "type": 3,
+                "value": "0.25"
+              },
+              "FollowPath.transform_tolerance": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "FollowPath.vtheta_samples": {
+                "type": 2,
+                "value": "3"
+              },
+              "FollowPath.vx_samples": {
+                "type": 2,
+                "value": "3"
+              },
+              "FollowPath.vy_samples": {
+                "type": 2,
+                "value": "1"
+              },
+              "FollowPath.xy_goal_tolerance": {
+                "type": 3,
+                "value": "0.25"
+              },
+              "action_server_result_timeout": {
+                "type": 3,
+                "value": "10.0"
+              },
+              "alternate_goal.plugin": {
+                "type": 4,
+                "value": "nav2_controller::SimpleGoalChecker"
+              },
+              "alternate_goal.stateful": {
+                "type": 1,
+                "value": true
+              },
+              "alternate_goal.symmetric_yaw_tolerance": {
+                "type": 1,
+                "value": false
+              },
+              "alternate_goal.xy_goal_tolerance": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "alternate_goal.yaw_goal_tolerance": {
+                "type": 3,
+                "value": "0.25"
+              },
+              "alternate_progress.movement_time_allowance": {
+                "type": 3,
+                "value": "10.0"
+              },
+              "alternate_progress.plugin": {
+                "type": 4,
+                "value": "nav2_controller::SimpleProgressChecker"
+              },
+              "alternate_progress.required_movement_radius": {
+                "type": 3,
+                "value": "0.3"
+              },
+              "autostart_node": {
+                "type": 1,
+                "value": false
+              },
+              "bond_heartbeat_period": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "controller_frequency": {
+                "type": 3,
+                "value": "10.0"
+              },
+              "controller_plugins": {
+                "type": 9,
+                "value": [
+                  "FollowPath",
+                  "Alternative"
+                ]
+              },
+              "costmap_update_timeout": {
+                "type": 3,
+                "value": "0.3"
+              },
+              "enable_stamped_cmd_vel": {
+                "type": 1,
+                "value": false
+              },
+              "failure_tolerance": {
+                "type": 3,
+                "value": "0.0"
+              },
+              "goal_checker.plugin": {
+                "type": 4,
+                "value": "nav2_controller::SimpleGoalChecker"
+              },
+              "goal_checker.stateful": {
+                "type": 1,
+                "value": true
+              },
+              "goal_checker.symmetric_yaw_tolerance": {
+                "type": 1,
+                "value": false
+              },
+              "goal_checker.xy_goal_tolerance": {
+                "type": 3,
+                "value": "0.2"
+              },
+              "goal_checker.yaw_goal_tolerance": {
+                "type": 3,
+                "value": "0.25"
+              },
+              "goal_checker_plugins": {
+                "type": 9,
+                "value": [
+                  "goal_checker",
+                  "alternate_goal"
+                ]
+              },
+              "min_theta_velocity_threshold": {
+                "type": 3,
+                "value": "0.0001"
+              },
+              "min_x_velocity_threshold": {
+                "type": 3,
+                "value": "0.0001"
+              },
+              "min_y_velocity_threshold": {
+                "type": 3,
+                "value": "0.0001"
+              },
+              "odom_topic": {
+                "type": 4,
+                "value": "odom"
+              },
+              "progress_checker.movement_time_allowance": {
+                "type": 3,
+                "value": "10.0"
+              },
+              "progress_checker.plugin": {
+                "type": 4,
+                "value": "nav2_controller::SimpleProgressChecker"
+              },
+              "progress_checker.required_movement_radius": {
+                "type": 3,
+                "value": "0.5"
+              },
+              "progress_checker_plugins": {
+                "type": 9,
+                "value": [
+                  "progress_checker",
+                  "alternate_progress"
+                ]
+              },
+              "publish_zero_velocity": {
+                "type": 1,
+                "value": true
+              },
+              "speed_limit_topic": {
+                "type": 4,
+                "value": "speed_limit"
+              },
+              "start_type_description_service": {
+                "type": 1,
+                "value": true
+              },
+              "use_realtime_priority": {
+                "type": 1,
+                "value": false
+              },
+              "use_sim_time": {
+                "type": 1,
+                "value": false
+              }
+            },
+            "packageXmlSha256": "42912cc11862922eaad84a81a9d5433f42b6827e50db797ab158604746a7a976",
+            "selectedLocalSourceFiles": [],
+            "lifecycleState": 3
+          }
+        },
+        "/velocity_smoother": {
+          "package": "nav2_velocity_smoother",
+          "commandInputs": [
+            "/cmd_vel_raw"
+          ],
+          "configuration": {
+            "parameters": {
+              "/bond_disable_heartbeat_timeout": {
+                "type": 1,
+                "value": true
+              },
+              "autostart_node": {
+                "type": 1,
+                "value": false
+              },
+              "bond_heartbeat_period": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "deadband_velocity": {
+                "type": 8,
+                "value": [
+                  "0.0",
+                  "0.0",
+                  "0.0"
+                ]
+              },
+              "enable_stamped_cmd_vel": {
+                "type": 1,
+                "value": false
+              },
+              "feedback": {
+                "type": 4,
+                "value": "OPEN_LOOP"
+              },
+              "max_accel": {
+                "type": 8,
+                "value": [
+                  "2.5",
+                  "0.0",
+                  "3.2"
+                ]
+              },
+              "max_decel": {
+                "type": 8,
+                "value": [
+                  "-2.5",
+                  "0.0",
+                  "-3.2"
+                ]
+              },
+              "max_velocity": {
+                "type": 8,
+                "value": [
+                  "0.5",
+                  "0.0",
+                  "2.5"
+                ]
+              },
+              "min_velocity": {
+                "type": 8,
+                "value": [
+                  "-0.5",
+                  "0.0",
+                  "-2.5"
+                ]
+              },
+              "odom_duration": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "odom_topic": {
+                "type": 4,
+                "value": "/odom"
+              },
+              "scale_velocities": {
+                "type": 1,
+                "value": false
+              },
+              "smoothing_frequency": {
+                "type": 3,
+                "value": "10.0"
+              },
+              "stamp_smoothed_velocity_with_smoothing_time": {
+                "type": 1,
+                "value": false
+              },
+              "start_type_description_service": {
+                "type": 1,
+                "value": true
+              },
+              "use_realtime_priority": {
+                "type": 1,
+                "value": false
+              },
+              "use_sim_time": {
+                "type": 1,
+                "value": false
+              },
+              "velocity_timeout": {
+                "type": 3,
+                "value": "1.0"
+              }
+            },
+            "packageXmlSha256": "fff165667a83b335c0045f813c0707479c312c1aa31c25de91116b4d8212e439",
+            "selectedLocalSourceFiles": [],
+            "lifecycleState": 3
+          }
+        },
+        "/collision_monitor": {
+          "package": "nav2_collision_monitor",
+          "commandInputs": [
+            "/cmd_vel_smoothed"
+          ],
+          "configuration": {
+            "parameters": {
+              "/bond_disable_heartbeat_timeout": {
+                "type": 1,
+                "value": true
+              },
+              "StopPolygon.action_type": {
+                "type": 4,
+                "value": "stop"
+              },
+              "StopPolygon.enabled": {
+                "type": 1,
+                "value": true
+              },
+              "StopPolygon.max_points": {
+                "type": 0,
+                "value": null
+              },
+              "StopPolygon.min_points": {
+                "type": 2,
+                "value": "1"
+              },
+              "StopPolygon.points": {
+                "type": 4,
+                "value": "[[0.3, 0.3], [0.3, -0.3], [-0.3, -0.3], [-0.3, 0.3]]"
+              },
+              "StopPolygon.polygon_subscribe_transient_local": {
+                "type": 1,
+                "value": false
+              },
+              "StopPolygon.sources_names": {
+                "type": 9,
+                "value": [
+                  "scan"
+                ]
+              },
+              "StopPolygon.type": {
+                "type": 4,
+                "value": "polygon"
+              },
+              "StopPolygon.visualize": {
+                "type": 1,
+                "value": false
+              },
+              "autostart_node": {
+                "type": 1,
+                "value": false
+              },
+              "base_frame_id": {
+                "type": 4,
+                "value": "base_link"
+              },
+              "base_shift_correction": {
+                "type": 1,
+                "value": true
+              },
+              "bond_heartbeat_period": {
+                "type": 3,
+                "value": "0.1"
+              },
+              "cmd_vel_in_topic": {
+                "type": 4,
+                "value": "/cmd_vel_smoothed"
+              },
+              "cmd_vel_out_topic": {
+                "type": 4,
+                "value": "/cmd_vel"
+              },
+              "enable_stamped_cmd_vel": {
+                "type": 1,
+                "value": false
+              },
+              "observation_sources": {
+                "type": 9,
+                "value": [
+                  "scan"
+                ]
+              },
+              "odom_frame_id": {
+                "type": 4,
+                "value": "odom"
+              },
+              "polygons": {
+                "type": 9,
+                "value": [
+                  "StopPolygon"
+                ]
+              },
+              "qos_overrides./tf.subscription.depth": {
+                "type": 2,
+                "value": "100"
+              },
+              "qos_overrides./tf.subscription.durability": {
+                "type": 4,
+                "value": "volatile"
+              },
+              "qos_overrides./tf.subscription.history": {
+                "type": 4,
+                "value": "keep_last"
+              },
+              "qos_overrides./tf.subscription.reliability": {
+                "type": 4,
+                "value": "reliable"
+              },
+              "qos_overrides./tf_static.subscription.depth": {
+                "type": 2,
+                "value": "100"
+              },
+              "qos_overrides./tf_static.subscription.history": {
+                "type": 4,
+                "value": "keep_last"
+              },
+              "qos_overrides./tf_static.subscription.reliability": {
+                "type": 4,
+                "value": "reliable"
+              },
+              "scan.enabled": {
+                "type": 1,
+                "value": true
+              },
+              "scan.source_timeout": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "scan.topic": {
+                "type": 4,
+                "value": "/scan"
+              },
+              "scan.type": {
+                "type": 4,
+                "value": "scan"
+              },
+              "source_timeout": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "start_type_description_service": {
+                "type": 1,
+                "value": true
+              },
+              "state_topic": {
+                "type": 4,
+                "value": "/collision_monitor_state"
+              },
+              "stop_pub_timeout": {
+                "type": 3,
+                "value": "1.0"
+              },
+              "transform_tolerance": {
+                "type": 3,
+                "value": "0.2"
+              },
+              "use_realtime_priority": {
+                "type": 1,
+                "value": false
+              },
+              "use_sim_time": {
+                "type": 1,
+                "value": false
+              }
+            },
+            "packageXmlSha256": "0174ffe440079c0125733aa1697fe44195a4bc628c2e367eb85e848d95d8caea",
+            "selectedLocalSourceFiles": [],
+            "lifecycleState": 3
+          }
+        },
+        "/rlsok_gz_base": {
+          "package": "ros_gz_bridge",
+          "commandInputs": [
+            "/cmd_vel"
+          ],
+          "configuration": {
+            "parameters": {
+              "bridge_names": {
+                "type": 9,
+                "value": []
+              },
+              "config_file": {
+                "type": 4,
+                "value": "/mnt/f/xy/rlsok-mail-feedback-20260908/artifacts/nav2-gazebo-20260910-attempt3/bridge.yaml"
+              },
+              "expand_gz_topic_names": {
+                "type": 1,
+                "value": false
+              },
+              "lazy": {
+                "type": 1,
+                "value": false
+              },
+              "override_frame_id": {
+                "type": 4,
+                "value": ""
+              },
+              "override_timestamps_with_wall_time": {
+                "type": 1,
+                "value": false
+              },
+              "qos_overrides./cmd_vel.subscription.depth": {
+                "type": 2,
+                "value": "10"
+              },
+              "qos_overrides./cmd_vel.subscription.history": {
+                "type": 4,
+                "value": "keep_last"
+              },
+              "qos_overrides./cmd_vel.subscription.reliability": {
+                "type": 4,
+                "value": "reliable"
+              },
+              "qos_overrides./odom.publisher.deadline": {
+                "type": 2,
+                "value": "0"
+              },
+              "qos_overrides./odom.publisher.depth": {
+                "type": 2,
+                "value": "10"
+              },
+              "qos_overrides./odom.publisher.durability": {
+                "type": 4,
+                "value": "volatile"
+              },
+              "qos_overrides./odom.publisher.history": {
+                "type": 4,
+                "value": "keep_last"
+              },
+              "qos_overrides./odom.publisher.liveliness": {
+                "type": 4,
+                "value": "system_default"
+              },
+              "qos_overrides./odom.publisher.reliability": {
+                "type": 4,
+                "value": "reliable"
+              },
+              "qos_overrides./parameter_events.publisher.depth": {
+                "type": 2,
+                "value": "1000"
+              },
+              "qos_overrides./parameter_events.publisher.durability": {
+                "type": 4,
+                "value": "volatile"
+              },
+              "qos_overrides./parameter_events.publisher.history": {
+                "type": 4,
+                "value": "keep_last"
+              },
+              "qos_overrides./parameter_events.publisher.reliability": {
+                "type": 4,
+                "value": "reliable"
+              },
+              "start_type_description_service": {
+                "type": 1,
+                "value": true
+              },
+              "subscription_heartbeat": {
+                "type": 2,
+                "value": "1000"
+              },
+              "use_sim_time": {
+                "type": 1,
+                "value": false
+              }
+            },
+            "packageXmlSha256": "919c3a309a210bdbaad02502e957d1dc3072eb7358ffbcfae4abd914455d9345",
+            "selectedLocalSourceFiles": [
+              {
+                "name": "bridge.yaml",
+                "sha256": "ed4a3be3ecac4ff583bdbe4d439441299b6a49abe7b33c9b5d8789753f5c430a"
+              },
+              {
+                "name": "world.sdf",
+                "sha256": "6d27c4b51e9e88ae4fdfb5201ee733932a29170e0d3a33f5b1f2337582a4e693"
+              }
+            ]
+          }
+        }
+      },
+      "graph": {
+        "/cmd_vel_raw": {
+          "publishers": [
+            {
+              "node": "/controller_server",
+              "type": "geometry_msgs/msg/Twist",
+              "gid": "010f7f017d266b830000000000006003",
+              "qos": {
+                "reliability": 1,
+                "durability": 2
+              }
+            }
+          ],
+          "selectedSubscribers": [
+            {
+              "node": "/velocity_smoother",
+              "type": "geometry_msgs/msg/Twist",
+              "gid": "010f7f017e2644bc0000000000002004",
+              "qos": {
+                "reliability": 1,
+                "durability": 2
+              }
+            }
+          ]
+        },
+        "/cmd_vel_smoothed": {
+          "publishers": [
+            {
+              "node": "/velocity_smoother",
+              "type": "geometry_msgs/msg/Twist",
+              "gid": "010f7f017e2644bc0000000000001f03",
+              "qos": {
+                "reliability": 1,
+                "durability": 2
+              }
+            }
+          ],
+          "selectedSubscribers": [
+            {
+              "node": "/collision_monitor",
+              "type": "geometry_msgs/msg/Twist",
+              "gid": "010f7f017f2600200000000000002204",
+              "qos": {
+                "reliability": 1,
+                "durability": 2
+              }
+            }
+          ]
+        },
+        "/cmd_vel": {
+          "publishers": [
+            {
+              "node": "/collision_monitor",
+              "type": "geometry_msgs/msg/Twist",
+              "gid": "010f7f017f2600200000000000002303",
+              "qos": {
+                "reliability": 1,
+                "durability": 2
+              }
+            }
+          ],
+          "selectedSubscribers": [
+            {
+              "node": "/rlsok_gz_base",
+              "type": "geometry_msgs/msg/Twist",
+              "gid": "010f7f0161267d510000000000001404",
+              "qos": {
+                "reliability": 1,
+                "durability": 2
+              }
+            }
+          ]
+        }
+      },
+      "actionServers": [
+        {
+          "node": "/controller_server",
+          "types": [
+            "nav2_msgs/action/FollowPath"
+          ]
+        }
+      ],
+      "goalFields": {
+        "path": "nav_msgs/Path",
+        "controller_id": "string",
+        "goal_checker_id": "string",
+        "progress_checker_id": "string"
+      },
+      "interface": {
+        "actionType": "nav2_msgs/action/FollowPath",
+        "interfaceSha256": "73c2cd95fe8e9851c98c012a8c4a86d4f396dbc9fe38a43c08da33c4295eef12",
+        "typeTree": {
+          "algorithm": "rosidl-action-fields-tree/v1",
+          "actionType": "nav2_msgs/action/FollowPath",
+          "components": {
+            "Goal": {
+              "kind": "message",
+              "name": "nav2_msgs/action/FollowPath_Goal"
+            },
+            "Result": {
+              "kind": "message",
+              "name": "nav2_msgs/action/FollowPath_Result"
+            },
+            "Feedback": {
+              "kind": "message",
+              "name": "nav2_msgs/action/FollowPath_Feedback"
+            }
+          },
+          "definitions": {
+            "nav2_msgs/action/FollowPath_Goal": {
+              "fields": [
+                {
+                  "name": "path",
+                  "type": {
+                    "kind": "message",
+                    "name": "nav_msgs/msg/Path"
+                  }
+                },
+                {
+                  "name": "controller_id",
+                  "type": {
+                    "kind": "string",
+                    "maximumSize": null
+                  }
+                },
+                {
+                  "name": "goal_checker_id",
+                  "type": {
+                    "kind": "string",
+                    "maximumSize": null
+                  }
+                },
+                {
+                  "name": "progress_checker_id",
+                  "type": {
+                    "kind": "string",
+                    "maximumSize": null
+                  }
+                }
+              ]
+            },
+            "nav_msgs/msg/Path": {
+              "fields": [
+                {
+                  "name": "header",
+                  "type": {
+                    "kind": "message",
+                    "name": "std_msgs/msg/Header"
+                  }
+                },
+                {
+                  "name": "poses",
+                  "type": {
+                    "kind": "sequence",
+                    "element": {
+                      "kind": "message",
+                      "name": "geometry_msgs/msg/PoseStamped"
+                    },
+                    "maximumSize": null
+                  }
+                }
+              ]
+            },
+            "std_msgs/msg/Header": {
+              "fields": [
+                {
+                  "name": "stamp",
+                  "type": {
+                    "kind": "message",
+                    "name": "builtin_interfaces/msg/Time"
+                  }
+                },
+                {
+                  "name": "frame_id",
+                  "type": {
+                    "kind": "string",
+                    "maximumSize": null
+                  }
+                }
+              ]
+            },
+            "builtin_interfaces/msg/Time": {
+              "fields": [
+                {
+                  "name": "sec",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "int32"
+                  }
+                },
+                {
+                  "name": "nanosec",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "uint32"
+                  }
+                }
+              ]
+            },
+            "geometry_msgs/msg/PoseStamped": {
+              "fields": [
+                {
+                  "name": "header",
+                  "type": {
+                    "kind": "message",
+                    "name": "std_msgs/msg/Header"
+                  }
+                },
+                {
+                  "name": "pose",
+                  "type": {
+                    "kind": "message",
+                    "name": "geometry_msgs/msg/Pose"
+                  }
+                }
+              ]
+            },
+            "geometry_msgs/msg/Pose": {
+              "fields": [
+                {
+                  "name": "position",
+                  "type": {
+                    "kind": "message",
+                    "name": "geometry_msgs/msg/Point"
+                  }
+                },
+                {
+                  "name": "orientation",
+                  "type": {
+                    "kind": "message",
+                    "name": "geometry_msgs/msg/Quaternion"
+                  }
+                }
+              ]
+            },
+            "geometry_msgs/msg/Point": {
+              "fields": [
+                {
+                  "name": "x",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "double"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "double"
+                  }
+                },
+                {
+                  "name": "z",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "double"
+                  }
+                }
+              ]
+            },
+            "geometry_msgs/msg/Quaternion": {
+              "fields": [
+                {
+                  "name": "x",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "double"
+                  }
+                },
+                {
+                  "name": "y",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "double"
+                  }
+                },
+                {
+                  "name": "z",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "double"
+                  }
+                },
+                {
+                  "name": "w",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "double"
+                  }
+                }
+              ]
+            },
+            "nav2_msgs/action/FollowPath_Result": {
+              "fields": [
+                {
+                  "name": "result",
+                  "type": {
+                    "kind": "message",
+                    "name": "std_msgs/msg/Empty"
+                  }
+                },
+                {
+                  "name": "error_code",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "uint16"
+                  }
+                },
+                {
+                  "name": "error_msg",
+                  "type": {
+                    "kind": "string",
+                    "maximumSize": null
+                  }
+                }
+              ]
+            },
+            "std_msgs/msg/Empty": {
+              "fields": []
+            },
+            "nav2_msgs/action/FollowPath_Feedback": {
+              "fields": [
+                {
+                  "name": "distance_to_goal",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "float"
+                  }
+                },
+                {
+                  "name": "speed",
+                  "type": {
+                    "kind": "primitive",
+                    "name": "float"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "issues": [],
+    "observationMethod": "read-only-ros-two-pass",
+    "authenticatedTopology": false,
+    "hardwareDispatch": "NO"
+  },
+  "shadowHandoffs": 0,
+  "shadowSinkAttempted": false,
+  "hardwareDispatch": "NO"
+}

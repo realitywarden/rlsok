@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "kind": "LocalShadowInputAssessment",
+  "assessedAt": "2026-09-10T09:34:38.831Z",
+  "profileSha256": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+  "observationSha256": "2b22092349102226dd82995064687d355dd80e6507cfffe932976b7750715dc5",
+  "proposalsSha256": "f9bcf8b560fbfa8ef066ae01127e60a3efee28e7abc8ba3a6b72ce42688ab6d6",
+  "pathId": "command",
+  "checks": [
+    {
+      "id": "approval.profile",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "approval.time",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "observation.profile",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "observation.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "environment",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "coverage",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "observation.paths",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "observation.facts",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "topic.subscription",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "topic.subscriber",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "topic.endpoint",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "topic.type",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "topic.definition",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-1-gait_node.py.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-1-gait_node.py.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-1-gait_node.py.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-2-kinematics.py.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-2-kinematics.py.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-2-kinematics.py.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-3-gait.launch.py.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-3-gait.launch.py.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-3-gait.launch.py.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-4-controllers.yaml.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-4-controllers.yaml.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-4-controllers.yaml.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-5-gazebo.launch.py.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-5-gazebo.launch.py.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-5-gazebo.launch.py.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-6-robot.urdf.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-6-robot.urdf.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-6-robot.urdf.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-7-runtime-settings.json.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-7-runtime-settings.json.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.file-7-runtime-settings.json.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.active-controller.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.active-controller.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.active-controller.value",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.gait-node-settings.source",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.gait-node-settings.freshness",
+      "passed": true,
+      "reason": "matched"
+    },
+    {
+      "id": "fact.gait-node-settings.value",
+      "passed": false,
+      "reason": "fact_mismatch:gait-node-settings"
+    },
+    {
+      "id": "goal",
+      "passed": true,
+      "reason": "matched"
+    }
+  ]
+}

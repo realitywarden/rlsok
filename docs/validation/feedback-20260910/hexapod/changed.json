@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "profileId": "hexapod-gait",
+  "observedAt": "2026-09-10T09:34:34.742Z",
+  "collector": "ros2-read-only/v1",
+  "environment": {
+    "rosDistro": "jazzy",
+    "rmwImplementation": "rmw_fastrtps_cpp",
+    "domainId": 224
+  },
+  "facts": [
+    {
+      "id": "file-1-gait_node.py",
+      "kind": "file_sha256",
+      "value": "f94393493d61bda1d4a7dd04f8fd94b3125e245652e561882520c0f8ad4fc289",
+      "observedAt": "2026-09-10T09:34:34.801Z"
+    },
+    {
+      "id": "file-2-kinematics.py",
+      "kind": "file_sha256",
+      "value": "d091360dd9e88c2000ec8a6cedf04eda4c2f662793e1b07524049007d1e95b8b",
+      "observedAt": "2026-09-10T09:34:34.850Z"
+    },
+    {
+      "id": "file-3-gait.launch.py",
+      "kind": "file_sha256",
+      "value": "7f37b7e56d4038bfb1d0ff470ec6b2a638c59938092bc75036dee8d6ff9ccb7d",
+      "observedAt": "2026-09-10T09:34:34.900Z"
+    },
+    {
+      "id": "file-4-controllers.yaml",
+      "kind": "file_sha256",
+      "value": "bd2726748d3b40e0d584e935e15e1855f6153ae96c5c6feae40a7ed39bfba598",
+      "observedAt": "2026-09-10T09:34:34.945Z"
+    },
+    {
+      "id": "file-5-gazebo.launch.py",
+      "kind": "file_sha256",
+      "value": "a9eec8316ffde69c18f56ebd28423661be644c59c8b71c10ef84e38c0d1a50d4",
+      "observedAt": "2026-09-10T09:34:34.989Z"
+    },
+    {
+      "id": "file-6-robot.urdf",
+      "kind": "file_sha256",
+      "value": "74125441425764ddde3a9dfe56a943c6af8a32aae071758fb71bef144fcececf",
+      "observedAt": "2026-09-10T09:34:35.005Z"
+    },
+    {
+      "id": "file-7-runtime-settings.json",
+      "kind": "file_sha256",
+      "value": "5eaea434b626cf3cd80122b73af9ca8db5522b74157901fe32b1f196a28f847d",
+      "observedAt": "2026-09-10T09:34:35.021Z"
+    },
+    {
+      "id": "active-controller",
+      "kind": "json_value",
+      "value": "af3e81562c41d3f6225e34dc53ffb3286b171dd69f8828a87fce6abae223c3b1",
+      "observedAt": "2026-09-10T09:34:15.376Z"
+    },
+    {
+      "id": "gait-node-settings",
+      "kind": "json_value",
+      "value": "eaab10e7af8f461d68eaad0ade522b4b14fef99dd0092c084747ee06ea64ed5e",
+      "observedAt": "2026-09-10T09:34:21.393Z"
+    }
+  ],
+  "paths": [
+    {
+      "id": "command",
+      "endpoint": "/cmd_vel",
+      "messageType": "geometry_msgs/msg/Twist",
+      "interfaceSha256": "be054e08c58911b4a88f9fc7585da0cde79d5a96b60a09bcf1f7a74273e41a32",
+      "subscriber": {
+        "name": "hexapod_gait",
+        "namespace": "/"
+      },
+      "subscriberCount": 1
+    }
+  ]
+}

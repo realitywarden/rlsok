@@ -1,0 +1,119 @@
+{
+  "scope": "Real installed Jazzy Nav2 with ROS-GZ bridge and Gazebo DiffDrive; zero RLSOK commands, no hardware claim",
+  "versions": "ros-jazzy-nav2-collision-monitor\t1.3.12-1noble.20260615.160103\nros-jazzy-nav2-controller\t1.3.12-1noble.20260615.165600\nros-jazzy-nav2-velocity-smoother\t1.3.12-1noble.20260615.153210\n",
+  "network": "private-loopback-only-namespace",
+  "actionGoalsSent": 0,
+  "velocityCommandsPublishedByExperiment": 0,
+  "velocityMessagesBeforeShutdown": 0,
+  "gazeboOdometryMessages": 2096,
+  "cases": [
+    {
+      "name": "unchanged-real-graph",
+      "decision": "WOULD_ALLOW",
+      "reason": "approved_exact_goal_and_observed_configuration_match",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 1,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "changed-smoothing_frequency",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_review_required",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "changed-scale_velocities",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_review_required",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "changed-velocity_timeout",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_review_required",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "changed-deadband_velocity",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_review_required",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "changed-max_velocity",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_review_required",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "swapped-controller_id",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_exact_goal_not_approved",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "swapped-goal_checker_id",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_exact_goal_not_approved",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "swapped-progress_checker_id",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_exact_goal_not_approved",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "replaced-path",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_exact_goal_not_approved",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "gazebo-feedback-changed",
+      "decision": "WOULD_BLOCK",
+      "reason": "nav2_review_required",
+      "approvalSha256": "e41440554f0c2941f0323154656124ab45f5391954476061a007a2cc175559e5",
+      "shadowHandoffs": 0,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    },
+    {
+      "name": "gazebo-closed-loop-observed",
+      "decision": "WOULD_ALLOW",
+      "reason": "approved_exact_goal_and_observed_configuration_match",
+      "approvalSha256": "c901cb4e4e77bb9c96c5504c619de04a8f191b95e0e9fdeb49a5faad1ddcd478",
+      "shadowHandoffs": 1,
+      "actionGoalsSent": 0,
+      "velocityCommandsPublishedByExperiment": 0
+    }
+  ]
+}

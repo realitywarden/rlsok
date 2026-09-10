@@ -1,8 +1,12 @@
 # Local review additions from technical correspondence — 10 September 2026
 
-Available in **v1.5.0-shadow.7**, alongside the [earlier controller experiments](email-feedback-evaluation-20260910.md). These are local review tools and reference explanations. They do not establish customer installation, live device identity, Nav2 integration, physical safety or acceptance. No command below dispatches to a robot.
+Extended in **v1.5.0-shadow.8**, alongside the [earlier controller experiments](email-feedback-evaluation-20260910.md). These are local review tools and reference explanations. They do not establish customer installation, authenticated device identity, physical safety or acceptance. No command below dispatches to a robot.
 
-## Nav2: compare the selected configuration and the exact goal separately
+## Nav2: observe the running graph and check the exact goal
+
+Version .8 adds [the read-only Nav2 observer and final Shadow handoff check](nav2-observed-shadow.md), with separate real Nav2 graph and ROS-GZ/Gazebo cases. Use that workflow for observed parameters, topology, fresh reads and exact-goal approval. The supplied-input comparison below remains available for historical inspection; it is not the acceptance evidence for the new observed workflow.
+
+### Historical supplied-input comparison
 
 The new `profile compare-nav2` command makes the [Jazzy reference](FEEDBACK_ADAPTER_REFERENCE_CONTRACTS.md#nav2-jazzy-execution-boundary-reference) executable as a **supplied-input comparison**, without adding ROS transport or an execution gate.
 
@@ -69,7 +73,7 @@ ros2 launch hexapod_gait gait.launch.py
 
 These identify the existing Gazebo/gait bringup in a separately prepared, isolated simulation environment. RLSOK does not execute them or set up Gazebo. Follow [prepare-source / refresh-source](source-shadow-workspaces.md) with the actual catalog, expanded URDF, runtime settings and local command example. Record any current uncommitted parameter differences in the selected source/settings before comparison. The reference commit is not an attestation of the current working tree.
 
-The reviewed entry boundary is `/cmd_vel` → `hexapod_gait`. Per-leg foot targets, inverse kinematics, 18 joint outputs and the downstream leg controller are distinct later stages. File-drift detection is delivered; end-to-end customer simulation and those downstream stages have not been validated here.
+The reviewed entry boundary is `/cmd_vel` → `hexapod_gait`. Per-leg foot targets, inverse kinematics, 18 joint outputs and the downstream leg controller are distinct later stages. The .8 [observed Hexapod workflow](hexapod-observed-shadow.md) requires fresh gait parameters, the selected JointTrajectory output link and the active 18-joint controller export. Its isolated public-source experiment uses the real Gazebo model and unmodified gait/IK code. Customer working-tree differences, hardware and acceptance are separate.
 
 ## Maintain one launch source of truth
 

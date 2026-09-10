@@ -41,6 +41,7 @@ function fixture(recipeId: string) {
   const save = (name: string, v: unknown) => { const p = join(root, name); writeFileSync(p, JSON.stringify(v)); return p; };
   const urdf = join(root, 'robot.urdf'); writeFileSync(urdf, '<robot name="synthetic"><link name="base_link"/></robot>');
   let controllerState: string | undefined;
+  let nodeSettings: string | undefined;
   if (recipe.controllerState) {
     const spec = recipe.controllerState;
     const configuration = { schemaVersion: 1, source: { controllerManager: '/controller_manager', controllerName: spec.name,
@@ -51,8 +52,16 @@ function fixture(recipeId: string) {
     controllerState = save('controller-state.json', { schemaVersion: 1, kind: 'RlsokRosControllerState', observedAt: new Date().toISOString(),
       configuration, configurationSha256: hash(canonical(configuration)) });
   }
+  if (recipe.nodeSettings) {
+    const spec = recipe.nodeSettings, link = spec.downstream;
+    const configuration = { schemaVersion: 1, source: { node: spec.node, environment: base.catalog.environment },
+      parameters: Object.fromEntries(Object.entries(spec.parameters).map(([key, type]) => [key, { type, value: type === 1 ? true : '1.0' }])),
+      downstream: link ? { ...link, publishers: [{ node: spec.node, type: link.messageType, gid: 'aabb' }], subscribers: [{ node: link.node, type: link.messageType, gid: 'ccdd' }] } : null };
+    nodeSettings = save('node-settings.json', { schemaVersion: 1, kind: 'RlsokRosNodeSettings', observedAt: new Date().toISOString(),
+      configuration, configurationSha256: hash(canonical(configuration)) });
+  }
   const input = { recipe: recipeId, source, urdf, catalog: save('catalog.json', base.catalog), settings: save('settings.json', { synthetic: true, launchArguments: {} }),
-    controllerState,
+    controllerState, nodeSettings,
     example: save('example.json', goal), deviceId: 'synthetic-isolated', output: join(root, 'workspace'),
     frame: recipe.joints ? undefined : 'base_link', subscriber: recipeId === 'rover-gazebo' ? '/ros_gz_bridge' : undefined };
   return { root, input, save };
@@ -142,4 +151,25 @@ test('source baseline requires active matching controller; refresh records chang
   const report = await evaluateProfile({ ...connection, approval, observation: observation(workspace, connection), now });
   assert.equal(report.decision, 'WOULD_BLOCK');
   assert.ok(report.results[0].checks.some(check => check.reason === 'fact_mismatch:active-controller'));
+});
+
+test('Hexapod requires fresh gait parameters and the actual 18-joint downstream binding; changed gait keeps the old approval', async () => {
+  const { input, save } = fixture('hexapod-gait');
+  const original = JSON.parse(readFileSync(input.nodeSettings!, 'utf8'));
+  for (const defect of ['stale', 'node', 'link', 'missing-parameter']) {
+    const state = structuredClone(original);
+    if (defect === 'stale') state.observedAt = '2000-01-01T00:00:00Z';
+    if (defect === 'node') state.configuration.source.node = '/unrelated_node';
+    if (defect === 'link') state.configuration.downstream.subscribers[0].node = '/wrong_controller';
+    if (defect === 'missing-parameter') delete state.configuration.parameters.cycle_time;
+    state.configurationSha256 = hash(canonical(state.configuration)); save('node-settings.json', state);
+    await assert.rejects(prepareSourceWorkspace(input)); assert.equal(existsSync(input.output), false);
+  }
+  save('node-settings.json', original);
+  const workspace = await prepareSourceWorkspace(input), connection: Connection = JSON.parse(readFileSync(join(workspace, 'connection.json'), 'utf8'));
+  const approval = approveProfile(connection.profile, 'synthetic-reviewer', new Date(now.getTime()+3600000).toISOString(), now);
+  original.configuration.parameters.cycle_time.value = '2.0'; original.configurationSha256 = hash(canonical(original.configuration)); save('node-settings.json', original);
+  await refreshSourceWorkspace({ ...input, workspace });
+  const report = await evaluateProfile({ ...connection, approval, observation: observation(workspace, connection), now });
+  assert.equal(report.decision, 'WOULD_BLOCK'); assert.ok(report.results[0].checks.some(c => c.reason === 'fact_mismatch:gait-node-settings'));
 });

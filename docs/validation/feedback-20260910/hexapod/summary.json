@@ -1,0 +1,20 @@
+{
+  "sourceRevision": "656eebab5587977a1f41d44657cb853433927053",
+  "scope": "Unmodified public Gazebo model and gait/IK, neutral stance only; no physical HAL or customer acceptance",
+  "baseline": "WOULD_ALLOW",
+  "changed": "WOULD_BLOCK",
+  "change": "gait restart with cycle_time 1.0 -> 2.0; same source/model/controllers and original approval",
+  "preserved": {
+    "approval.json": "d09d7d6d075432da323103bf93c2f79ef76bfe7ddf6a4bb48eb6cec6717c7549",
+    "profile.json": "5cf7190c706c3a9be9baeefa3db78f34c04f1d4012687d1306813522fd6d64db",
+    "proposals.json": "dde9f766ac6cfca15decfcfe8f77213a1c9966350a53dcc44f2a1da7f02de8a6"
+  },
+  "countsBeforeShutdown": {
+    "trajectories": 1893,
+    "jointStates": 4246,
+    "twists": 0,
+    "clock": 10172
+  },
+  "rlsokCommandPublications": 0,
+  "rlsokActionGoalsSent": 0
+}

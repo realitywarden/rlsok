@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokSourceWorkspace",
+  "recipe": "hexapod-gait",
+  "referenceRepository": "ariegweomamerie/hexapod_ros2",
+  "referenceCommit": "656eebab5587977a1f41d44657cb853433927053",
+  "referenceLaunches": [
+    "ros2 launch Hexapod_Robot_description gazebo.launch.py",
+    "ros2 launch hexapod_gait gait.launch.py"
+  ],
+  "controllerStateSource": {
+    "controllerManager": "/controller_manager",
+    "controllerName": "leg_controller",
+    "controllerNode": "/leg_controller",
+    "environment": {
+      "rosDistro": "jazzy",
+      "rmwImplementation": "rmw_fastrtps_cpp",
+      "domainId": 224
+    }
+  },
+  "nodeSettingsSource": {
+    "node": "/hexapod_gait",
+    "environment": {
+      "rosDistro": "jazzy",
+      "rmwImplementation": "rmw_fastrtps_cpp",
+      "domainId": 224
+    }
+  },
+  "scope": "Twist input to the gait node, bound to fresh gait parameter and downstream 18-joint controller exports plus selected source/model files. This observes software configuration; it does not intercept the gait output or certify IK, dynamics, the physical HAL or safety.",
+  "files": [
+    "files/source/src/hexapod_gait/hexapod_gait/gait_node.py",
+    "files/source/src/hexapod_gait/hexapod_gait/kinematics.py",
+    "files/source/src/hexapod_gait/launch/gait.launch.py",
+    "files/source/src/Hexapod_Robot_description/config/controllers.yaml",
+    "files/source/src/Hexapod_Robot_description/launch/gazebo.launch.py",
+    "files/robot.urdf",
+    "files/runtime-settings.json",
+    "files/controller-state.json",
+    "files/node-settings.json"
+  ]
+}

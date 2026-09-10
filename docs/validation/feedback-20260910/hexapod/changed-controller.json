@@ -1,0 +1,1333 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokRosControllerState",
+  "observedAt": "2026-09-10T09:34:15.376Z",
+  "configuration": {
+    "schemaVersion": 1,
+    "source": {
+      "controllerManager": "/controller_manager",
+      "controllerName": "leg_controller",
+      "controllerNode": "/leg_controller",
+      "environment": {
+        "rosDistro": "jazzy",
+        "rmwImplementation": "rmw_fastrtps_cpp",
+        "domainId": 224
+      }
+    },
+    "controller": {
+      "name": "leg_controller",
+      "state": "active",
+      "type": "joint_trajectory_controller/JointTrajectoryController",
+      "is_async": false,
+      "update_rate": 100,
+      "claimed_interfaces": [
+        "leg_l1_coxa/position",
+        "leg_l1_femur/position",
+        "leg_l1_tibia/position",
+        "leg_l2_coxa/position",
+        "leg_l2_femur/position",
+        "leg_l2_tibia/position",
+        "leg_l3_coxa/position",
+        "leg_l3_femur/position",
+        "leg_l3_tibia/position",
+        "leg_r1_coxa/position",
+        "leg_r1_femur/position",
+        "leg_r1_tibia/position",
+        "leg_r2_coxa/position",
+        "leg_r2_femur/position",
+        "leg_r2_tibia/position",
+        "leg_r3_coxa/position",
+        "leg_r3_femur/position",
+        "leg_r3_tibia/position"
+      ],
+      "required_command_interfaces": [
+        "leg_l1_coxa/position",
+        "leg_l1_femur/position",
+        "leg_l1_tibia/position",
+        "leg_l2_coxa/position",
+        "leg_l2_femur/position",
+        "leg_l2_tibia/position",
+        "leg_l3_coxa/position",
+        "leg_l3_femur/position",
+        "leg_l3_tibia/position",
+        "leg_r1_coxa/position",
+        "leg_r1_femur/position",
+        "leg_r1_tibia/position",
+        "leg_r2_coxa/position",
+        "leg_r2_femur/position",
+        "leg_r2_tibia/position",
+        "leg_r3_coxa/position",
+        "leg_r3_femur/position",
+        "leg_r3_tibia/position"
+      ],
+      "required_state_interfaces": [
+        "leg_l1_coxa/position",
+        "leg_l1_coxa/velocity",
+        "leg_l1_femur/position",
+        "leg_l1_femur/velocity",
+        "leg_l1_tibia/position",
+        "leg_l1_tibia/velocity",
+        "leg_l2_coxa/position",
+        "leg_l2_coxa/velocity",
+        "leg_l2_femur/position",
+        "leg_l2_femur/velocity",
+        "leg_l2_tibia/position",
+        "leg_l2_tibia/velocity",
+        "leg_l3_coxa/position",
+        "leg_l3_coxa/velocity",
+        "leg_l3_femur/position",
+        "leg_l3_femur/velocity",
+        "leg_l3_tibia/position",
+        "leg_l3_tibia/velocity",
+        "leg_r1_coxa/position",
+        "leg_r1_coxa/velocity",
+        "leg_r1_femur/position",
+        "leg_r1_femur/velocity",
+        "leg_r1_tibia/position",
+        "leg_r1_tibia/velocity",
+        "leg_r2_coxa/position",
+        "leg_r2_coxa/velocity",
+        "leg_r2_femur/position",
+        "leg_r2_femur/velocity",
+        "leg_r2_tibia/position",
+        "leg_r2_tibia/velocity",
+        "leg_r3_coxa/position",
+        "leg_r3_coxa/velocity",
+        "leg_r3_femur/position",
+        "leg_r3_femur/velocity",
+        "leg_r3_tibia/position",
+        "leg_r3_tibia/velocity"
+      ],
+      "is_chainable": false,
+      "is_chained": false,
+      "exported_state_interfaces": [],
+      "reference_interfaces": [],
+      "chain_connections": []
+    },
+    "parameters": {
+      "action_monitor_rate": {
+        "type": 3,
+        "value": "20.0"
+      },
+      "allow_integration_in_goal_trajectories": {
+        "type": 1,
+        "value": false
+      },
+      "allow_nonzero_velocity_at_trajectory_end": {
+        "type": 1,
+        "value": false
+      },
+      "allow_partial_joints_goal": {
+        "type": 1,
+        "value": false
+      },
+      "cmd_timeout": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "command_interfaces": {
+        "type": 9,
+        "value": [
+          "position"
+        ]
+      },
+      "command_joints": {
+        "type": 9,
+        "value": []
+      },
+      "constraints.decelerate_on_cancel": {
+        "type": 1,
+        "value": false
+      },
+      "constraints.goal_time": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_coxa.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_coxa.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_coxa.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_femur.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_femur.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_femur.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_tibia.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_tibia.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l1_tibia.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_coxa.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_coxa.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_coxa.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_femur.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_femur.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_femur.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_tibia.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_tibia.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l2_tibia.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_coxa.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_coxa.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_coxa.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_femur.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_femur.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_femur.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_tibia.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_tibia.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_l3_tibia.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_coxa.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_coxa.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_coxa.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_femur.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_femur.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_femur.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_tibia.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_tibia.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r1_tibia.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_coxa.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_coxa.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_coxa.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_femur.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_femur.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_femur.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_tibia.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_tibia.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r2_tibia.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_coxa.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_coxa.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_coxa.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_femur.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_femur.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_femur.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_tibia.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_tibia.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.leg_r3_tibia.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.stopped_velocity_tolerance": {
+        "type": 3,
+        "value": "0.01"
+      },
+      "gains.leg_l1_coxa.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l1_coxa.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_coxa.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_coxa.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_coxa.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_coxa.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_coxa.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_coxa.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l1_coxa.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_coxa.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_coxa.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_coxa.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l1_femur.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l1_femur.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_femur.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_femur.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_femur.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_femur.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_femur.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_femur.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l1_femur.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_femur.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_femur.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_femur.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l1_tibia.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l1_tibia.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_tibia.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_tibia.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_tibia.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_tibia.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_tibia.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_tibia.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l1_tibia.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_tibia.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l1_tibia.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l1_tibia.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l2_coxa.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l2_coxa.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_coxa.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_coxa.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_coxa.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_coxa.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_coxa.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_coxa.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l2_coxa.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_coxa.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_coxa.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_coxa.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l2_femur.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l2_femur.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_femur.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_femur.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_femur.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_femur.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_femur.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_femur.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l2_femur.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_femur.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_femur.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_femur.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l2_tibia.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l2_tibia.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_tibia.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_tibia.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_tibia.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_tibia.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_tibia.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_tibia.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l2_tibia.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_tibia.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l2_tibia.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l2_tibia.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l3_coxa.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l3_coxa.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_coxa.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_coxa.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_coxa.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_coxa.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_coxa.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_coxa.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l3_coxa.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_coxa.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_coxa.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_coxa.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l3_femur.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l3_femur.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_femur.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_femur.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_femur.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_femur.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_femur.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_femur.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l3_femur.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_femur.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_femur.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_femur.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l3_tibia.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_l3_tibia.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_tibia.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_tibia.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_tibia.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_tibia.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_tibia.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_tibia.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_l3_tibia.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_tibia.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_l3_tibia.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_l3_tibia.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r1_coxa.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r1_coxa.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_coxa.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_coxa.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_coxa.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_coxa.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_coxa.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_coxa.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r1_coxa.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_coxa.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_coxa.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_coxa.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r1_femur.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r1_femur.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_femur.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_femur.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_femur.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_femur.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_femur.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_femur.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r1_femur.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_femur.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_femur.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_femur.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r1_tibia.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r1_tibia.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_tibia.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_tibia.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_tibia.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_tibia.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_tibia.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_tibia.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r1_tibia.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_tibia.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r1_tibia.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r1_tibia.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r2_coxa.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r2_coxa.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_coxa.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_coxa.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_coxa.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_coxa.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_coxa.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_coxa.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r2_coxa.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_coxa.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_coxa.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_coxa.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r2_femur.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r2_femur.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_femur.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_femur.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_femur.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_femur.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_femur.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_femur.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r2_femur.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_femur.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_femur.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_femur.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r2_tibia.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r2_tibia.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_tibia.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_tibia.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_tibia.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_tibia.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_tibia.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_tibia.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r2_tibia.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_tibia.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r2_tibia.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r2_tibia.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r3_coxa.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r3_coxa.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_coxa.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_coxa.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_coxa.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_coxa.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_coxa.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_coxa.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r3_coxa.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_coxa.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_coxa.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_coxa.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r3_femur.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r3_femur.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_femur.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_femur.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_femur.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_femur.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_femur.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_femur.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r3_femur.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_femur.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_femur.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_femur.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r3_tibia.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.leg_r3_tibia.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_tibia.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_tibia.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_tibia.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_tibia.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_tibia.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_tibia.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.leg_r3_tibia.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_tibia.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.leg_r3_tibia.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.leg_r3_tibia.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "interpolate_from_desired_state": {
+        "type": 1,
+        "value": false
+      },
+      "interpolation_method": {
+        "type": 4,
+        "value": "splines"
+      },
+      "is_async": {
+        "type": 1,
+        "value": false
+      },
+      "joints": {
+        "type": 9,
+        "value": [
+          "leg_l1_coxa",
+          "leg_l1_femur",
+          "leg_l1_tibia",
+          "leg_l2_coxa",
+          "leg_l2_femur",
+          "leg_l2_tibia",
+          "leg_l3_coxa",
+          "leg_l3_femur",
+          "leg_l3_tibia",
+          "leg_r1_coxa",
+          "leg_r1_femur",
+          "leg_r1_tibia",
+          "leg_r2_coxa",
+          "leg_r2_femur",
+          "leg_r2_tibia",
+          "leg_r3_coxa",
+          "leg_r3_femur",
+          "leg_r3_tibia"
+        ]
+      },
+      "open_loop_control": {
+        "type": 1,
+        "value": false
+      },
+      "qos_overrides./clock.subscription.depth": {
+        "type": 2,
+        "value": "1"
+      },
+      "qos_overrides./clock.subscription.durability": {
+        "type": 4,
+        "value": "volatile"
+      },
+      "qos_overrides./clock.subscription.history": {
+        "type": 4,
+        "value": "keep_last"
+      },
+      "qos_overrides./clock.subscription.reliability": {
+        "type": 4,
+        "value": "best_effort"
+      },
+      "set_last_command_interface_value_as_state_on_activation": {
+        "type": 1,
+        "value": true
+      },
+      "speed_scaling.command_interface": {
+        "type": 4,
+        "value": ""
+      },
+      "speed_scaling.initial_scaling_factor": {
+        "type": 3,
+        "value": "1.0"
+      },
+      "speed_scaling.state_interface": {
+        "type": 4,
+        "value": ""
+      },
+      "start_type_description_service": {
+        "type": 1,
+        "value": true
+      },
+      "state_interfaces": {
+        "type": 9,
+        "value": [
+          "position",
+          "velocity"
+        ]
+      },
+      "thread_priority": {
+        "type": 2,
+        "value": "-100"
+      },
+      "update_rate": {
+        "type": 2,
+        "value": "100"
+      },
+      "use_sim_time": {
+        "type": 1,
+        "value": true
+      }
+    },
+    "actionServers": [
+      {
+        "endpoint": "/leg_controller/follow_joint_trajectory",
+        "type": "control_msgs/action/FollowJointTrajectory"
+      }
+    ]
+  },
+  "configurationSha256": "af3e81562c41d3f6225e34dc53ffb3286b171dd69f8828a87fce6abae223c3b1"
+}

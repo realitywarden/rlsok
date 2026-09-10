@@ -1,0 +1,9 @@
+{
+  "decision": "WOULD_BLOCK",
+  "reason": "nav2_exact_goal_not_approved",
+  "approvalSha256": "82669e19dcad06e627ce08a2a497605af2c77089fa6ae01d201fbdec389ac058",
+  "commandSha256": "c8de91bb42decea4d6ca4a26f6f2dc3da3118a217885f745962a7fbfa2595f8c",
+  "shadowHandoffs": 0,
+  "shadowSinkAttempted": false,
+  "hardwareDispatch": "NO"
+}

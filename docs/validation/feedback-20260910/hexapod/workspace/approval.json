@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "scope": "local-shadow-only",
+  "profileSha256": "47885dbdf42cd2eb10385b5bc6908f8ecb45c1de017fb539124f190966098f94",
+  "actor": "public-gazebo-source-review",
+  "approvedAt": "2026-09-10T09:33:58.044Z",
+  "expiresAt": "2026-09-10T10:33:55.069787+00:00"
+}

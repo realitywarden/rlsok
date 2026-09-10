@@ -1,0 +1,9 @@
+{
+  "decision": "WOULD_BLOCK",
+  "reason": "nav2_observation_incomplete:unexpected_command_subscriptions:/rlsok_sim_base",
+  "approvalSha256": "82669e19dcad06e627ce08a2a497605af2c77089fa6ae01d201fbdec389ac058",
+  "commandSha256": "4f04ce46c7f1d959c7e82fd48064fc142b04ee114a2d971c45f421212d5a3eb2",
+  "shadowHandoffs": 0,
+  "shadowSinkAttempted": false,
+  "hardwareDispatch": "NO"
+}

@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "id": "hexapod-gait",
+  "mode": "shadow",
+  "environment": {
+    "rosDistro": "jazzy",
+    "rmwImplementation": "rmw_fastrtps_cpp",
+    "domainId": 224
+  },
+  "robot": {
+    "deviceId": "isolated-public-hexapod",
+    "model": "Public hexapod Gazebo gait input",
+    "controller": "/cmd_vel",
+    "urdfSha256": "74125441425764ddde3a9dfe56a943c6af8a32aae071758fb71bef144fcececf"
+  },
+  "jointOrder": [],
+  "maxObservationAgeMs": 300000,
+  "facts": [
+    {
+      "id": "file-1-gait_node.py",
+      "kind": "file_sha256",
+      "path": "files/source/src/hexapod_gait/hexapod_gait/gait_node.py",
+      "expected": "f94393493d61bda1d4a7dd04f8fd94b3125e245652e561882520c0f8ad4fc289"
+    },
+    {
+      "id": "file-2-kinematics.py",
+      "kind": "file_sha256",
+      "path": "files/source/src/hexapod_gait/hexapod_gait/kinematics.py",
+      "expected": "d091360dd9e88c2000ec8a6cedf04eda4c2f662793e1b07524049007d1e95b8b"
+    },
+    {
+      "id": "file-3-gait.launch.py",
+      "kind": "file_sha256",
+      "path": "files/source/src/hexapod_gait/launch/gait.launch.py",
+      "expected": "7f37b7e56d4038bfb1d0ff470ec6b2a638c59938092bc75036dee8d6ff9ccb7d"
+    },
+    {
+      "id": "file-4-controllers.yaml",
+      "kind": "file_sha256",
+      "path": "files/source/src/Hexapod_Robot_description/config/controllers.yaml",
+      "expected": "bd2726748d3b40e0d584e935e15e1855f6153ae96c5c6feae40a7ed39bfba598"
+    },
+    {
+      "id": "file-5-gazebo.launch.py",
+      "kind": "file_sha256",
+      "path": "files/source/src/Hexapod_Robot_description/launch/gazebo.launch.py",
+      "expected": "a9eec8316ffde69c18f56ebd28423661be644c59c8b71c10ef84e38c0d1a50d4"
+    },
+    {
+      "id": "file-6-robot.urdf",
+      "kind": "file_sha256",
+      "path": "files/robot.urdf",
+      "expected": "74125441425764ddde3a9dfe56a943c6af8a32aae071758fb71bef144fcececf"
+    },
+    {
+      "id": "file-7-runtime-settings.json",
+      "kind": "file_sha256",
+      "path": "files/runtime-settings.json",
+      "expected": "5eaea434b626cf3cd80122b73af9ca8db5522b74157901fe32b1f196a28f847d"
+    },
+    {
+      "id": "active-controller",
+      "kind": "json_value",
+      "path": "files/controller-state.json",
+      "pointer": "/configurationSha256",
+      "expected": "af3e81562c41d3f6225e34dc53ffb3286b171dd69f8828a87fce6abae223c3b1"
+    },
+    {
+      "id": "gait-node-settings",
+      "kind": "json_value",
+      "path": "files/node-settings.json",
+      "pointer": "/configurationSha256",
+      "expected": "a0b6a6692a5eb6e1383c38e1d0f2d3cb0e0d6e71a470394349f4bd6bf57d586c"
+    }
+  ],
+  "paths": [
+    {
+      "id": "command",
+      "endpoint": "/cmd_vel",
+      "interfaceSha256": "be054e08c58911b4a88f9fc7585da0cde79d5a96b60a09bcf1f7a74273e41a32",
+      "checks": [
+        "file-1-gait_node.py",
+        "file-2-kinematics.py",
+        "file-3-gait.launch.py",
+        "file-4-controllers.yaml",
+        "file-5-gazebo.launch.py",
+        "file-6-robot.urdf",
+        "file-7-runtime-settings.json",
+        "active-controller",
+        "gait-node-settings"
+      ],
+      "adapter": "topic_twist",
+      "messageType": "geometry_msgs/msg/Twist",
+      "subscriber": {
+        "name": "hexapod_gait",
+        "namespace": "/"
+      },
+      "fields": {
+        "linear": "/linear",
+        "angular": "/angular"
+      },
+      "commandFrame": "base_footprint"
+    }
+  ]
+}

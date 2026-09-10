@@ -16,6 +16,38 @@ export const controllerExportSchema = z.object({ schemaVersion: z.literal(1), ki
 }).strict();
 export type ControllerExport = z.infer<typeof controllerExportSchema>;
 
+export const nodeSettingsSchema = z.object({ schemaVersion: z.literal(1), kind: z.literal('RlsokRosNodeSettings'),
+  observedAt: z.string().datetime({ offset: true }), configurationSha256: digest,
+  configuration: z.object({ schemaVersion: z.literal(1), source: z.object({ node, environment: environmentSchema }).strict(),
+    parameters: z.record(parameter), downstream: z.object({ node, topic: node, messageType: z.string().min(1),
+      publishers: z.array(z.object({ node, type: z.string(), gid: z.string().regex(/^[a-f0-9]+$/) }).strict()).length(1),
+      subscribers: z.array(z.object({ node, type: z.string(), gid: z.string().regex(/^[a-f0-9]+$/) }).strict()).length(1)
+    }).strict().nullable() }).strict()
+}).strict();
+export type NodeSettingsExport = z.infer<typeof nodeSettingsSchema>;
+export async function readNodeSettingsExport(input: unknown): Promise<NodeSettingsExport> {
+  assertBoundedInput(input);
+  const state = nodeSettingsSchema.parse(input);
+  if (Object.keys(state.configuration.parameters).length > 512) throw new Error('too_many_node_parameters');
+  if (await sha256Bytes(new TextEncoder().encode(canonical(state.configuration))) !== state.configurationSha256) throw new Error('node_settings_digest_mismatch');
+  return state;
+}
+export function requireNodeSettingsBaseline(state: NodeSettingsExport, requirement: { node: string; parameters: Record<string, number>; downstream?: { node: string; topic: string; messageType: string } }, now = new Date()): void {
+  const age = now.getTime() - Date.parse(state.observedAt);
+  if (age < 0 || age > 300000) throw new Error('node_settings_stale_or_future');
+  if (state.configuration.source.node !== requirement.node) throw new Error('node_settings_source_differs_from_recipe');
+  if (requirement.downstream) {
+    const link = state.configuration.downstream, expected = requirement.downstream;
+    if (!link || link.node !== expected.node || link.topic !== expected.topic || link.messageType !== expected.messageType ||
+      link.publishers[0].node !== requirement.node || link.publishers[0].type !== expected.messageType ||
+      link.subscribers[0].node !== expected.node || link.subscribers[0].type !== expected.messageType) throw new Error('node_settings_downstream_differs_from_recipe');
+  }
+  for (const [key, type] of Object.entries(requirement.parameters)) {
+    const value = state.configuration.parameters[key];
+    if (!value || value.type !== type || (type === 3 && (typeof value.value !== 'string' || !Number.isFinite(Number(value.value))))) throw new Error(`missing_or_invalid_node_setting:${key}`);
+  }
+}
+
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${canonical(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`;

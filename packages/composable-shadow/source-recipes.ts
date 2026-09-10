@@ -7,7 +7,8 @@ export interface SourceRecipe {
   interfaceType: string;
   subscriber?: string;
   joints?: string[];
-  controllerState?: { name: string; type: string; claimedInterfaces: string[]; parameters: Record<string, string[]>; actionEndpoint?: string };
+  controllerState?: { name: string; type: string; claimedInterfaces: string[]; parameters: Record<string, string[]>; actionEndpoint?: string; downstream?: boolean };
+  nodeSettings?: { node: string; parameters: Record<string, number>; downstream?: { node: string; topic: string; messageType: string } };
   files: string[];
   referenceLaunches?: string[];
   boundary: string;
@@ -63,10 +64,16 @@ export const sourceRecipes: Record<string, SourceRecipe> = {
     repository: 'ariegweomamerie/hexapod_ros2', referenceCommit: '656eebab5587977a1f41d44657cb853433927053',
     model: 'Public hexapod Gazebo gait input', endpoint: '/cmd_vel', interfaceType: 'geometry_msgs/msg/Twist', subscriber: 'hexapod_gait',
     referenceLaunches: ['ros2 launch Hexapod_Robot_description gazebo.launch.py', 'ros2 launch hexapod_gait gait.launch.py'],
+    nodeSettings: { node: '/hexapod_gait', parameters: { cycle_time: 3, step_height: 3, max_step: 3, update_rate: 3, deadband: 3, use_sim_time: 1 },
+      downstream: { node: '/leg_controller', topic: '/leg_controller/joint_trajectory', messageType: 'trajectory_msgs/msg/JointTrajectory' } },
+    controllerState: { name: 'leg_controller', type: 'joint_trajectory_controller/JointTrajectoryController', downstream: true,
+      actionEndpoint: '/leg_controller/follow_joint_trajectory',
+      claimedInterfaces: ['l1', 'l2', 'l3', 'r1', 'r2', 'r3'].flatMap(leg => ['coxa', 'femur', 'tibia'].map(j => `leg_${leg}_${j}/position`)),
+      parameters: { joints: ['l1', 'l2', 'l3', 'r1', 'r2', 'r3'].flatMap(leg => ['coxa', 'femur', 'tibia'].map(j => `leg_${leg}_${j}`)), command_interfaces: ['position'] } },
     files: ['src/hexapod_gait/hexapod_gait/gait_node.py', 'src/hexapod_gait/hexapod_gait/kinematics.py',
       'src/hexapod_gait/launch/gait.launch.py', 'src/Hexapod_Robot_description/config/controllers.yaml',
       'src/Hexapod_Robot_description/launch/gazebo.launch.py'],
-    boundary: 'Twist input to the gait node. Downstream IK, JointTrajectory output and physical safety are outside this check.'
+    boundary: 'Twist input to the gait node, bound to fresh gait parameter and downstream 18-joint controller exports plus selected source/model files. This observes software configuration; it does not intercept the gait output or certify IK, dynamics, the physical HAL or safety.'
   },
   'so101-arm': {
     repository: 'adoodevv/so101_ros2', referenceCommit: '0305e03ab54e64aae9263fcbf339622e654012f3',

@@ -4,7 +4,7 @@ These eight mappings come from inspected public source. They create a separate R
 
 | Recipe | Inspected source | Selected boundary | Material scope limit |
 | --- | --- | --- | --- |
-| `hexapod-gait` | [hexapod_ros2, 656eebab](https://github.com/ariegweomamerie/hexapod_ros2/tree/656eebab5587977a1f41d44657cb853433927053) | `/cmd_vel` Twist → `/hexapod_gait` | Gait input only; downstream KDL/IK and joint output are separate |
+| `hexapod-gait` | [hexapod_ros2, 656eebab](https://github.com/ariegweomamerie/hexapod_ros2/tree/656eebab5587977a1f41d44657cb853433927053) | `/cmd_vel` Twist → `/hexapod_gait` | Fresh gait parameters, selected output link and 18-joint controller state; no IK/dynamics or hardware certification |
 | `so101-arm` | [so101_ros2, 0305e03a](https://github.com/adoodevv/so101_ros2/tree/0305e03ab54e64aae9263fcbf339622e654012f3) | `/arm_controller/follow_joint_trajectory`, five arm joints | Gripper and direct LeRobot/serial teleoperation are separate |
 | `trik-drive` | [trik_ros2_control, d6ac6cad](https://github.com/krranky/trik_ros2_control/tree/d6ac6cad28a6596317b6b7e6f45372145ec8c601) | Remapped `/cmd_vel` TwistStamped → `/diff_drive_controller` | Files do not authenticate the active TCP brick, wheel calibration or flashed code |
 | `lely-velocity` | [Lelyrobot, 3e286c14](https://github.com/tomo1000cmd/Lelyrobot/tree/3e286c14f21db5f14d49e9ceb1b54e7e80fafb85) | `/cmd_vel` Twist → `/arduino_bridge` | The default ament_python path; C++ has different motor scaling |
@@ -33,7 +33,8 @@ Provide these actual inputs; the command does not fill them with synthetic examp
 - The expanded URDF used for this evaluation, with Xacro includes and arguments resolved. The preparer does not execute Xacro or launch files. Preserve its source/arguments in the settings below.
 - A nonempty `runtime-settings.json` object recording the operator-reviewed launch command, resolved arguments, parameter overrides and selected simulation/model configuration. For TRIK also record the reviewed wheel signs/mapping; for LelyRobot identify the Python bridge and serial/scaling settings. Keep sensitive values local. This is an operator record, **not** an automated export of the active controller state. Do not include a changing capture timestamp in this exact-byte baseline file.
 - One representative message or action Goal as JSON from the chosen interface. It is evaluated locally and never sent. For Twist supply the reviewed command frame separately; for TwistStamped its `header.frame_id` must match. No speed safety envelope is inferred.
-- For every recipe with a `controllerState` specification (`so101-arm`, `trik-drive`, `parol6-arm`, `kinova-gen3-7dof`, `xarm1s-moveit-arm`), a fresh `profile export-controller` result from the selected controller manager and controller node. This is required: a YAML copy cannot establish which controller currently owns the command interfaces.
+- Hexapod also requires a fresh `export-node-settings` result for the gait parameters and its selected JointTrajectory link; follow [the observed Hexapod workflow](hexapod-observed-shadow.md).
+- For every recipe with a `controllerState` specification (`so101-arm`, `trik-drive`, `parol6-arm`, `kinova-gen3-7dof`, `xarm1s-moveit-arm`, `hexapod-gait`), a fresh `profile export-controller` result from the selected controller manager and controller node. This is required: a YAML copy cannot establish which controller currently owns the command interfaces.
 
 The SO-101 recipe uses the joint order declared in its public controller configuration: `shoulder_pan`, `shoulder_lift`, `elbow_flex`, `wrist_flex`, `wrist_roll`. Its example needs `trajectory.joint_names` and `trajectory.points` with positions and increasing `time_from_start`. A similarly named state message is not a command example.
 
@@ -46,6 +47,7 @@ rlsok profile prepare-source --recipe hexapod-gait \
   --source "$CHECKOUT" --catalog catalog.json --urdf expanded.urdf \
   --settings runtime-settings.json --example command-example.json \
   --device-id isolated-hexapod --frame "$COMMAND_FRAME" \
+  --controller-state baseline-controller.json --node-settings baseline-gait.json \
   --output hexapod-review
 ```
 
@@ -57,7 +59,7 @@ rlsok profile export-controller --manager /controller_manager \
   --output baseline-controller.json
 ```
 
-For TRIK use `--controller diff_drive_controller --node /diff_drive_controller`, then pass that export and the actual command frame to `prepare-source`. LelyRobot needs its command frame, but does not use ros2_control controller-state export. For `rover-gazebo`, also supply `--subscriber /actual_bridge_node` from the catalog: its public launch does not fix the node name. A logger is not a substitute. Named non-controller recipe nodes may have an explicit namespace, e.g. `--subscriber /sim/hexapod_gait`; the topic itself still has to match the recipe. The SO-101/TRIK recipes currently map the public root-namespace controller nodes.
+For TRIK use `--controller diff_drive_controller --node /diff_drive_controller`, then pass that export and the actual command frame to `prepare-source`. LelyRobot needs its command frame, but does not use ros2_control controller-state export. For `rover-gazebo`, also supply `--subscriber /actual_bridge_node` from the catalog: its public launch does not fix the node name. A logger is not a substitute. Named non-controller recipe nodes may have an explicit namespace, e.g. `--subscriber /sim/arduino_bridge`; the topic itself still has to match the recipe. The SO-101/TRIK recipes map the public root-namespace controller nodes; Hexapod maps the root gait node and downstream leg controller.
 
 The separate exporter calls only ROS `ListControllers`, `ListParameters` and `GetParameters` services, plus local graph queries for the selected controller's action servers. It does not switch controllers, set parameters or send goals. It reads selected controller metadata twice around the parameter/action reads and refuses a detected mid-read change. Service discovery must show one server node. Multiple same-name servers inside one node, transport authenticity and atomicity of all parameter reads are not proven.
 

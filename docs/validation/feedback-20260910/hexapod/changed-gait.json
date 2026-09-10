@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokRosNodeSettings",
+  "observedAt": "2026-09-10T09:34:21.393Z",
+  "configuration": {
+    "schemaVersion": 1,
+    "source": {
+      "node": "/hexapod_gait",
+      "environment": {
+        "rosDistro": "jazzy",
+        "rmwImplementation": "rmw_fastrtps_cpp",
+        "domainId": 224
+      }
+    },
+    "parameters": {
+      "cycle_time": {
+        "type": 3,
+        "value": "2.0"
+      },
+      "deadband": {
+        "type": 3,
+        "value": "0.01"
+      },
+      "max_step": {
+        "type": 3,
+        "value": "0.1"
+      },
+      "start_type_description_service": {
+        "type": 1,
+        "value": true
+      },
+      "step_height": {
+        "type": 3,
+        "value": "0.035"
+      },
+      "update_rate": {
+        "type": 3,
+        "value": "50.0"
+      },
+      "use_sim_time": {
+        "type": 1,
+        "value": true
+      }
+    },
+    "downstream": {
+      "node": "/leg_controller",
+      "topic": "/leg_controller/joint_trajectory",
+      "messageType": "trajectory_msgs/msg/JointTrajectory",
+      "publishers": [
+        {
+          "node": "/hexapod_gait",
+          "type": "trajectory_msgs/msg/JointTrajectory",
+          "gid": "010f7f013e40d5700000000000001403"
+        }
+      ],
+      "subscribers": [
+        {
+          "node": "/leg_controller",
+          "type": "trajectory_msgs/msg/JointTrajectory",
+          "gid": "010f7f01113e307d0000000000007904"
+        }
+      ]
+    }
+  },
+  "configurationSha256": "eaab10e7af8f461d68eaad0ade522b4b14fef99dd0092c084747ee06ea64ed5e"
+}

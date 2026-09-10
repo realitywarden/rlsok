@@ -1,0 +1,9 @@
+{
+  "decision": "WOULD_BLOCK",
+  "reason": "nav2_capture_failed:nav2_capture_failed:CollectionError:odometry_source_not_unique\n",
+  "approvalSha256": "9a0b6a99c0f5fc5cc2d13c58bef0cfc759ff466a2fca01516a83c86a0dca6904",
+  "commandSha256": "4f04ce46c7f1d959c7e82fd48064fc142b04ee114a2d971c45f421212d5a3eb2",
+  "shadowHandoffs": 0,
+  "shadowSinkAttempted": false,
+  "hardwareDispatch": "NO"
+}
