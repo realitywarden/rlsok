@@ -9,6 +9,7 @@ export interface SourceRecipe {
   joints?: string[];
   controllerState?: { name: string; type: string; claimedInterfaces: string[]; parameters: Record<string, string[]>; actionEndpoint?: string };
   files: string[];
+  referenceLaunches?: string[];
   boundary: string;
 }
 
@@ -61,6 +62,7 @@ export const sourceRecipes: Record<string, SourceRecipe> = {
   'hexapod-gait': {
     repository: 'ariegweomamerie/hexapod_ros2', referenceCommit: '656eebab5587977a1f41d44657cb853433927053',
     model: 'Public hexapod Gazebo gait input', endpoint: '/cmd_vel', interfaceType: 'geometry_msgs/msg/Twist', subscriber: 'hexapod_gait',
+    referenceLaunches: ['ros2 launch Hexapod_Robot_description gazebo.launch.py', 'ros2 launch hexapod_gait gait.launch.py'],
     files: ['src/hexapod_gait/hexapod_gait/gait_node.py', 'src/hexapod_gait/hexapod_gait/kinematics.py',
       'src/hexapod_gait/launch/gait.launch.py', 'src/Hexapod_Robot_description/config/controllers.yaml',
       'src/Hexapod_Robot_description/launch/gazebo.launch.py'],

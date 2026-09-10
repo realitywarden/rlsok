@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokNav2ReviewInput",
+  "distribution": "jazzy",
+  "inputSource": "synthetic",
+  "observedAt": "2026-09-10T07:00:00Z",
+  "actionEndpoint": "/follow_path",
+  "software": [
+    {
+      "identity": "ros-navigation/navigation2",
+      "version": "f4108e5b1c2bce804a1aa0c7be6673a8eb4a1501"
+    },
+    {
+      "identity": "synthetic-base-driver",
+      "version": "fixture-1"
+    }
+  ],
+  "smoother": {
+    "feedback": "OPEN_LOOP",
+    "scale_velocities": false,
+    "smoothing_frequency": 20,
+    "velocity_timeout": 1,
+    "max_velocity": [
+      0.5,
+      0,
+      2.5
+    ],
+    "min_velocity": [
+      -0.5,
+      0,
+      -2.5
+    ],
+    "max_accel": [
+      2.5,
+      0,
+      3.2
+    ],
+    "max_decel": [
+      -2.5,
+      0,
+      -3.2
+    ],
+    "deadband_velocity": [
+      0,
+      0,
+      0
+    ],
+    "stamp_smoothed_velocity_with_smoothing_time": false,
+    "timestampConsumed": true,
+    "use_realtime_priority": false,
+    "odometry": {
+      "topic": "/odom",
+      "sourceNode": "/odom_source",
+      "frame": "odom",
+      "duration": 0.1
+    }
+  },
+  "topology": {
+    "selectedPathComplete": true,
+    "stages": [
+      {
+        "role": "controller",
+        "node": "/controller_server",
+        "inputTopic": null,
+        "outputTopic": "/cmd_vel_raw",
+        "implementation": "synthetic/controller",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "role": "smoother",
+        "node": "/velocity_smoother",
+        "inputTopic": "/cmd_vel_raw",
+        "outputTopic": "/cmd_vel",
+        "implementation": "synthetic/smoother",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "role": "base",
+        "node": "/base_driver",
+        "inputTopic": "/cmd_vel",
+        "outputTopic": null,
+        "implementation": "synthetic/base",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "edges": [
+      {
+        "publisher": "/controller_server",
+        "subscriber": "/velocity_smoother",
+        "topic": "/cmd_vel_raw",
+        "selectedPublisherCount": 1,
+        "selectedSubscriptionCount": 1,
+        "otherPublisherCount": 0
+      },
+      {
+        "publisher": "/velocity_smoother",
+        "subscriber": "/base_driver",
+        "topic": "/cmd_vel",
+        "selectedPublisherCount": 1,
+        "selectedSubscriptionCount": 1,
+        "otherPublisherCount": 0
+      }
+    ]
+  },
+  "loadedPlugins": {
+    "controller_id": [
+      {
+        "id": "FollowPath",
+        "implementation": "synthetic/FollowPath",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "id": "Alternative",
+        "implementation": "synthetic/Alternative",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "goal_checker_id": [
+      {
+        "id": "goal_checker",
+        "implementation": "synthetic/goal_checker",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "id": "alternate_goal",
+        "implementation": "synthetic/alternate_goal",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "progress_checker_id": [
+      {
+        "id": "progress_checker",
+        "implementation": "synthetic/progress_checker",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "id": "alternate_progress",
+        "implementation": "synthetic/alternate_progress",
+        "version": "fixture-1",
+        "configurationSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ]
+  },
+  "goal": {
+    "controller_id": "FollowPath",
+    "goal_checker_id": "goal_checker",
+    "progress_checker_id": "progress_checker",
+    "path": {
+      "header": {
+        "frame_id": "map",
+        "stamp": {
+          "sec": 0,
+          "nanosec": 0
+        }
+      },
+      "poses": []
+    }
+  },
+  "volatile": {
+    "velocity_sample": [
+      0,
+      0,
+      0
+    ]
+  },
+  "diagnostics": {
+    "description": "Synthetic selected-fact fixture. Empty opaque path is not a runnable Nav2 trajectory."
+  }
+}

@@ -42,6 +42,7 @@ const copy = (source, target) => {
     copy(path.join(root, 'experimental/composable-shadow'), path.join(stage, 'lib/rlsok/experimental/composable-shadow'));
     copy(path.join(root, 'docs'), path.join(stage, 'docs'));
     copy(path.join(root, 'examples/composable-shadow'), path.join(stage, 'materials'));
+    copy(path.join(root, 'examples/adapter-references'), path.join(stage, 'lib/rlsok/examples/adapter-references'));
     copy(path.join(root, 'LICENSE'), path.join(stage, 'LICENSE'));
     const lock = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
     const dependencies = [];
@@ -82,6 +83,7 @@ const copy = (source, target) => {
     copy(path.join(root, 'docs/interface-onboarding.md'), path.join(output, 'INTERFACE-ONBOARDING.md'));
     copy(path.join(root, 'docs/source-shadow-workspaces.md'), path.join(output, 'SOURCE-WORKSPACES.md'));
     copy(path.join(root, 'docs/email-feedback-evaluation-20260910.md'), path.join(output, 'FEEDBACK-EVALUATION.md'));
+    copy(path.join(root, 'docs/email-feedback-afternoon-20260910.md'), path.join(output, 'AFTERNOON-FEEDBACK.md'));
     copy(path.join(root, 'docs/pliant-propulsors-review.md'), path.join(output, 'PROPULSOR-REVIEW.md'));
     run(process.execPath, [path.join(__dirname, 'generate-sbom.cjs')]);
     run(process.execPath, [path.join(__dirname, 'license-inventory.cjs')]);

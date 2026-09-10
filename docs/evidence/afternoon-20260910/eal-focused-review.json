@@ -1,0 +1,64 @@
+{
+  "sourceRepository": "https://github.com/ty-knowgic/engineering-assurance-layer",
+  "sourceCommit": "9701f183169ef024d908825d019c439186edc2ac",
+  "inputSource": "synthetic",
+  "hardwareDispatch": "NO",
+  "scope": "Three direct parser/rule probes; no CLI policy filter, full suite or ROS run",
+  "baseline": {
+    "selectedPlugin": "Slow",
+    "unsupported": [],
+    "absentSections": [],
+    "uncheckedRoles": [],
+    "findings": []
+  },
+  "sameLimitsFeedbackFrequencyChange": {
+    "unchangedRuleOutput": true,
+    "result": {
+      "selectedPlugin": "Slow",
+      "unsupported": [],
+      "absentSections": [],
+      "uncheckedRoles": [],
+      "findings": []
+    }
+  },
+  "twoControllers": {
+    "slowFirst": {
+      "selectedPlugin": "Slow",
+      "unsupported": [],
+      "absentSections": [],
+      "uncheckedRoles": [],
+      "findings": []
+    },
+    "fastFirst": {
+      "selectedPlugin": "Fast",
+      "unsupported": [],
+      "absentSections": [],
+      "uncheckedRoles": [],
+      "findings": [
+        {
+          "category": "NAV2_VELOCITY_OVERDECLARED",
+          "severity": "MEDIUM",
+          "title": "Controller declares maximum forward velocity 4.00x the downstream smoother limit"
+        },
+        {
+          "category": "NAV2_ACCEL_OVERDECLARED",
+          "severity": "HIGH",
+          "title": "Controller declares linear acceleration limit 3.00x the downstream smoother limit"
+        }
+      ]
+    }
+  },
+  "nonFiniteControllerAcceleration": {
+    "selectedPlugin": "Slow",
+    "unsupported": [],
+    "absentSections": [],
+    "uncheckedRoles": [],
+    "findings": [
+      {
+        "category": "NAV2_LIMIT_HEADROOM",
+        "severity": "LOW",
+        "title": "Controller uses only part of the available linear acceleration limit"
+      }
+    ]
+  }
+}

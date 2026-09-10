@@ -11,6 +11,7 @@ import { prepareSourceWorkspace, refreshSourceWorkspace } from '../../packages/c
 import { sourceRecipes } from '../../packages/composable-shadow/source-recipes';
 import { compareControllerExports, controllerComparisonMarkdown } from '../../packages/composable-shadow/controller-comparison';
 import { prepareSo101ControllerSwap } from '../../packages/composable-shadow/so101-swap';
+import { compareNav2ReviewInputs, nav2ReviewMarkdown } from '../../packages/composable-shadow/nav2-review';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -19,6 +20,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
+  rlsok profile compare-nav2 --baseline <nav2-input.json> --changed <nav2-input.json> --output <new-directory>
   rlsok profile compare-controllers --baseline <state.json> --changed <state.json> --output <new-directory>
   rlsok profile prepare-so101-swap --input <ros2_controllers.yaml> --output <new-controllers.yaml>
   rlsok profile export-controller --manager </controller_manager> --controller <name> --node </controller_node> --output <new-state.json> [--python <python3>]
@@ -135,12 +137,22 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     return 0;
   }
   if (command === 'prepare-so101-swap') {
+    // Configuration copy only; controller changes are never dispatched by this CLI.
     const o = options(rest, ['input', 'output'], ['input', 'output']);
     if (!statSync(o.input).isFile() || statSync(o.input).size > 2 * 1024 * 1024) throw new Error('controller_yaml_must_be_a_file_under_2MiB');
     const yaml = prepareSo101ControllerSwap(readFileSync(o.input, 'utf8'));
     writeFileSync(resolve(o.output), yaml, { flag: 'wx', mode: 0o600 });
     process.stdout.write('Prepared SO-101 controller-type change; five arm joints and gripper configuration preserved. File only: no controller was switched.\n');
     return 0;
+  }
+  if (command === 'compare-nav2') {
+    const o = options(rest, ['baseline', 'changed', 'output'], ['baseline', 'changed', 'output']);
+    const report = compareNav2ReviewInputs(read(o.baseline), read(o.changed));
+    const directory = newDirectory(o.output);
+    write(join(directory, 'nav2-review.json'), report);
+    writeFileSync(join(directory, 'nav2-review.md'), nav2ReviewMarkdown(report), { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`${report.result} | supplied Nav2 inputs | hardware dispatch: NO | not execution approval\n${directory}\n`);
+    return report.result === 'INCOMPLETE' ? 2 : report.result === 'REVIEW_REQUIRED' ? 1 : 0;
   }
   if (command === 'prepare-source') {
     const o = options(rest, ['recipe', 'source', 'catalog', 'urdf', 'settings', 'example', 'device-id', 'output', 'frame', 'subscriber', 'controller-state'],

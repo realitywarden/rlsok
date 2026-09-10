@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "inputSource": "synthetic",
+  "scope": "Local supplied-input CLI comparison; no Nav2 process, real graph, customer trial or permission",
+  "cases": [
+    {
+      "case": "same-input",
+      "result": "MATCH",
+      "exitCode": 0,
+      "differences": [],
+      "issues": [],
+      "hardwareDispatch": "NO",
+      "createsApproval": false
+    },
+    {
+      "case": "same-limits-new-frequency",
+      "result": "REVIEW_REQUIRED",
+      "exitCode": 1,
+      "differences": [
+        "smoother"
+      ],
+      "issues": [],
+      "hardwareDispatch": "NO",
+      "createsApproval": false
+    },
+    {
+      "case": "closed-loop-source",
+      "result": "REVIEW_REQUIRED",
+      "exitCode": 1,
+      "differences": [
+        "smoother",
+        "odometry"
+      ],
+      "issues": [],
+      "hardwareDispatch": "NO",
+      "createsApproval": false
+    },
+    {
+      "case": "selected-path-broken",
+      "result": "INCOMPLETE",
+      "exitCode": 2,
+      "differences": [],
+      "issues": [
+        "missing_or_ambiguous_selected_edge_1",
+        "missing_or_ambiguous_selected_edge_2"
+      ],
+      "hardwareDispatch": "NO",
+      "createsApproval": false
+    },
+    {
+      "case": "goal-controller-substitution",
+      "result": "REVIEW_REQUIRED",
+      "exitCode": 1,
+      "differences": [
+        "goalSelectors",
+        "commandSha256"
+      ],
+      "issues": [],
+      "hardwareDispatch": "NO",
+      "createsApproval": false
+    },
+    {
+      "case": "same-api-new-runtime",
+      "result": "REVIEW_REQUIRED",
+      "exitCode": 1,
+      "differences": [
+        "software"
+      ],
+      "issues": [],
+      "hardwareDispatch": "NO",
+      "createsApproval": false
+    },
+    {
+      "case": "volatile-only",
+      "result": "MATCH",
+      "exitCode": 0,
+      "differences": [],
+      "issues": [],
+      "hardwareDispatch": "NO",
+      "createsApproval": false
+    }
+  ]
+}
