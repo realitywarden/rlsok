@@ -1,0 +1,8 @@
+{
+  "fixtureOnly": true,
+  "baseline": "WOULD_ALLOW",
+  "changedCalibration": "WOULD_BLOCK",
+  "changedLimitsUnderOldApproval": "WOULD_BLOCK",
+  "explanation": "Example zero changes 0 -> 0.1 rad. With illustrative half-range 0.5 rad, review bounds -0.5..0.5 -> -0.4..0.6. Both changes invalidate the original approval. No new approval is generated for the changed inputs; the owner must review the actual limits and mission conditions.",
+  "scope": "Synthetic configuration-review example only. Not a Dynamixel mission adapter, limit-safety validation, or physical calibration."
+}

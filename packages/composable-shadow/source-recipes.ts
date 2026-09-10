@@ -13,6 +13,51 @@ export interface SourceRecipe {
 }
 
 export const sourceRecipes: Record<string, SourceRecipe> = {
+  'xarm1s-moveit-arm': {
+    repository: 'allProgramming/ros2_xarm_1s_demos', referenceCommit: '3836e35a61064af2810c7d6174b5d5e841b1bf7b',
+    model: 'Public xArm 1S MoveIt five-axis arm configuration',
+    endpoint: '/xarm_1s_arm_controller/follow_joint_trajectory', interfaceType: 'control_msgs/action/FollowJointTrajectory',
+    joints: ['arm6', 'arm5', 'arm4', 'arm3', 'arm2'],
+    controllerState: { name: 'xarm_1s_arm_controller', type: 'joint_trajectory_controller/JointTrajectoryController',
+      actionEndpoint: '/xarm_1s_arm_controller/follow_joint_trajectory',
+      claimedInterfaces: ['arm6', 'arm5', 'arm4', 'arm3', 'arm2'].map(j => `${j}/position`),
+      parameters: { joints: ['arm6', 'arm5', 'arm4', 'arm3', 'arm2'], command_interfaces: ['position'] } },
+    files: ['ros2_ws/src/xarm_1s_moveit_config/config/ros2_controllers.yaml',
+      'ros2_ws/src/xarm_1s_moveit_config/config/moveit_controllers.yaml',
+      'ros2_ws/src/xarm_1s_moveit_config/config/xarm_1s.ros2_control.xacro',
+      'ros2_ws/src/xarm_1s_description/urdf/xarm_1s.urdf.xacro',
+      'ros2_ws/src/ros2_control_xarm_1s/src/xarm_1s.cpp'],
+    boundary: 'Public MoveIt arm action only; hand_controller/arm1 is separate. The same repository also has a distinct six-joint bare ros2_control configuration, which this recipe does not map. Current hardware/environment availability is unknown.'
+  },
+  'parol6-arm': {
+    repository: 'grahas/parol6_ros2_control', referenceCommit: 'c111b97d5afd00b9b04d593bb11ab52ba67dc6cd',
+    model: 'Public PAROL6 trajectory input', endpoint: '/parol6_arm_controller/follow_joint_trajectory', interfaceType: 'control_msgs/action/FollowJointTrajectory',
+    joints: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6'],
+    controllerState: { name: 'parol6_arm_controller', type: 'joint_trajectory_controller/JointTrajectoryController',
+      actionEndpoint: '/parol6_arm_controller/follow_joint_trajectory',
+      claimedInterfaces: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6'].map(j => `${j}/position`),
+      parameters: { joints: ['L1', 'L2', 'L3', 'L4', 'L5', 'L6'], command_interfaces: ['position'] } },
+    files: ['parol6_bringup/config/parol6_controllers.yaml', 'parol6_bringup/launch/parol6_control.launch.py',
+      'parol6_bringup/urdf/parol6.ros2_control.xacro', 'parol6_bringup/urdf/parol6_with_tools.xacro',
+      'parol6_hardware_interface/src/parol6_system_interface.cpp', 'parol6_hardware_interface/src/bridge_client.cpp',
+      'parol6_bridge/parol6_bridge/bridge_node.py', 'parol6_bridge/parol6_bridge/protocol.py'],
+    boundary: 'ROS trajectory action to parol6_arm_controller. The hardware write -> local TCP bridge -> robot server path is documented, not intercepted or authenticated. Do not launch the physical bridge for discovery.'
+  },
+  'kinova-gen3-7dof': {
+    repository: 'Kinovarobotics/ros2_kortex', referenceCommit: '462dab9aa4732d733be55e1846530dd920c7c7d3',
+    model: 'Public Kortex Jazzy Gen3 seven-axis trajectory input, no prefix',
+    endpoint: '/joint_trajectory_controller/follow_joint_trajectory', interfaceType: 'control_msgs/action/FollowJointTrajectory',
+    joints: ['joint_1', 'joint_2', 'joint_3', 'joint_4', 'joint_5', 'joint_6', 'joint_7'],
+    controllerState: { name: 'joint_trajectory_controller', type: 'joint_trajectory_controller/JointTrajectoryController',
+      actionEndpoint: '/joint_trajectory_controller/follow_joint_trajectory',
+      claimedInterfaces: Array.from({length: 7}, (_, i) => `joint_${i + 1}/position`),
+      parameters: { joints: ['joint_1', 'joint_2', 'joint_3', 'joint_4', 'joint_5', 'joint_6', 'joint_7'], command_interfaces: ['position'] } },
+    files: ['kortex_description/arms/gen3/7dof/config/ros2_controllers.yaml',
+      'kortex_description/arms/gen3/7dof/urdf/kortex.ros2_control.xacro',
+      'kortex_bringup/launch/kortex_control.launch.py', 'kortex_bringup/launch/kortex_sim_control.launch.py',
+      'kortex_driver/src/hardware_interface.cpp'],
+    boundary: 'Prototype for the unprefixed seven-joint trajectory action before ros2_control software state. Shadow is a parallel evaluator, not a gate in Kortex write(). Direct JointTrajectory topics, velocity/Twist controllers, gripper and direct Kortex API calls are separate paths. No physical Gen3 compatibility claim.'
+  },
   'hexapod-gait': {
     repository: 'ariegweomamerie/hexapod_ros2', referenceCommit: '656eebab5587977a1f41d44657cb853433927053',
     model: 'Public hexapod Gazebo gait input', endpoint: '/cmd_vel', interfaceType: 'geometry_msgs/msg/Twist', subscriber: 'hexapod_gait',

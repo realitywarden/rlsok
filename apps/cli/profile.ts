@@ -9,6 +9,8 @@ import { readConnection } from '../../packages/composable-shadow/onboarding';
 import { reportMarkdown, compareReports, comparisonMarkdown } from '../../packages/composable-shadow/report';
 import { prepareSourceWorkspace, refreshSourceWorkspace } from '../../packages/composable-shadow/source-workspace';
 import { sourceRecipes } from '../../packages/composable-shadow/source-recipes';
+import { compareControllerExports, controllerComparisonMarkdown } from '../../packages/composable-shadow/controller-comparison';
+import { prepareSo101ControllerSwap } from '../../packages/composable-shadow/so101-swap';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -17,6 +19,8 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
+  rlsok profile compare-controllers --baseline <state.json> --changed <state.json> --output <new-directory>
+  rlsok profile prepare-so101-swap --input <ros2_controllers.yaml> --output <new-controllers.yaml>
   rlsok profile export-controller --manager </controller_manager> --controller <name> --node </controller_node> --output <new-state.json> [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>]
@@ -119,6 +123,23 @@ export async function runProfileCommand(args: string[]): Promise<number> {
   if (command === 'source-recipes') {
     options(rest, [], []);
     process.stdout.write(`${JSON.stringify(sourceRecipes, null, 2)}\nPublic source mappings only; verify the actual local graph and files.\n`);
+    return 0;
+  }
+  if (command === 'compare-controllers') {
+    const o = options(rest, ['baseline', 'changed', 'output'], ['baseline', 'changed', 'output']);
+    const report = await compareControllerExports(read(o.baseline), read(o.changed));
+    const directory = newDirectory(o.output);
+    write(join(directory, 'controller-comparison.json'), report);
+    writeFileSync(join(directory, 'controller-comparison.md'), controllerComparisonMarkdown(report), { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`Controller configuration ${report.configurationMatches ? 'matches' : 'changed'}; ${report.differences.length} differing groups. Historical comparison only.\n${directory}\n`);
+    return 0;
+  }
+  if (command === 'prepare-so101-swap') {
+    const o = options(rest, ['input', 'output'], ['input', 'output']);
+    if (!statSync(o.input).isFile() || statSync(o.input).size > 2 * 1024 * 1024) throw new Error('controller_yaml_must_be_a_file_under_2MiB');
+    const yaml = prepareSo101ControllerSwap(readFileSync(o.input, 'utf8'));
+    writeFileSync(resolve(o.output), yaml, { flag: 'wx', mode: 0o600 });
+    process.stdout.write('Prepared SO-101 controller-type change; five arm joints and gripper configuration preserved. File only: no controller was switched.\n');
     return 0;
   }
   if (command === 'prepare-source') {

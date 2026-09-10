@@ -66,7 +66,7 @@ function observation(workspace: string, connection: Connection): any {
       : { id: path.id, endpoint: path.endpoint, interfaceSha256: path.interfaceSha256, actionType: path.actionType, serverCount: 1 }] };
 }
 
-test('all five source mappings refresh changed files without rewriting approval, profile or example', async () => {
+test('all source mappings refresh changed files without rewriting approval, profile or example', async () => {
   for (const recipe of Object.keys(sourceRecipes)) {
     const { input } = fixture(recipe);
     const workspace = await prepareSourceWorkspace(input);

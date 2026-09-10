@@ -1,0 +1,29 @@
+# Review this copy in an isolated simulation. RLSOK has not loaded or switched any controller.
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+    arm_controller:
+      type: position_controllers/JointGroupPositionController
+    gripper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    use_sim_time: false
+arm_controller:
+  ros__parameters:
+    joints:
+      - shoulder_pan
+      - shoulder_lift
+      - elbow_flex
+      - wrist_flex
+      - wrist_roll
+gripper_controller:
+  ros__parameters:
+    joints:
+      - gripper
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+    allow_integration_in_goal_trajectories: true
+    allow_nonzero_velocity_at_trajectory_end: true

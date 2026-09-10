@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 import controller_state as state
 
 
@@ -24,6 +25,23 @@ class Reader:
 
 class ControllerTests(unittest.TestCase):
     def export(self, reader): return state.export_state(reader, '/controller_manager', 'arm_controller', '/arm_controller')
+
+    def test_service_graph_can_lag_readiness_but_duplicate_servers_and_deadline_fail(self):
+        reader = state.RosStateReader(); reader.deadline = 1
+        clock = [0.0]; nodes = [[]]
+        reader.node = SimpleNamespace(get_node_names_and_namespaces=lambda: nodes[0],
+            get_service_names_and_types_by_node=lambda *_: [('/test', ['service/Type'])])
+        def spin(**_): clock[0] += 0.1; nodes[0] = [('server', '/')]
+        reader.executor = SimpleNamespace(spin_once=spin)
+        with patch.object(state.time, 'monotonic', side_effect=lambda: clock[0]):
+            reader.wait_for_server_node('/test')
+            self.assertGreater(clock[0], 0)
+            nodes[0] = [('first', '/'), ('second', '/')]
+            with self.assertRaisesRegex(state.CollectionError, 'multiple'): reader.wait_for_server_node('/test')
+            nodes[0] = [('same', '/'), ('same', '/')]
+            with self.assertRaisesRegex(state.CollectionError, 'ambiguous'): reader.wait_for_server_node('/test')
+            nodes[0] = []; clock[0] = 1.0
+            with self.assertRaisesRegex(state.CollectionError, 'deadline'): reader.wait_for_server_node('/test')
 
     def test_baseline_and_claimed_interface_change_have_different_digests(self):
         reader = Reader(); before = self.export(reader)

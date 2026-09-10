@@ -1,6 +1,6 @@
 # Review a public ROS 2 project's configuration locally
 
-These five mappings come from inspected public source. They create a separate RLSOK workspace without editing the upstream checkout, installing a controller, generating an approval or sending a command. They are not customer case studies, hardware certifications or evidence that an owner has run RLSOK.
+These eight mappings come from inspected public source. They create a separate RLSOK workspace without editing the upstream checkout, installing a controller, generating an approval or sending a command. They are not customer case studies, hardware certifications or evidence that an owner has run RLSOK.
 
 | Recipe | Inspected source | Selected boundary | Material scope limit |
 | --- | --- | --- | --- |
@@ -9,6 +9,16 @@ These five mappings come from inspected public source. They create a separate RL
 | `trik-drive` | [trik_ros2_control, d6ac6cad](https://github.com/krranky/trik_ros2_control/tree/d6ac6cad28a6596317b6b7e6f45372145ec8c601) | Remapped `/cmd_vel` TwistStamped → `/diff_drive_controller` | Files do not authenticate the active TCP brick, wheel calibration or flashed code |
 | `lely-velocity` | [Lelyrobot, 3e286c14](https://github.com/tomo1000cmd/Lelyrobot/tree/3e286c14f21db5f14d49e9ceb1b54e7e80fafb85) | `/cmd_vel` Twist → `/arduino_bridge` | The default ament_python path; C++ has different motor scaling |
 | `rover-gazebo` | [ROS2-Autonomous-Rover, 1384dbbc](https://github.com/skunal3318/ROS2-Autonomous-Rover/tree/1384dbbcb9daaeabfcede0904c202521c51e27ca) | `/cmd_vel` Twist → the selected Gazebo bridge node | ROS discovery does not attest Gazebo-side delivery or FSM behavior |
+
+The new PAROL6, Kortex seven-axis and xArm 1S MoveIt mappings, exact input requirements and command boundaries are described in [the feedback evaluation guide](email-feedback-evaluation-20260910.md).
+
+| Recipe | Public reference | Selected boundary |
+| --- | --- | --- |
+| `parol6-arm` | grahas/parol6_ros2_control, c111b97d | Six-joint `/parol6_arm_controller/follow_joint_trajectory` |
+| `kinova-gen3-7dof` | Kinovarobotics/ros2_kortex Jazzy, 462dab9a | Seven-joint `/joint_trajectory_controller/follow_joint_trajectory`, no prefix |
+| `xarm1s-moveit-arm` | allProgramming/ros2_xarm_1s_demos, 3836e35a | Five-joint `/xarm_1s_arm_controller/follow_joint_trajectory`; hand separate |
+
+All three require fresh exports of their own active JTC and use the same prepare/refresh/approve/capture/compare flow below. The source recipe identifies required file paths; it does not attest deployed binaries or current customer configuration.
 
 ## Prepare the inputs
 
@@ -23,7 +33,7 @@ Provide these actual inputs; the command does not fill them with synthetic examp
 - The expanded URDF used for this evaluation, with Xacro includes and arguments resolved. The preparer does not execute Xacro or launch files. Preserve its source/arguments in the settings below.
 - A nonempty `runtime-settings.json` object recording the operator-reviewed launch command, resolved arguments, parameter overrides and selected simulation/model configuration. For TRIK also record the reviewed wheel signs/mapping; for LelyRobot identify the Python bridge and serial/scaling settings. Keep sensitive values local. This is an operator record, **not** an automated export of the active controller state. Do not include a changing capture timestamp in this exact-byte baseline file.
 - One representative message or action Goal as JSON from the chosen interface. It is evaluated locally and never sent. For Twist supply the reviewed command frame separately; for TwistStamped its `header.frame_id` must match. No speed safety envelope is inferred.
-- For `so101-arm` and `trik-drive`, a fresh `profile export-controller` result from the selected controller manager and controller node. This is required: a YAML copy cannot establish which controller currently owns the command interfaces.
+- For every recipe with a `controllerState` specification (`so101-arm`, `trik-drive`, `parol6-arm`, `kinova-gen3-7dof`, `xarm1s-moveit-arm`), a fresh `profile export-controller` result from the selected controller manager and controller node. This is required: a YAML copy cannot establish which controller currently owns the command interfaces.
 
 The SO-101 recipe uses the joint order declared in its public controller configuration: `shoulder_pan`, `shoulder_lift`, `elbow_flex`, `wrist_flex`, `wrist_roll`. Its example needs `trajectory.joint_names` and `trajectory.points` with positions and increasing `time_from_start`. A similarly named state message is not a command example.
 
@@ -67,7 +77,7 @@ rlsok profile capture --profile profile.json --output baseline.json
 
 Refresh reads every required input before writing; a missing input is an error. Do not capture after any refresh error. Refresh changes only the local input copies; it preserves the approved profile, example and previous evidence.
 
-Choose and review one changed copy in an isolated branch/directory. For SO-101, agree which controller and binding to swap first. A change to a copied YAML file demonstrates file drift; it does **not** demonstrate that a running controller was swapped. For a controlled simulation swap, export the same selected controller again to a new `changed-controller.json`. The export may now show the controller inactive or absent; preserve that result. Pass `--controller-state changed-controller.json` to `refresh-source`. Refresh retains the original approval and accepts the changed state so the evaluator can report the actual mismatch. It rejects an export from a different manager/node/domain or one with an invalid digest. Do not activate or move hardware merely to demonstrate a negative result.
+Choose and review one changed copy in an isolated branch/directory. For SO-101, the [specified same-name type change](email-feedback-evaluation-20260910.md#so-101-change-the-same-arm-controllers-type) has its own copy generator and mock experiment. A change to a copied YAML file demonstrates file drift; it does **not** demonstrate that a running controller was swapped. For a controlled simulation swap, export the same selected controller again to a new `changed-controller.json`. The export may now show the controller inactive or absent; preserve that result. Pass `--controller-state changed-controller.json` to `refresh-source`. Refresh retains the original approval and accepts the changed state so the evaluator can report the actual mismatch. It rejects an export from a different manager/node/domain or one with an invalid digest. Do not activate or move hardware merely to demonstrate a negative result.
 
 Refresh from the changed copy, then capture and compare with the **same** approval and example:
 
@@ -82,7 +92,7 @@ rlsok profile compare --profile profile.json --approval approval.json \
 
 Keep both observations within the profile's five-minute freshness window. Use new output paths for another comparison. Do not edit observation timestamps, replace observed values with expected hashes, or approve the changed profile to make the comparison pass.
 
-For SO-101/TRIK include the corresponding `--controller-state` file on **every** prepare/refresh call, including the baseline refresh shown above. Re-export before each capture; copying an old export does not refresh its timestamp. An old or future export produces a blocked evaluation. If the selected endpoint disappears after the swap, successful graph collection omits that path; the report records missing coverage and blocks. A graph query or file-read failure still stops collection without a fabricated observation.
+For every controller-state recipe include the corresponding `--controller-state` file on **every** prepare/refresh call, including the baseline refresh shown above. Re-export before each capture; copying an old export does not refresh its timestamp. An old or future export produces a blocked evaluation. If the selected endpoint disappears after the swap, successful graph collection omits that path; the report records missing coverage and blocks. A graph query or file-read failure still stops collection without a fabricated observation.
 
 The readable report should show a matching baseline and the intended changed fact failing. Use `profile.json` to resolve each fact ID to its source path. A stale-data block alone is not evidence of the intended configuration change. WOULD_ALLOW means these declared local checks passed; it is not permission to move or a physical safety proof.
 

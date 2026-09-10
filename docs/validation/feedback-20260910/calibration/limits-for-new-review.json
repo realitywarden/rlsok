@@ -1,0 +1,6 @@
+{
+  "fixtureOnly": true,
+  "halfRangeRadians": 0.5,
+  "lowerRadians": -0.4,
+  "upperRadians": 0.6
+}

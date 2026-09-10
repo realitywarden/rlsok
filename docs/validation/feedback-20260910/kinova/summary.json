@@ -1,0 +1,12 @@
+{
+  "recipe": "kinova-gen3-7dof",
+  "sourceCommit": "462dab9aa4732d733be55e1846530dd920c7c7d3",
+  "controllers": "real installed ROS 2 controller_manager and plugins",
+  "hardware": "mock_components/GenericSystem only",
+  "change": "deactivate seven-axis JTC",
+  "baseline": "WOULD_ALLOW",
+  "changed": "WOULD_BLOCK",
+  "activeControllerFactMismatch": true,
+  "motionCommandsPublished": 0,
+  "customerRun": false
+}

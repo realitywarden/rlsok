@@ -16,7 +16,7 @@ For reusable interface selection and field mapping, open the
 processed in the browser; exported workspaces are consumed by the local CLI.
 
 For the FANUC/Humble composable workflow, download the separate
-[v1.5.0-shadow.4 evaluation package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0-shadow.4)
+[v1.5.0-shadow.5 evaluation package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0-shadow.5)
 and follow the [installation-to-Evidence guide](docs/fanuc-shadow-self-service.md).
 This locally reviewed/built prerelease has not been validated on Humble or a
 physical FANUC. It does not change the stable Cloud or v1.4.5 installer below.
@@ -128,3 +128,7 @@ Shadow is the default mode and never dispatches a controller goal.
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Configuration feedback evaluation
+
+The [2026-09-10 guide](docs/email-feedback-evaluation-20260910.md) provides a SO-101 controller type-change workflow, PAROL6/Kortex/xArm source workspaces, command-boundary diagrams and the [propulsor source review and patch](docs/pliant-propulsors-review.md). These are local Shadow and source-review deliverables, not customer acceptance or hardware certification.

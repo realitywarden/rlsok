@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokControllerComparison",
+  "source": {
+    "controllerManager": "/controller_manager",
+    "controllerName": "joint_trajectory_controller",
+    "controllerNode": "/joint_trajectory_controller",
+    "environment": {
+      "rosDistro": "jazzy",
+      "rmwImplementation": "rmw_fastrtps_cpp",
+      "domainId": 221
+    }
+  },
+  "baselineObservedAt": "2026-09-10T06:56:54.831Z",
+  "changedObservedAt": "2026-09-10T06:57:21.931Z",
+  "baselineConfigurationSha256": "e146ab22a03285c6760d42bfa0ecc38820b891f1d42e73633f730f6572be8481",
+  "changedConfigurationSha256": "290ee6599ff43570c93b1c54a53cf371674119a81e1ed21204e37570dfdcc2a5",
+  "configurationMatches": false,
+  "differences": [
+    {
+      "group": "controller",
+      "before": {
+        "name": "joint_trajectory_controller",
+        "state": "active",
+        "type": "joint_trajectory_controller/JointTrajectoryController",
+        "claimed_interfaces": [
+          "joint_1/position",
+          "joint_2/position",
+          "joint_3/position",
+          "joint_4/position",
+          "joint_5/position",
+          "joint_6/position",
+          "joint_7/position"
+        ],
+        "is_async": false,
+        "update_rate": 1000,
+        "required_command_interfaces": [
+          "joint_1/position",
+          "joint_2/position",
+          "joint_3/position",
+          "joint_4/position",
+          "joint_5/position",
+          "joint_6/position",
+          "joint_7/position"
+        ],
+        "required_state_interfaces": [
+          "joint_1/position",
+          "joint_1/velocity",
+          "joint_2/position",
+          "joint_2/velocity",
+          "joint_3/position",
+          "joint_3/velocity",
+          "joint_4/position",
+          "joint_4/velocity",
+          "joint_5/position",
+          "joint_5/velocity",
+          "joint_6/position",
+          "joint_6/velocity",
+          "joint_7/position",
+          "joint_7/velocity"
+        ],
+        "is_chainable": false,
+        "is_chained": false,
+        "exported_state_interfaces": [],
+        "reference_interfaces": [],
+        "chain_connections": []
+      },
+      "after": {
+        "name": "joint_trajectory_controller",
+        "state": "inactive",
+        "type": "joint_trajectory_controller/JointTrajectoryController",
+        "claimed_interfaces": [],
+        "is_async": false,
+        "update_rate": 1000,
+        "required_command_interfaces": [
+          "joint_1/position",
+          "joint_2/position",
+          "joint_3/position",
+          "joint_4/position",
+          "joint_5/position",
+          "joint_6/position",
+          "joint_7/position"
+        ],
+        "required_state_interfaces": [
+          "joint_1/position",
+          "joint_1/velocity",
+          "joint_2/position",
+          "joint_2/velocity",
+          "joint_3/position",
+          "joint_3/velocity",
+          "joint_4/position",
+          "joint_4/velocity",
+          "joint_5/position",
+          "joint_5/velocity",
+          "joint_6/position",
+          "joint_6/velocity",
+          "joint_7/position",
+          "joint_7/velocity"
+        ],
+        "is_chainable": false,
+        "is_chained": false,
+        "exported_state_interfaces": [],
+        "reference_interfaces": [],
+        "chain_connections": []
+      }
+    }
+  ],
+  "scope": "Historical, self-attested ROS software exports. No approval, motion command, hardware attestation or freshness decision is produced."
+}

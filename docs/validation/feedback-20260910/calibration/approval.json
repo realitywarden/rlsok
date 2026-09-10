@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "scope": "local-shadow-only",
+  "profileSha256": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+  "actor": "synthetic-example-reviewer",
+  "approvedAt": "2026-09-10T06:49:02.763Z",
+  "expiresAt": "2026-09-10T07:49:02.763Z"
+}

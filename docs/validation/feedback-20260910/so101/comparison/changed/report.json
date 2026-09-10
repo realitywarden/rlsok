@@ -1,0 +1,711 @@
+{
+  "schemaVersion": 1,
+  "kind": "ComposableShadowReport",
+  "profileId": "so101-arm",
+  "profileSha256": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+  "evaluatedAt": "2026-09-10T06:56:46.729Z",
+  "collector": "ros2-read-only/v1",
+  "assurance": "LOCAL_SELF_ATTESTED",
+  "coverage": "declared_paths_only",
+  "cloudUploaded": false,
+  "hardwareSignalSent": false,
+  "controllerGoalsAttempted": 0,
+  "decision": "WOULD_BLOCK",
+  "results": [
+    {
+      "pathId": "command",
+      "adapter": "joint_trajectory",
+      "endpoint": "/arm_controller/follow_joint_trajectory",
+      "interfaceType": "control_msgs/action/FollowJointTrajectory",
+      "decision": "WOULD_BLOCK",
+      "reason": "declared_path_observations_incomplete",
+      "checks": [
+        {
+          "id": "approval.profile",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "approval.time",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.profile",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "environment",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "coverage",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.paths",
+          "passed": false,
+          "reason": "declared_path_observations_incomplete"
+        },
+        {
+          "id": "observation.facts",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.server",
+          "passed": false,
+          "reason": "action_server_missing_or_ambiguous"
+        },
+        {
+          "id": "action.endpoint",
+          "passed": false,
+          "reason": "action_endpoint_mismatch"
+        },
+        {
+          "id": "action.type",
+          "passed": false,
+          "reason": "action_type_mismatch"
+        },
+        {
+          "id": "action.definition",
+          "passed": false,
+          "reason": "action_definition_mismatch"
+        },
+        {
+          "id": "fact.file-1-ros2_controllers.yaml.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-1-ros2_controllers.yaml.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-1-ros2_controllers.yaml.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-2-moveit_controllers.yaml.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-2-moveit_controllers.yaml.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-2-moveit_controllers.yaml.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-3-joint_limits.yaml.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-3-joint_limits.yaml.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-3-joint_limits.yaml.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-4-initial_positions.yaml.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-4-initial_positions.yaml.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-4-initial_positions.yaml.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-5-load_ros2_controllers.launch.py.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-5-load_ros2_controllers.launch.py.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-5-load_ros2_controllers.launch.py.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-6-so101_gazebo_moveit.launch.py.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-6-so101_gazebo_moveit.launch.py.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-6-so101_gazebo_moveit.launch.py.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-7-so101.gazebo.launch.py.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-7-so101.gazebo.launch.py.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-7-so101.gazebo.launch.py.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-8-robot.urdf.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-8-robot.urdf.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-8-robot.urdf.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-9-runtime-settings.json.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-9-runtime-settings.json.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-9-runtime-settings.json.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.active-controller.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.active-controller.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.active-controller.value",
+          "passed": false,
+          "reason": "fact_mismatch:active-controller"
+        },
+        {
+          "id": "goal",
+          "passed": true,
+          "reason": "matched"
+        }
+      ],
+      "expectedConfigurationDigest": "c8d7ff91d9d486f7cfcf0c204db909cfc1c0cd83f6aa3c0840e239b8e20d8304",
+      "observedConfigurationDigest": null,
+      "assessment": {
+        "schemaVersion": 1,
+        "kind": "LocalShadowInputAssessment",
+        "assessedAt": "2026-09-10T06:56:46.729Z",
+        "profileSha256": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+        "observationSha256": "b0a253b1299a2f5f0ba6301cdbc198936d54edc8304d7dedb6b19f8e11da2bd4",
+        "proposalsSha256": "734e31efbebd0837f1605ba1b4c9a8f3b15d1d426b77b1fb09fef024cb495703",
+        "pathId": "command",
+        "checks": [
+          {
+            "id": "approval.profile",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "approval.time",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.profile",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "environment",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "coverage",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.paths",
+            "passed": false,
+            "reason": "declared_path_observations_incomplete"
+          },
+          {
+            "id": "observation.facts",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.server",
+            "passed": false,
+            "reason": "action_server_missing_or_ambiguous"
+          },
+          {
+            "id": "action.endpoint",
+            "passed": false,
+            "reason": "action_endpoint_mismatch"
+          },
+          {
+            "id": "action.type",
+            "passed": false,
+            "reason": "action_type_mismatch"
+          },
+          {
+            "id": "action.definition",
+            "passed": false,
+            "reason": "action_definition_mismatch"
+          },
+          {
+            "id": "fact.file-1-ros2_controllers.yaml.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-1-ros2_controllers.yaml.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-1-ros2_controllers.yaml.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-2-moveit_controllers.yaml.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-2-moveit_controllers.yaml.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-2-moveit_controllers.yaml.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-3-joint_limits.yaml.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-3-joint_limits.yaml.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-3-joint_limits.yaml.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-4-initial_positions.yaml.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-4-initial_positions.yaml.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-4-initial_positions.yaml.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-5-load_ros2_controllers.launch.py.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-5-load_ros2_controllers.launch.py.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-5-load_ros2_controllers.launch.py.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-6-so101_gazebo_moveit.launch.py.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-6-so101_gazebo_moveit.launch.py.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-6-so101_gazebo_moveit.launch.py.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-7-so101.gazebo.launch.py.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-7-so101.gazebo.launch.py.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-7-so101.gazebo.launch.py.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-8-robot.urdf.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-8-robot.urdf.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-8-robot.urdf.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-9-runtime-settings.json.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-9-runtime-settings.json.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-9-runtime-settings.json.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.active-controller.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.active-controller.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.active-controller.value",
+            "passed": false,
+            "reason": "fact_mismatch:active-controller"
+          },
+          {
+            "id": "goal",
+            "passed": true,
+            "reason": "matched"
+          }
+        ]
+      },
+      "release": {
+        "apiVersion": "realitywarden.io/v1alpha1",
+        "kind": "ExecutablePolicy",
+        "metadata": {
+          "name": "so101-arm.command",
+          "releaseId": "so101-arm.command.596f27544486fd4b",
+          "createdAt": "2026-09-10T06:55:56.674Z"
+        },
+        "model": {
+          "artifact": "profile.json",
+          "sha256": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+          "framework": "ros2",
+          "policyType": "shadow/joint_trajectory",
+          "codeRevision": "composable-shadow/v1"
+        },
+        "actionContract": {
+          "representation": "trajectory",
+          "dimension": 5,
+          "jointOrder": [
+            "shoulder_pan",
+            "shoulder_lift",
+            "elbow_flex",
+            "wrist_flex",
+            "wrist_roll"
+          ],
+          "units": {
+            "position": "radian",
+            "velocity": "radian_per_second"
+          },
+          "normalizerSha256": "36e2a959be2e5b213265fe59f9344daf15369268e90ea4de9c5aeb88cb25955c",
+          "preprocessorSha256": "24488a9e211298e2b4dae1fdd71fb91d05aaf99faba9dd85d84f2f6c124781e9",
+          "postprocessorSha256": "069983e8c15414354ef53ff2d3eb03d31161f855590e8177edbe21c115c8b914"
+        },
+        "robot": {
+          "profileId": "so101-arm",
+          "profileSha256": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+          "urdfSha256": "62c4a403ff8365f41eed8c172f961c39737dcc5096f1bc9559fa89f86f3365b1",
+          "controllerType": "/arm_controller/follow_joint_trajectory",
+          "controllerConfigSha256": "c8d7ff91d9d486f7cfcf0c204db909cfc1c0cd83f6aa3c0840e239b8e20d8304"
+        },
+        "runtimePolicy": {
+          "policySha256": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+          "maxStateAgeMs": 300000,
+          "maxConfigurationAgeMs": 300000,
+          "failClosed": true
+        },
+        "executionConfiguration": {
+          "schemaVersion": 2,
+          "identity": {
+            "device": "isolated-mock-controller",
+            "robot": "Public SO-101 ROS 2 simulation arm"
+          },
+          "semanticContract": {
+            "command": {
+              "interfaceType": "control_msgs/action/FollowJointTrajectory",
+              "endpoint": "/arm_controller/follow_joint_trajectory"
+            },
+            "controller": {
+              "implementation": "/arm_controller/follow_joint_trajectory",
+              "version": "composable-shadow/v1"
+            },
+            "jointCommandMapping": [
+              {
+                "joint": "shoulder_pan",
+                "commandIndex": 0
+              },
+              {
+                "joint": "shoulder_lift",
+                "commandIndex": 1
+              },
+              {
+                "joint": "elbow_flex",
+                "commandIndex": 2
+              },
+              {
+                "joint": "wrist_flex",
+                "commandIndex": 3
+              },
+              {
+                "joint": "wrist_roll",
+                "commandIndex": 4
+              }
+            ]
+          },
+          "provenance": [
+            {
+              "kind": "content",
+              "sourceIdentity": "composition",
+              "purpose": "controller_configuration",
+              "contentSha256": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:active-controller",
+              "purpose": "other",
+              "contentSha256": "5da87c4466fa9786b5f1e29be7332c8a90e9206bab7b30034570de6bc267468e"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-1-ros2_controllers.yaml",
+              "purpose": "other",
+              "contentSha256": "2c1e555800e7c550be8817ba80abeb34d1a51ac8eb8d1d8dd4d86f9085906285"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-2-moveit_controllers.yaml",
+              "purpose": "other",
+              "contentSha256": "34a79aecaef0f12818cc1f2a2f6b4e797321494ddee62e4b1253c3071e306556"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-3-joint_limits.yaml",
+              "purpose": "other",
+              "contentSha256": "f0ab304209f4222c171c2049df05dbf3cb5726d5b3ce33b798f6b241e96f5d7d"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-4-initial_positions.yaml",
+              "purpose": "other",
+              "contentSha256": "3cda40d83ceee716544fda67963893e2356aa904d4cdfa202acbba2393d180b7"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-5-load_ros2_controllers.launch.py",
+              "purpose": "other",
+              "contentSha256": "0efafa3c9b157d39f9366b75d20255c6abbddadcbda105799b5edcea3ed7688d"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-6-so101_gazebo_moveit.launch.py",
+              "purpose": "other",
+              "contentSha256": "9a8de694cae97bdea3b9c05f1b5cc743f73f68466de59f7b4f485e19dfe3048c"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-7-so101.gazebo.launch.py",
+              "purpose": "other",
+              "contentSha256": "77876d792db2613cb2d076c5abdd7dfdb5572741d25cc4cb8c0bb8aad5727754"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-8-robot.urdf",
+              "purpose": "other",
+              "contentSha256": "62c4a403ff8365f41eed8c172f961c39737dcc5096f1bc9559fa89f86f3365b1"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-9-runtime-settings.json",
+              "purpose": "other",
+              "contentSha256": "f4bc109db03b6ed625451b6cb24435bbf37d742a7c86fad663b33161b4aa8864"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "interface",
+              "purpose": "controller_configuration",
+              "contentSha256": "fe7f55eedea96edf48ae7a92de2cad59c21c7fb8cd0c7a62290228cbd8ed0485"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "ros-environment",
+              "purpose": "other",
+              "contentSha256": "fd84ce325499dcf1ac1c96a045fb32e4df34f1ce69cc7faa7ff103fdd034dc97"
+            }
+          ],
+          "observation": {
+            "observedAt": "2026-09-10T06:56:46.729Z",
+            "environment": {
+              "rosDistro": "jazzy",
+              "rmwImplementation": "rmw_fastrtps_cpp"
+            }
+          }
+        },
+        "approvedConfigurationDigest": "c8d7ff91d9d486f7cfcf0c204db909cfc1c0cd83f6aa3c0840e239b8e20d8304",
+        "evidence": {
+          "scenarioPackId": "local-composable-shadow/v1",
+          "testReportSha256": "92f960eccfa724e9d473a94dc1ed73b28fc6e4e3a8ea447c2b6db0a262d78040",
+          "status": "approved",
+          "approvedBy": "local-mock-controller-validation",
+          "approvedAt": "2026-09-10T06:55:56.674Z"
+        },
+        "deployment": {
+          "allowedDeviceIds": [
+            "isolated-mock-controller"
+          ],
+          "mode": "shadow",
+          "expiresAt": "2026-09-10T07:55:54.091388+00:00"
+        }
+      },
+      "evidence": {
+        "apiVersion": "realitywarden.io/v1alpha1",
+        "kind": "EvidenceBundle",
+        "releaseId": "so101-arm.command.596f27544486fd4b",
+        "executablePolicyHash": "b5b479a3610a21001f8491865a14e1fb6719787541a9301018757ed50958145c",
+        "createdAt": "2026-09-10T06:56:46.729Z",
+        "entries": [
+          {
+            "sequence": 0,
+            "previousHash": null,
+            "evidence": {
+              "releaseId": "so101-arm.command.596f27544486fd4b",
+              "executablePolicyHash": "b5b479a3610a21001f8491865a14e1fb6719787541a9301018757ed50958145c",
+              "modelHash": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+              "actionContractHash": "bc32c982e2a19bac347416aac2c29895f45ebdb163c7981abab3ef39f33178bf",
+              "robotProfileHash": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+              "controllerProfileHash": "c8d7ff91d9d486f7cfcf0c204db909cfc1c0cd83f6aa3c0840e239b8e20d8304",
+              "expectedConfigurationDigest": "c8d7ff91d9d486f7cfcf0c204db909cfc1c0cd83f6aa3c0840e239b8e20d8304",
+              "observedConfigurationDigest": null,
+              "expectedConfigurationSchemaVersion": 2,
+              "observedConfigurationSchemaVersion": null,
+              "runtimePolicyHash": "596f27544486fd4be3f85297a17f3e48ac6263ec1939e74039d1da389782eb1b",
+              "deviceId": "isolated-mock-controller",
+              "proposalId": "reviewed-example",
+              "proposedAction": {
+                "pathId": "command",
+                "adapter": "joint_trajectory",
+                "goalSha256": "1fe0fe7483fc78fc1093d36684529fb316e67465970ce9eaf3af994ba45264e6"
+              },
+              "decision": "blocked",
+              "decisionReason": "shadow:configuration_missing",
+              "matchedRuleIds": [
+                "shadow_release_eligibility"
+              ],
+              "stateObservedAt": "2026-09-10T06:56:43.756Z",
+              "decisionMadeAt": "2026-09-10T06:56:46.729Z",
+              "hardwareSignalSent": false,
+              "hardwareSignalState": "not_sent",
+              "executionEvidence": "shadow_not_dispatched"
+            },
+            "hash": "a8ca61c842dc0dacb8a4a5d1ea06b09fe4d7ad834c1ee56f755b04a0666f98a2"
+          }
+        ],
+        "testReportSha256": "92f960eccfa724e9d473a94dc1ed73b28fc6e4e3a8ea447c2b6db0a262d78040"
+      }
+    }
+  ],
+  "limitations": [
+    "Shadow evaluation only: no hardware dispatch or production execution permit.",
+    "Local approval and observation files are operator-supplied, not authenticated Cloud approval or hardware attestation.",
+    "Graph discovery confirms visible server/subscriber metadata, not physical robot identity, QoS delivery, controller readiness or all execution paths.",
+    "Topic proposals are supplied local message examples; no live messages are intercepted, forwarded or published. Other nodes can still command a robot: use an isolated simulation.",
+    "Twist uses the operator-declared command frame; only TwistStamped includes a checked frame ID. Limits, collision checks and readiness remain the existing controller responsibility.",
+    "File hashes prove local file content; timestamped JSON facts require a trusted read-only exporter of active controller state.",
+    "Goal adapters check declared fields and configuration eligibility, not complete ROS serialization or physical motion safety."
+  ]
+}

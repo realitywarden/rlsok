@@ -1,0 +1,594 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokRosControllerState",
+  "observedAt": "2026-09-10T06:57:21.931Z",
+  "configuration": {
+    "schemaVersion": 1,
+    "source": {
+      "controllerManager": "/controller_manager",
+      "controllerName": "joint_trajectory_controller",
+      "controllerNode": "/joint_trajectory_controller",
+      "environment": {
+        "rosDistro": "jazzy",
+        "rmwImplementation": "rmw_fastrtps_cpp",
+        "domainId": 221
+      }
+    },
+    "controller": {
+      "name": "joint_trajectory_controller",
+      "state": "inactive",
+      "type": "joint_trajectory_controller/JointTrajectoryController",
+      "is_async": false,
+      "update_rate": 1000,
+      "claimed_interfaces": [],
+      "required_command_interfaces": [
+        "joint_1/position",
+        "joint_2/position",
+        "joint_3/position",
+        "joint_4/position",
+        "joint_5/position",
+        "joint_6/position",
+        "joint_7/position"
+      ],
+      "required_state_interfaces": [
+        "joint_1/position",
+        "joint_1/velocity",
+        "joint_2/position",
+        "joint_2/velocity",
+        "joint_3/position",
+        "joint_3/velocity",
+        "joint_4/position",
+        "joint_4/velocity",
+        "joint_5/position",
+        "joint_5/velocity",
+        "joint_6/position",
+        "joint_6/velocity",
+        "joint_7/position",
+        "joint_7/velocity"
+      ],
+      "is_chainable": false,
+      "is_chained": false,
+      "exported_state_interfaces": [],
+      "reference_interfaces": [],
+      "chain_connections": []
+    },
+    "parameters": {
+      "action_monitor_rate": {
+        "type": 3,
+        "value": "20.0"
+      },
+      "allow_integration_in_goal_trajectories": {
+        "type": 1,
+        "value": false
+      },
+      "allow_nonzero_velocity_at_trajectory_end": {
+        "type": 1,
+        "value": false
+      },
+      "allow_partial_joints_goal": {
+        "type": 1,
+        "value": false
+      },
+      "cmd_timeout": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "command_interfaces": {
+        "type": 9,
+        "value": [
+          "position"
+        ]
+      },
+      "command_joints": {
+        "type": 9,
+        "value": []
+      },
+      "constraints.decelerate_on_cancel": {
+        "type": 1,
+        "value": false
+      },
+      "constraints.goal_time": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_1.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_1.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_1.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_2.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_2.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_2.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_3.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_3.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_3.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_4.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_4.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_4.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_5.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_5.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_5.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_6.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_6.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_6.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_7.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_7.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.joint_7.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.stopped_velocity_tolerance": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_1.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.joint_1.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_1.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_1.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_1.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_1.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_1.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_1.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_1.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_1.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_1.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_1.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_2.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.joint_2.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_2.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_2.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_2.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_2.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_2.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_2.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_2.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_2.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_2.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_2.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_3.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.joint_3.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_3.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_3.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_3.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_3.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_3.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_3.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_3.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_3.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_3.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_3.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_4.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.joint_4.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_4.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_4.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_4.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_4.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_4.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_4.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_4.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_4.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_4.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_4.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_5.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.joint_5.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_5.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_5.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_5.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_5.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_5.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_5.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_5.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_5.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_5.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_5.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_6.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.joint_6.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_6.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_6.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_6.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_6.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_6.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_6.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_6.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_6.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_6.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_6.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_7.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.joint_7.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_7.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_7.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_7.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_7.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_7.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_7.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.joint_7.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_7.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.joint_7.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.joint_7.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "interpolate_from_desired_state": {
+        "type": 1,
+        "value": false
+      },
+      "interpolation_method": {
+        "type": 4,
+        "value": "splines"
+      },
+      "is_async": {
+        "type": 1,
+        "value": false
+      },
+      "joints": {
+        "type": 9,
+        "value": [
+          "joint_1",
+          "joint_2",
+          "joint_3",
+          "joint_4",
+          "joint_5",
+          "joint_6",
+          "joint_7"
+        ]
+      },
+      "open_loop_control": {
+        "type": 1,
+        "value": false
+      },
+      "set_last_command_interface_value_as_state_on_activation": {
+        "type": 1,
+        "value": true
+      },
+      "speed_scaling.command_interface": {
+        "type": 4,
+        "value": ""
+      },
+      "speed_scaling.initial_scaling_factor": {
+        "type": 3,
+        "value": "1.0"
+      },
+      "speed_scaling.state_interface": {
+        "type": 4,
+        "value": ""
+      },
+      "start_type_description_service": {
+        "type": 1,
+        "value": true
+      },
+      "state_interfaces": {
+        "type": 9,
+        "value": [
+          "position",
+          "velocity"
+        ]
+      },
+      "thread_priority": {
+        "type": 2,
+        "value": "-100"
+      },
+      "update_rate": {
+        "type": 2,
+        "value": "1000"
+      },
+      "use_sim_time": {
+        "type": 1,
+        "value": false
+      }
+    },
+    "actionServers": [
+      {
+        "endpoint": "/joint_trajectory_controller/follow_joint_trajectory",
+        "type": "control_msgs/action/FollowJointTrajectory"
+      }
+    ]
+  },
+  "configurationSha256": "290ee6599ff43570c93b1c54a53cf371674119a81e1ed21204e37570dfdcc2a5"
+}

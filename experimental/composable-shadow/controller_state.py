@@ -118,17 +118,28 @@ class RosStateReader:
         if not distro or not domain.isdigit() or not 0 <= int(domain) <= 232: raise CollectionError("invalid ROS environment")
         return {'rosDistro': distro, 'rmwImplementation': self.rmw(), 'domainId': int(domain)}
 
+    def wait_for_server_node(self, endpoint):
+        # Service readiness and per-node graph discovery can arrive separately.
+        # Wait only for an absent graph entry; duplicates still fail immediately.
+        while time.monotonic() < self.deadline:
+            nodes = self.node.get_node_names_and_namespaces()
+            if len(nodes) > 4096 or len(set(nodes)) != len(nodes): raise CollectionError("ambiguous ROS node identities")
+            servers = sum(1 for name, namespace in nodes
+                          if any(service == endpoint for service, _ in self.node.get_service_names_and_types_by_node(name, namespace)))
+            if servers == 1: return
+            if servers > 1: raise CollectionError(f"read-only service has multiple visible server nodes: {endpoint}")
+            self.executor.spin_once(timeout_sec=min(0.1, max(0.0, self.deadline - time.monotonic())))
+        raise CollectionError(f"read-only service has no visible server node before deadline: {endpoint}")
+
     def request(self, service_type, endpoint, request):
         client = self.node.create_client(service_type, endpoint)
         try:
             while time.monotonic() < self.deadline and not client.wait_for_service(timeout_sec=0.1): pass
             remaining = self.deadline - time.monotonic()
             if remaining <= 0: raise CollectionError(f"read-only service unavailable: {endpoint}")
-            nodes = self.node.get_node_names_and_namespaces()
-            if len(nodes) > 4096 or len(set(nodes)) != len(nodes): raise CollectionError("ambiguous ROS node identities")
-            servers = sum(1 for name, namespace in nodes
-                          if any(service == endpoint for service, _ in self.node.get_service_names_and_types_by_node(name, namespace)))
-            if servers != 1: raise CollectionError(f"read-only service must have one visible server node: {endpoint}")
+            self.wait_for_server_node(endpoint)
+            remaining = self.deadline - time.monotonic()
+            if remaining <= 0: raise CollectionError(f"read-only service unavailable: {endpoint}")
             future = client.call_async(request)
             self.executor.spin_until_future_complete(future, timeout_sec=remaining)
             if not future.done() or future.cancelled(): raise CollectionError(f"read-only service timed out: {endpoint}")

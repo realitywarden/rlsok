@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokRosControllerState",
+  "observedAt": "2026-09-10T06:55:41.171Z",
+  "configuration": {
+    "schemaVersion": 1,
+    "source": {
+      "controllerManager": "/controller_manager",
+      "controllerName": "arm_controller",
+      "controllerNode": "/arm_controller",
+      "environment": {
+        "rosDistro": "jazzy",
+        "rmwImplementation": "rmw_fastrtps_cpp",
+        "domainId": 220
+      }
+    },
+    "controller": {
+      "name": "arm_controller",
+      "state": "active",
+      "type": "joint_trajectory_controller/JointTrajectoryController",
+      "is_async": false,
+      "update_rate": 100,
+      "claimed_interfaces": [
+        "shoulder_pan/position",
+        "shoulder_lift/position",
+        "elbow_flex/position",
+        "wrist_flex/position",
+        "wrist_roll/position"
+      ],
+      "required_command_interfaces": [
+        "shoulder_pan/position",
+        "shoulder_lift/position",
+        "elbow_flex/position",
+        "wrist_flex/position",
+        "wrist_roll/position"
+      ],
+      "required_state_interfaces": [
+        "shoulder_pan/position",
+        "shoulder_lift/position",
+        "elbow_flex/position",
+        "wrist_flex/position",
+        "wrist_roll/position"
+      ],
+      "is_chainable": false,
+      "is_chained": false,
+      "exported_state_interfaces": [],
+      "reference_interfaces": [],
+      "chain_connections": []
+    },
+    "parameters": {
+      "action_monitor_rate": {
+        "type": 3,
+        "value": "20.0"
+      },
+      "allow_integration_in_goal_trajectories": {
+        "type": 1,
+        "value": true
+      },
+      "allow_nonzero_velocity_at_trajectory_end": {
+        "type": 1,
+        "value": true
+      },
+      "allow_partial_joints_goal": {
+        "type": 1,
+        "value": false
+      },
+      "cmd_timeout": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "command_interfaces": {
+        "type": 9,
+        "value": [
+          "position"
+        ]
+      },
+      "command_joints": {
+        "type": 9,
+        "value": []
+      },
+      "constraints.decelerate_on_cancel": {
+        "type": 1,
+        "value": false
+      },
+      "constraints.elbow_flex.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.elbow_flex.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.elbow_flex.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.goal_time": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.shoulder_lift.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.shoulder_lift.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.shoulder_lift.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.shoulder_pan.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.shoulder_pan.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.shoulder_pan.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.stopped_velocity_tolerance": {
+        "type": 3,
+        "value": "0.01"
+      },
+      "constraints.wrist_flex.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.wrist_flex.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.wrist_flex.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.wrist_roll.goal": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.wrist_roll.max_deceleration_on_cancel": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "constraints.wrist_roll.trajectory": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.elbow_flex.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.elbow_flex.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.elbow_flex.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.elbow_flex.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.elbow_flex.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.elbow_flex.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.elbow_flex.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.elbow_flex.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.elbow_flex.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.elbow_flex.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.elbow_flex.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.elbow_flex.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.shoulder_lift.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.shoulder_lift.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_lift.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_lift.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_lift.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_lift.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.shoulder_lift.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.shoulder_lift.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.shoulder_lift.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_lift.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_lift.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.shoulder_lift.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.shoulder_pan.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.shoulder_pan.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_pan.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_pan.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_pan.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_pan.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.shoulder_pan.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.shoulder_pan.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.shoulder_pan.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_pan.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.shoulder_pan.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.shoulder_pan.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.wrist_flex.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.wrist_flex.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_flex.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_flex.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_flex.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_flex.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.wrist_flex.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.wrist_flex.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.wrist_flex.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_flex.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_flex.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.wrist_flex.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.wrist_roll.antiwindup_strategy": {
+        "type": 4,
+        "value": "legacy"
+      },
+      "gains.wrist_roll.d": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_roll.error_deadband": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_roll.ff_velocity_scale": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_roll.i": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_roll.i_clamp": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.wrist_roll.i_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.wrist_roll.i_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "gains.wrist_roll.p": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_roll.tracking_time_constant": {
+        "type": 3,
+        "value": "0.0"
+      },
+      "gains.wrist_roll.u_clamp_max": {
+        "type": 3,
+        "value": "inf"
+      },
+      "gains.wrist_roll.u_clamp_min": {
+        "type": 3,
+        "value": "-inf"
+      },
+      "interpolate_from_desired_state": {
+        "type": 1,
+        "value": false
+      },
+      "interpolation_method": {
+        "type": 4,
+        "value": "splines"
+      },
+      "is_async": {
+        "type": 1,
+        "value": false
+      },
+      "joints": {
+        "type": 9,
+        "value": [
+          "shoulder_pan",
+          "shoulder_lift",
+          "elbow_flex",
+          "wrist_flex",
+          "wrist_roll"
+        ]
+      },
+      "open_loop_control": {
+        "type": 1,
+        "value": false
+      },
+      "set_last_command_interface_value_as_state_on_activation": {
+        "type": 1,
+        "value": true
+      },
+      "speed_scaling.command_interface": {
+        "type": 4,
+        "value": ""
+      },
+      "speed_scaling.initial_scaling_factor": {
+        "type": 3,
+        "value": "1.0"
+      },
+      "speed_scaling.state_interface": {
+        "type": 4,
+        "value": ""
+      },
+      "start_type_description_service": {
+        "type": 1,
+        "value": true
+      },
+      "state_interfaces": {
+        "type": 9,
+        "value": [
+          "position"
+        ]
+      },
+      "thread_priority": {
+        "type": 2,
+        "value": "-100"
+      },
+      "update_rate": {
+        "type": 2,
+        "value": "100"
+      },
+      "use_sim_time": {
+        "type": 1,
+        "value": false
+      }
+    },
+    "actionServers": [
+      {
+        "endpoint": "/arm_controller/follow_joint_trajectory",
+        "type": "control_msgs/action/FollowJointTrajectory"
+      }
+    ]
+  },
+  "configurationSha256": "284949d0b5f509e97da27a35db85e0b7b89e2bf8ca90e698b1ed63599221c975"
+}

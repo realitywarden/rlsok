@@ -1,0 +1,685 @@
+{
+  "schemaVersion": 1,
+  "kind": "ComposableShadowReport",
+  "profileId": "kinova-gen3-7dof",
+  "profileSha256": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+  "evaluatedAt": "2026-09-10T06:57:40.414Z",
+  "collector": "ros2-read-only/v1",
+  "assurance": "LOCAL_SELF_ATTESTED",
+  "coverage": "declared_paths_only",
+  "cloudUploaded": false,
+  "hardwareSignalSent": false,
+  "controllerGoalsAttempted": 0,
+  "decision": "WOULD_ALLOW",
+  "results": [
+    {
+      "pathId": "command",
+      "adapter": "joint_trajectory",
+      "endpoint": "/joint_trajectory_controller/follow_joint_trajectory",
+      "interfaceType": "control_msgs/action/FollowJointTrajectory",
+      "decision": "WOULD_ALLOW",
+      "reason": "shadow:composable_profile_matched",
+      "checks": [
+        {
+          "id": "approval.profile",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "approval.time",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.profile",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "environment",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "coverage",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.paths",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.facts",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.server",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.endpoint",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.type",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.definition",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-1-ros2_controllers.yaml.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-1-ros2_controllers.yaml.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-1-ros2_controllers.yaml.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-2-kortex.ros2_control.xacro.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-2-kortex.ros2_control.xacro.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-2-kortex.ros2_control.xacro.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-3-kortex_control.launch.py.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-3-kortex_control.launch.py.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-3-kortex_control.launch.py.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-4-kortex_sim_control.launch.py.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-4-kortex_sim_control.launch.py.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-4-kortex_sim_control.launch.py.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-5-hardware_interface.cpp.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-5-hardware_interface.cpp.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-5-hardware_interface.cpp.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-6-robot.urdf.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-6-robot.urdf.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-6-robot.urdf.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-7-runtime-settings.json.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-7-runtime-settings.json.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.file-7-runtime-settings.json.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.active-controller.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.active-controller.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.active-controller.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "goal",
+          "passed": true,
+          "reason": "matched"
+        }
+      ],
+      "expectedConfigurationDigest": "57646aeb709c039defd6a96a25f2a144a67cf5bc137551be0dd3776a73357528",
+      "observedConfigurationDigest": "57646aeb709c039defd6a96a25f2a144a67cf5bc137551be0dd3776a73357528",
+      "assessment": {
+        "schemaVersion": 1,
+        "kind": "LocalShadowInputAssessment",
+        "assessedAt": "2026-09-10T06:57:40.414Z",
+        "profileSha256": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+        "observationSha256": "e31b417f4a2847fd4c2f9f8f322d67cede5559ff0d6fd5120a2966e6c9fbd4ad",
+        "proposalsSha256": "33c57219a4cb0546e0cf34b4be9d8d444290ddf876e686f7781c2b82cbbcc380",
+        "pathId": "command",
+        "checks": [
+          {
+            "id": "approval.profile",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "approval.time",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.profile",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "environment",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "coverage",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.paths",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.facts",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.server",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.endpoint",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.type",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.definition",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-1-ros2_controllers.yaml.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-1-ros2_controllers.yaml.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-1-ros2_controllers.yaml.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-2-kortex.ros2_control.xacro.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-2-kortex.ros2_control.xacro.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-2-kortex.ros2_control.xacro.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-3-kortex_control.launch.py.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-3-kortex_control.launch.py.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-3-kortex_control.launch.py.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-4-kortex_sim_control.launch.py.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-4-kortex_sim_control.launch.py.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-4-kortex_sim_control.launch.py.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-5-hardware_interface.cpp.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-5-hardware_interface.cpp.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-5-hardware_interface.cpp.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-6-robot.urdf.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-6-robot.urdf.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-6-robot.urdf.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-7-runtime-settings.json.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-7-runtime-settings.json.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.file-7-runtime-settings.json.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.active-controller.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.active-controller.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.active-controller.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "goal",
+            "passed": true,
+            "reason": "matched"
+          }
+        ]
+      },
+      "release": {
+        "apiVersion": "realitywarden.io/v1alpha1",
+        "kind": "ExecutablePolicy",
+        "metadata": {
+          "name": "kinova-gen3-7dof.command",
+          "releaseId": "kinova-gen3-7dof.command.1d79f9c51a182711",
+          "createdAt": "2026-09-10T06:57:09.346Z"
+        },
+        "model": {
+          "artifact": "profile.json",
+          "sha256": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+          "framework": "ros2",
+          "policyType": "shadow/joint_trajectory",
+          "codeRevision": "composable-shadow/v1"
+        },
+        "actionContract": {
+          "representation": "trajectory",
+          "dimension": 7,
+          "jointOrder": [
+            "joint_1",
+            "joint_2",
+            "joint_3",
+            "joint_4",
+            "joint_5",
+            "joint_6",
+            "joint_7"
+          ],
+          "units": {
+            "position": "radian",
+            "velocity": "radian_per_second"
+          },
+          "normalizerSha256": "36e2a959be2e5b213265fe59f9344daf15369268e90ea4de9c5aeb88cb25955c",
+          "preprocessorSha256": "24488a9e211298e2b4dae1fdd71fb91d05aaf99faba9dd85d84f2f6c124781e9",
+          "postprocessorSha256": "069983e8c15414354ef53ff2d3eb03d31161f855590e8177edbe21c115c8b914"
+        },
+        "robot": {
+          "profileId": "kinova-gen3-7dof",
+          "profileSha256": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+          "urdfSha256": "da1b71b4890b6b11f80a8f1ae4aa312867148f7b4bec7e9e6d69ca8f86ab5d7f",
+          "controllerType": "/joint_trajectory_controller/follow_joint_trajectory",
+          "controllerConfigSha256": "57646aeb709c039defd6a96a25f2a144a67cf5bc137551be0dd3776a73357528"
+        },
+        "runtimePolicy": {
+          "policySha256": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+          "maxStateAgeMs": 300000,
+          "maxConfigurationAgeMs": 300000,
+          "failClosed": true
+        },
+        "executionConfiguration": {
+          "schemaVersion": 2,
+          "identity": {
+            "device": "isolated-mock-controller",
+            "robot": "Public Kortex Jazzy Gen3 seven-axis trajectory input, no prefix"
+          },
+          "semanticContract": {
+            "command": {
+              "interfaceType": "control_msgs/action/FollowJointTrajectory",
+              "endpoint": "/joint_trajectory_controller/follow_joint_trajectory"
+            },
+            "controller": {
+              "implementation": "/joint_trajectory_controller/follow_joint_trajectory",
+              "version": "composable-shadow/v1"
+            },
+            "jointCommandMapping": [
+              {
+                "joint": "joint_1",
+                "commandIndex": 0
+              },
+              {
+                "joint": "joint_2",
+                "commandIndex": 1
+              },
+              {
+                "joint": "joint_3",
+                "commandIndex": 2
+              },
+              {
+                "joint": "joint_4",
+                "commandIndex": 3
+              },
+              {
+                "joint": "joint_5",
+                "commandIndex": 4
+              },
+              {
+                "joint": "joint_6",
+                "commandIndex": 5
+              },
+              {
+                "joint": "joint_7",
+                "commandIndex": 6
+              }
+            ]
+          },
+          "provenance": [
+            {
+              "kind": "content",
+              "sourceIdentity": "composition",
+              "purpose": "controller_configuration",
+              "contentSha256": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:active-controller",
+              "purpose": "other",
+              "contentSha256": "5d486622c98b8087cef55f356cbff32dd75ba33dc9df5faa6f4b35ca26b07015"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-1-ros2_controllers.yaml",
+              "purpose": "other",
+              "contentSha256": "d7a1c4da4dc09552f2eebc4eb1238bb3f9fe60a41560f35b2b4ca15105762269"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-2-kortex.ros2_control.xacro",
+              "purpose": "other",
+              "contentSha256": "237cd022627960e44c81d7bbdf3a92754cf71d1956bb4a71e5b514f380c05e76"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-3-kortex_control.launch.py",
+              "purpose": "other",
+              "contentSha256": "d57dc7037480aa85a4377d9148c325b202f97289f6b9f5a0a7d3797fff8839e3"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-4-kortex_sim_control.launch.py",
+              "purpose": "other",
+              "contentSha256": "b317cd965aa66c04b16750f313120d81066c8d3dc4cf1c6bfb56ac0a31767a4b"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-5-hardware_interface.cpp",
+              "purpose": "other",
+              "contentSha256": "27815bc9e9276e8aaa814703a61866a2c9b13390f48fe6d9dee0fc70cccd7879"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-6-robot.urdf",
+              "purpose": "other",
+              "contentSha256": "da1b71b4890b6b11f80a8f1ae4aa312867148f7b4bec7e9e6d69ca8f86ab5d7f"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:file-7-runtime-settings.json",
+              "purpose": "other",
+              "contentSha256": "4151c2e1c19ef9e9270d2ce7d0697b68894143d8e3a671dfad4c680711aef333"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "interface",
+              "purpose": "controller_configuration",
+              "contentSha256": "fe7f55eedea96edf48ae7a92de2cad59c21c7fb8cd0c7a62290228cbd8ed0485"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "ros-environment",
+              "purpose": "other",
+              "contentSha256": "cb6bc740aaade48dd6ac208babd6ae36ef8409e13135b634c317cb5c5b7a4eb8"
+            }
+          ],
+          "observation": {
+            "observedAt": "2026-09-10T06:57:40.414Z",
+            "environment": {
+              "rosDistro": "jazzy",
+              "rmwImplementation": "rmw_fastrtps_cpp"
+            }
+          }
+        },
+        "approvedConfigurationDigest": "57646aeb709c039defd6a96a25f2a144a67cf5bc137551be0dd3776a73357528",
+        "evidence": {
+          "scenarioPackId": "local-composable-shadow/v1",
+          "testReportSha256": "dd9a7608722fd6730ffd637e60060f5bbb0b3f4f07239493456cf3ddb9d7b62a",
+          "status": "approved",
+          "approvedBy": "local-mock-controller-validation",
+          "approvedAt": "2026-09-10T06:57:09.346Z"
+        },
+        "deployment": {
+          "allowedDeviceIds": [
+            "isolated-mock-controller"
+          ],
+          "mode": "shadow",
+          "expiresAt": "2026-09-10T07:57:06.794744+00:00"
+        }
+      },
+      "evidence": {
+        "apiVersion": "realitywarden.io/v1alpha1",
+        "kind": "EvidenceBundle",
+        "releaseId": "kinova-gen3-7dof.command.1d79f9c51a182711",
+        "executablePolicyHash": "f1db0f253f99d5d39db5db62305874b460dbb645c83bf7e7a2f6d1b707212753",
+        "createdAt": "2026-09-10T06:57:40.414Z",
+        "entries": [
+          {
+            "sequence": 0,
+            "previousHash": null,
+            "evidence": {
+              "releaseId": "kinova-gen3-7dof.command.1d79f9c51a182711",
+              "executablePolicyHash": "f1db0f253f99d5d39db5db62305874b460dbb645c83bf7e7a2f6d1b707212753",
+              "modelHash": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+              "actionContractHash": "e55157fa888098eda4f4ff843f7c47f11434c073567c1279309c61e5db4d4330",
+              "robotProfileHash": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+              "controllerProfileHash": "57646aeb709c039defd6a96a25f2a144a67cf5bc137551be0dd3776a73357528",
+              "expectedConfigurationDigest": "57646aeb709c039defd6a96a25f2a144a67cf5bc137551be0dd3776a73357528",
+              "observedConfigurationDigest": "57646aeb709c039defd6a96a25f2a144a67cf5bc137551be0dd3776a73357528",
+              "expectedConfigurationSchemaVersion": 2,
+              "observedConfigurationSchemaVersion": 2,
+              "runtimePolicyHash": "1d79f9c51a1827110fa4e54457d2633dae0e19e0c2609071f8402c535b946a69",
+              "deviceId": "isolated-mock-controller",
+              "proposalId": "reviewed-example",
+              "proposedAction": {
+                "adapter": "joint_trajectory",
+                "goalSha256": "99064e0847681563c95b3be6a39e4a5a55e1447aa294bcb2d5df8ec7c134dbc1",
+                "pathId": "command"
+              },
+              "decision": "allowed",
+              "decisionReason": "shadow:composable_profile_matched",
+              "matchedRuleIds": [
+                "approval.profile",
+                "approval.time",
+                "observation.profile",
+                "observation.freshness",
+                "environment",
+                "coverage",
+                "observation.paths",
+                "observation.facts",
+                "action.server",
+                "action.endpoint",
+                "action.type",
+                "action.definition",
+                "fact.file-1-ros2_controllers.yaml.source",
+                "fact.file-1-ros2_controllers.yaml.freshness",
+                "fact.file-1-ros2_controllers.yaml.value",
+                "fact.file-2-kortex.ros2_control.xacro.source",
+                "fact.file-2-kortex.ros2_control.xacro.freshness",
+                "fact.file-2-kortex.ros2_control.xacro.value",
+                "fact.file-3-kortex_control.launch.py.source",
+                "fact.file-3-kortex_control.launch.py.freshness",
+                "fact.file-3-kortex_control.launch.py.value",
+                "fact.file-4-kortex_sim_control.launch.py.source",
+                "fact.file-4-kortex_sim_control.launch.py.freshness",
+                "fact.file-4-kortex_sim_control.launch.py.value",
+                "fact.file-5-hardware_interface.cpp.source",
+                "fact.file-5-hardware_interface.cpp.freshness",
+                "fact.file-5-hardware_interface.cpp.value",
+                "fact.file-6-robot.urdf.source",
+                "fact.file-6-robot.urdf.freshness",
+                "fact.file-6-robot.urdf.value",
+                "fact.file-7-runtime-settings.json.source",
+                "fact.file-7-runtime-settings.json.freshness",
+                "fact.file-7-runtime-settings.json.value",
+                "fact.active-controller.source",
+                "fact.active-controller.freshness",
+                "fact.active-controller.value",
+                "goal"
+              ],
+              "stateObservedAt": "2026-09-10T06:57:15.386Z",
+              "decisionMadeAt": "2026-09-10T06:57:40.414Z",
+              "hardwareSignalSent": false,
+              "hardwareSignalState": "not_sent",
+              "executionEvidence": "shadow_not_dispatched"
+            },
+            "hash": "118c4852164edfe29e6e82df498c111410643d0688250ea36183fb84f5c4f011"
+          }
+        ],
+        "testReportSha256": "dd9a7608722fd6730ffd637e60060f5bbb0b3f4f07239493456cf3ddb9d7b62a"
+      }
+    }
+  ],
+  "limitations": [
+    "Shadow evaluation only: no hardware dispatch or production execution permit.",
+    "Local approval and observation files are operator-supplied, not authenticated Cloud approval or hardware attestation.",
+    "Graph discovery confirms visible server/subscriber metadata, not physical robot identity, QoS delivery, controller readiness or all execution paths.",
+    "Topic proposals are supplied local message examples; no live messages are intercepted, forwarded or published. Other nodes can still command a robot: use an isolated simulation.",
+    "Twist uses the operator-declared command frame; only TwistStamped includes a checked frame ID. Limits, collision checks and readiness remain the existing controller responsibility.",
+    "File hashes prove local file content; timestamped JSON facts require a trusted read-only exporter of active controller state.",
+    "Goal adapters check declared fields and configuration eligibility, not complete ROS serialization or physical motion safety."
+  ]
+}

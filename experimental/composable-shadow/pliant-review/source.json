@@ -1,0 +1,14 @@
+{
+  "repository": "Shafayat-Alam/pliant-propulsors-control",
+  "commit": "a7e35e7358b37ba4f6417097c6934864f80012f4",
+  "files": {
+    "src/soft_propulsors_control/soft_propulsors_control/controller.py": {
+      "beforeSha256": "a2a123e9d0c2ed2364ff584c586cdabadc85c9a101bae77828ad69555d273c31",
+      "afterSha256": "07f68724d2e5a5b76b85ce65b98d8c7ffca2f351897eb295766832a13f9bcf00"
+    },
+    "src/soft_propulsors_control/soft_propulsors_control/Dynamixel_XW430_T200_interface.py": {
+      "beforeSha256": "b9ac9158cb4789234621ec6e38b44330fe5075dda424c4324a0d908ea4502d61",
+      "afterSha256": "f58257d059325f52a2d00d63b94f91a1f21706166f093adbfc75ef1eb64b6846"
+    }
+  }
+}

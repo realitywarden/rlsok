@@ -1,0 +1,408 @@
+{
+  "schemaVersion": 1,
+  "kind": "ComposableShadowReport",
+  "profileId": "synthetic-calibration-review",
+  "profileSha256": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+  "evaluatedAt": "2026-09-10T06:49:02.763Z",
+  "collector": "fixture/v1",
+  "assurance": "LOCAL_SELF_ATTESTED",
+  "coverage": "declared_paths_only",
+  "cloudUploaded": false,
+  "hardwareSignalSent": false,
+  "controllerGoalsAttempted": 0,
+  "decision": "WOULD_BLOCK",
+  "results": [
+    {
+      "pathId": "trajectory",
+      "adapter": "joint_trajectory",
+      "endpoint": "/fixture/follow_joint_trajectory",
+      "interfaceType": "control_msgs/action/FollowJointTrajectory",
+      "decision": "WOULD_BLOCK",
+      "reason": "fact_mismatch:calibration",
+      "checks": [
+        {
+          "id": "approval.profile",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "approval.time",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.profile",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "environment",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "coverage",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.paths",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "observation.facts",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.server",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.endpoint",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.type",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "action.definition",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.calibration.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.calibration.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.calibration.value",
+          "passed": false,
+          "reason": "fact_mismatch:calibration"
+        },
+        {
+          "id": "fact.position-limits.source",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.position-limits.freshness",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "fact.position-limits.value",
+          "passed": true,
+          "reason": "matched"
+        },
+        {
+          "id": "goal",
+          "passed": true,
+          "reason": "matched"
+        }
+      ],
+      "expectedConfigurationDigest": "c8bd363e850a49a06b70f3011b8327b5502b584149e2bfe8140c2785b3eaa140",
+      "observedConfigurationDigest": "133c7bbb7c95dce400c9e060b09e87055b15ffd7f5c8e45a8780a5cbdc2f6d28",
+      "assessment": {
+        "schemaVersion": 1,
+        "kind": "LocalShadowInputAssessment",
+        "assessedAt": "2026-09-10T06:49:02.763Z",
+        "profileSha256": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+        "observationSha256": "48328990335a142c4465eb220e7989f412535dca7b5fe9e8f1058ccc0caa495a",
+        "proposalsSha256": "b149e5f98e30685c55b4cad954c80c4525a0df21a286fb27bbebbcd91be097ea",
+        "pathId": "trajectory",
+        "checks": [
+          {
+            "id": "approval.profile",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "approval.time",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.profile",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "environment",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "coverage",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.paths",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "observation.facts",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.server",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.endpoint",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.type",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "action.definition",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.calibration.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.calibration.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.calibration.value",
+            "passed": false,
+            "reason": "fact_mismatch:calibration"
+          },
+          {
+            "id": "fact.position-limits.source",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.position-limits.freshness",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "fact.position-limits.value",
+            "passed": true,
+            "reason": "matched"
+          },
+          {
+            "id": "goal",
+            "passed": true,
+            "reason": "matched"
+          }
+        ]
+      },
+      "release": {
+        "apiVersion": "realitywarden.io/v1alpha1",
+        "kind": "ExecutablePolicy",
+        "metadata": {
+          "name": "synthetic-calibration-review.trajectory",
+          "releaseId": "synthetic-calibration-review.trajectory.658567c1e8dfde40",
+          "createdAt": "2026-09-10T06:49:02.763Z"
+        },
+        "model": {
+          "artifact": "profile.json",
+          "sha256": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+          "framework": "ros2",
+          "policyType": "shadow/joint_trajectory",
+          "codeRevision": "composable-shadow/v1"
+        },
+        "actionContract": {
+          "representation": "trajectory",
+          "dimension": 2,
+          "jointOrder": [
+            "axis_1",
+            "axis_2"
+          ],
+          "units": {
+            "position": "radian",
+            "velocity": "radian_per_second"
+          },
+          "normalizerSha256": "36e2a959be2e5b213265fe59f9344daf15369268e90ea4de9c5aeb88cb25955c",
+          "preprocessorSha256": "24488a9e211298e2b4dae1fdd71fb91d05aaf99faba9dd85d84f2f6c124781e9",
+          "postprocessorSha256": "069983e8c15414354ef53ff2d3eb03d31161f855590e8177edbe21c115c8b914"
+        },
+        "robot": {
+          "profileId": "synthetic-calibration-review",
+          "profileSha256": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+          "urdfSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "controllerType": "fixture-only",
+          "controllerConfigSha256": "c8bd363e850a49a06b70f3011b8327b5502b584149e2bfe8140c2785b3eaa140"
+        },
+        "runtimePolicy": {
+          "policySha256": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+          "maxStateAgeMs": 300000,
+          "maxConfigurationAgeMs": 300000,
+          "failClosed": true
+        },
+        "executionConfiguration": {
+          "schemaVersion": 2,
+          "identity": {
+            "device": "fixture-only",
+            "robot": "two-axis software fixture"
+          },
+          "semanticContract": {
+            "command": {
+              "interfaceType": "control_msgs/action/FollowJointTrajectory",
+              "endpoint": "/fixture/follow_joint_trajectory"
+            },
+            "controller": {
+              "implementation": "fixture-only",
+              "version": "composable-shadow/v1"
+            },
+            "jointCommandMapping": [
+              {
+                "joint": "axis_1",
+                "commandIndex": 0
+              },
+              {
+                "joint": "axis_2",
+                "commandIndex": 1
+              }
+            ]
+          },
+          "provenance": [
+            {
+              "kind": "content",
+              "sourceIdentity": "composition",
+              "purpose": "controller_configuration",
+              "contentSha256": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:calibration",
+              "purpose": "other",
+              "contentSha256": "2e80909306c37c618c63716948e94d474078ff8d8f1ec82e9c57e972b7d25add"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "fact:position-limits",
+              "purpose": "other",
+              "contentSha256": "a1798501b653fd4b37654333f608069808534eff85096ea855a7e2b2df7f9ec9"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "interface",
+              "purpose": "controller_configuration",
+              "contentSha256": "f2a66a08ca6d8ab2e067bf5be6d04b3af884b41c13ba63a68b3d404c020fc1cf"
+            },
+            {
+              "kind": "content",
+              "sourceIdentity": "ros-environment",
+              "purpose": "other",
+              "contentSha256": "f7fa260070ba8a2a5bfd15e56cffd587d28b941955245f8d556bbf598bc32a23"
+            }
+          ],
+          "observation": {
+            "observedAt": "2026-09-10T06:49:02.763Z",
+            "environment": {
+              "rosDistro": "humble",
+              "rmwImplementation": "rmw_fastrtps_cpp"
+            }
+          }
+        },
+        "approvedConfigurationDigest": "c8bd363e850a49a06b70f3011b8327b5502b584149e2bfe8140c2785b3eaa140",
+        "evidence": {
+          "scenarioPackId": "local-composable-shadow/v1",
+          "testReportSha256": "41cd03ef711e1cc949dbaffcb8e45930081a41c1fcc5313d4071817dad8b3565",
+          "status": "approved",
+          "approvedBy": "synthetic-example-reviewer",
+          "approvedAt": "2026-09-10T06:49:02.763Z"
+        },
+        "deployment": {
+          "allowedDeviceIds": [
+            "fixture-only"
+          ],
+          "mode": "shadow",
+          "expiresAt": "2026-09-10T07:49:02.763Z"
+        }
+      },
+      "evidence": {
+        "apiVersion": "realitywarden.io/v1alpha1",
+        "kind": "EvidenceBundle",
+        "releaseId": "synthetic-calibration-review.trajectory.658567c1e8dfde40",
+        "executablePolicyHash": "f04370796150cb10bc75828b81dab485b0267edd1ae907f48c8b0c25c5bc40eb",
+        "createdAt": "2026-09-10T06:49:02.763Z",
+        "entries": [
+          {
+            "sequence": 0,
+            "previousHash": null,
+            "evidence": {
+              "releaseId": "synthetic-calibration-review.trajectory.658567c1e8dfde40",
+              "executablePolicyHash": "f04370796150cb10bc75828b81dab485b0267edd1ae907f48c8b0c25c5bc40eb",
+              "modelHash": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+              "actionContractHash": "4d684667f8ce02511c58fcdd67abcbf0e71e4c47aef803eae46f765ecea43f66",
+              "robotProfileHash": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+              "controllerProfileHash": "c8bd363e850a49a06b70f3011b8327b5502b584149e2bfe8140c2785b3eaa140",
+              "expectedConfigurationDigest": "c8bd363e850a49a06b70f3011b8327b5502b584149e2bfe8140c2785b3eaa140",
+              "observedConfigurationDigest": "133c7bbb7c95dce400c9e060b09e87055b15ffd7f5c8e45a8780a5cbdc2f6d28",
+              "expectedConfigurationSchemaVersion": 2,
+              "observedConfigurationSchemaVersion": 2,
+              "runtimePolicyHash": "658567c1e8dfde409f0d43ef589bafb6bf3b9ce8cb23d89b664d154709efa5b6",
+              "deviceId": "fixture-only",
+              "proposalId": "synthetic-mission-candidate",
+              "proposedAction": {
+                "pathId": "trajectory",
+                "adapter": "joint_trajectory",
+                "goalSha256": "57112abbe6a3a5c843852cb38ecd4d3ab70b3fa65feafef3c709fdfb690fb2f6"
+              },
+              "decision": "blocked",
+              "decisionReason": "shadow:configuration_mismatch",
+              "matchedRuleIds": [
+                "shadow_release_eligibility"
+              ],
+              "stateObservedAt": "2026-09-10T06:49:02.763Z",
+              "decisionMadeAt": "2026-09-10T06:49:02.763Z",
+              "hardwareSignalSent": false,
+              "hardwareSignalState": "not_sent",
+              "executionEvidence": "shadow_not_dispatched"
+            },
+            "hash": "6a73b2162eefd891b28965533857603d49b09842702e1f92a92c6229d58d0c07"
+          }
+        ],
+        "testReportSha256": "41cd03ef711e1cc949dbaffcb8e45930081a41c1fcc5313d4071817dad8b3565"
+      }
+    }
+  ],
+  "limitations": [
+    "Shadow evaluation only: no hardware dispatch or production execution permit.",
+    "Local approval and observation files are operator-supplied, not authenticated Cloud approval or hardware attestation.",
+    "Graph discovery confirms visible server/subscriber metadata, not physical robot identity, QoS delivery, controller readiness or all execution paths.",
+    "Topic proposals are supplied local message examples; no live messages are intercepted, forwarded or published. Other nodes can still command a robot: use an isolated simulation.",
+    "Twist uses the operator-declared command frame; only TwistStamped includes a checked frame ID. Limits, collision checks and readiness remain the existing controller responsibility.",
+    "File hashes prove local file content; timestamped JSON facts require a trusted read-only exporter of active controller state.",
+    "Goal adapters check declared fields and configuration eligibility, not complete ROS serialization or physical motion safety."
+  ]
+}

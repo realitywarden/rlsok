@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "proposals": [
+    {
+      "id": "synthetic-mission-candidate",
+      "pathId": "trajectory",
+      "goal": {
+        "trajectory": {
+          "joint_names": [
+            "axis_1",
+            "axis_2"
+          ],
+          "points": [
+            {
+              "positions": [
+                0,
+                0
+              ],
+              "time_from_start": {
+                "sec": 1,
+                "nanosec": 0
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

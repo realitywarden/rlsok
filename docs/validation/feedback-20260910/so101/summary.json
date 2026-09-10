@@ -1,0 +1,12 @@
+{
+  "recipe": "so101-arm",
+  "sourceCommit": "0305e03ab54e64aae9263fcbf339622e654012f3",
+  "controllers": "real installed ROS 2 controller_manager and plugins",
+  "hardware": "mock_components/GenericSystem only",
+  "change": "same-name JTC to JointGroupPositionController, same five joints, gripper unchanged",
+  "baseline": "WOULD_ALLOW",
+  "changed": "WOULD_BLOCK",
+  "activeControllerFactMismatch": true,
+  "motionCommandsPublished": 0,
+  "customerRun": false
+}

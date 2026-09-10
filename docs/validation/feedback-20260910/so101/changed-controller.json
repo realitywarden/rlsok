@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokRosControllerState",
+  "observedAt": "2026-09-10T06:56:25.901Z",
+  "configuration": {
+    "schemaVersion": 1,
+    "source": {
+      "controllerManager": "/controller_manager",
+      "controllerName": "arm_controller",
+      "controllerNode": "/arm_controller",
+      "environment": {
+        "rosDistro": "jazzy",
+        "rmwImplementation": "rmw_fastrtps_cpp",
+        "domainId": 220
+      }
+    },
+    "controller": {
+      "name": "arm_controller",
+      "state": "active",
+      "type": "position_controllers/JointGroupPositionController",
+      "is_async": false,
+      "update_rate": 100,
+      "claimed_interfaces": [
+        "shoulder_pan/position",
+        "shoulder_lift/position",
+        "elbow_flex/position",
+        "wrist_flex/position",
+        "wrist_roll/position"
+      ],
+      "required_command_interfaces": [
+        "shoulder_pan/position",
+        "shoulder_lift/position",
+        "elbow_flex/position",
+        "wrist_flex/position",
+        "wrist_roll/position"
+      ],
+      "required_state_interfaces": [],
+      "is_chainable": false,
+      "is_chained": false,
+      "exported_state_interfaces": [],
+      "reference_interfaces": [],
+      "chain_connections": []
+    },
+    "parameters": {
+      "interface_name": {
+        "type": 4,
+        "value": "position"
+      },
+      "is_async": {
+        "type": 1,
+        "value": false
+      },
+      "joints": {
+        "type": 9,
+        "value": [
+          "shoulder_pan",
+          "shoulder_lift",
+          "elbow_flex",
+          "wrist_flex",
+          "wrist_roll"
+        ]
+      },
+      "start_type_description_service": {
+        "type": 1,
+        "value": true
+      },
+      "thread_priority": {
+        "type": 2,
+        "value": "-100"
+      },
+      "update_rate": {
+        "type": 2,
+        "value": "100"
+      },
+      "use_sim_time": {
+        "type": 1,
+        "value": false
+      }
+    },
+    "actionServers": []
+  },
+  "configurationSha256": "60cc9f7e9edde88a9b9f43ecad6f03b20bb668ddec06e8c0a9119971b297847b"
+}

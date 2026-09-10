@@ -1,0 +1,12 @@
+{
+  "scope": "local GenericSystem controller experiment; no customer run or physical hardware",
+  "files": {
+    "summary.json": "c9f793da32e036f3b0e2b62491b2256c7527c4410d2fb2f0b4aa170ed49355bb",
+    "baseline-controller.json": "ecffa753b1b0579f54a361dc1747ae80d50c3a7333daff878dbbdae93cb38b49",
+    "changed-controller.json": "f1ef8bccde5b0b10a5bfee29c48c422ef880c404a4ab9e8e5fc9a57910a043de",
+    "controller-diff/controller-comparison.json": "d0e9d6352a2d854d1966e1001747c5778774caeb00ff7831212042e0e9353fe4",
+    "controller-diff/controller-comparison.md": "45db67c0a686652f78e8c37bce6e009b11372c01326531f2136da46e48a622d7",
+    "comparison/baseline/report.json": "ef7dddfc26f8aa311e54ef95c697d88486399bd6d8c98cd5a96de70ceb983595",
+    "comparison/changed/report.json": "0b0907de8c6d8e3727f7a461a104146c0849a3b6c11019829e26ec115d233da8"
+  }
+}

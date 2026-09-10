@@ -1,0 +1,15 @@
+{
+  "scope": "local GenericSystem controller experiment; no customer run or physical hardware",
+  "files": {
+    "summary.json": "e9655557d9e0268ed04f4ebd5c21b00cebf5cf31344c5d52a675633069083b0c",
+    "baseline-controller.json": "7b75f73c184e2432152a2da30add1e09c4cf5aa4ad6e5649a9b651b606469c25",
+    "changed-controller.json": "2bb8a3911f716c5403fa8bec9d10a668807e3c8e55e6bbf4a60711aaa978e375",
+    "controller-diff/controller-comparison.json": "d9ca8be27dd65a488270a9693555e76f9bac24b6d3c17a4cdd9c640ebf865510",
+    "controller-diff/controller-comparison.md": "87a007b7deda39555085b622b99761aa6722c97661409885039c024beab35ebd",
+    "comparison/baseline/report.json": "0f32274a82a9be18a464f0365d9bf3a21d6020f1c3b8a786642064697435c654",
+    "comparison/changed/report.json": "d2e4e458e553b535ab0fcb3e75a71667b61afd8368d404a81d29ced0c8d4b30b",
+    "gripper-before.json": "2ce32f83766064c8844d9afb47ec6e94e478f33edb5a55c5bb66108ebcd83ad2",
+    "gripper-after.json": "3b11b802310b614c7bc8466a3aacc3a96a6b7bdda1ceb0612f676bf3c5ef545c",
+    "changed-controller-manager.yaml": "2d3bb4d13efc1925c9bafdb6e3a24d889b30f273d53bb1f14b5c0738fe53f69a"
+  }
+}

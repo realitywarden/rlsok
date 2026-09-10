@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "synthetic-calibration-review",
+  "mode": "shadow",
+  "environment": {
+    "rosDistro": "humble",
+    "rmwImplementation": "rmw_fastrtps_cpp",
+    "domainId": 42
+  },
+  "robot": {
+    "deviceId": "fixture-only",
+    "model": "two-axis software fixture",
+    "controller": "fixture-only",
+    "urdfSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "jointOrder": [
+    "axis_1",
+    "axis_2"
+  ],
+  "maxObservationAgeMs": 300000,
+  "facts": [
+    {
+      "id": "calibration",
+      "kind": "file_sha256",
+      "path": "baseline-calibration.json",
+      "expected": "2e80909306c37c618c63716948e94d474078ff8d8f1ec82e9c57e972b7d25add"
+    },
+    {
+      "id": "position-limits",
+      "kind": "file_sha256",
+      "path": "baseline-limits.json",
+      "expected": "a1798501b653fd4b37654333f608069808534eff85096ea855a7e2b2df7f9ec9"
+    }
+  ],
+  "paths": [
+    {
+      "id": "trajectory",
+      "adapter": "joint_trajectory",
+      "endpoint": "/fixture/follow_joint_trajectory",
+      "actionType": "control_msgs/action/FollowJointTrajectory",
+      "interfaceSha256": "f2a66a08ca6d8ab2e067bf5be6d04b3af884b41c13ba63a68b3d404c020fc1cf",
+      "fields": {
+        "jointNames": "/trajectory/joint_names",
+        "points": "/trajectory/points"
+      },
+      "checks": [
+        "calibration",
+        "position-limits"
+      ]
+    }
+  ]
+}
