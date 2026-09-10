@@ -1,6 +1,6 @@
 # Configuration feedback: runnable evaluation and command boundaries
 
-This guide accompanies v1.5.0-shadow.5. It describes public-source preparation and local software experiments, not customer use, vendor approval or physical robot compatibility. RLSOK Shadow evaluates a local candidate against an explicitly reviewed configuration; it does not intercept an application's commands.
+This guide accompanies v1.5.0-shadow.6. It describes public-source preparation and local software experiments, not customer use, vendor approval or physical robot compatibility. RLSOK Shadow evaluates a local candidate against an explicitly reviewed configuration; it does not intercept an application's commands.
 
 ## SO-101: change the same arm controller's type
 
