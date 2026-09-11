@@ -2,6 +2,13 @@
   "schemaVersion": 1,
   "contributors": [
     {
+      "id": "aleksandr-and-alisa",
+      "displayName": "Aleksandr & Alisa",
+      "contribution": "Provided feedback on device identification and calibration data binding to serial numbers.",
+      "preferredUrl": "https://github.com/cyberbanana777/so-arm101-ros2-pkgs",
+      "optInConfirmed": true
+    },
+    {
       "id": "xiaoyang",
       "displayName": "Xiaoyang",
       "contribution": "Reviewed DDS command-path trust, path-scoped failure behavior, and the distinction between authenticated evidence and raw ROS graph identity.",
@@ -34,7 +41,8 @@
       "id": "bartosz-burda",
       "displayName": "Bartosz Burda",
       "project": "selfpatch.ai / ros2_medkit",
-      "contribution": "Provided architecture feedback on separating fault/degradation ownership from execution authorization and consuming available capabilities at that boundary. Independent feedback; no endorsement, integration, or support relationship implied.",
+      "contribution": "Reviewer, architecture feedback. Feedback on separating fault and degradation state from execution authorization, and on using available capabilities as the boundary.",
+      "attributionBoundary": "Independent feedback. No endorsement, integration, or support relationship implied.",
       "preferredUrl": "https://github.com/selfpatch/ros2_medkit",
       "optInConfirmed": true
     },
