@@ -85,6 +85,9 @@ const copy = (source, target) => {
     copy(path.join(root, 'docs/email-feedback-evaluation-20260910.md'), path.join(output, 'FEEDBACK-EVALUATION.md'));
     copy(path.join(root, 'docs/email-feedback-afternoon-20260910.md'), path.join(output, 'AFTERNOON-FEEDBACK.md'));
     copy(path.join(root, 'docs/pliant-propulsors-review.md'), path.join(output, 'PROPULSOR-REVIEW.md'));
+    fs.writeFileSync(path.join(output, 'TELLO-PASSIVE-SHADOW.md'),
+      fs.readFileSync(path.join(root, 'docs/tello-passive-shadow.md'), 'utf8')
+        .replace('(tello-passive-observation.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/tello-passive-observation.md)`));
     run(process.execPath, [path.join(__dirname, 'generate-sbom.cjs')]);
     run(process.execPath, [path.join(__dirname, 'license-inventory.cjs')]);
     for (const name of ['rlsok.cdx.json', 'licenses.json']) copy(path.join(root, 'artifacts', name), path.join(output, name));

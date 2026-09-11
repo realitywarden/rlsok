@@ -13,6 +13,7 @@ import { compareControllerExports, controllerComparisonMarkdown } from '../../pa
 import { prepareSo101ControllerSwap } from '../../packages/composable-shadow/so101-swap';
 import { compareNav2ReviewInputs, nav2ReviewMarkdown } from '../../packages/composable-shadow/nav2-review';
 import { approveNav2Goal, checkNav2BeforeShadowHandoff } from '../../packages/composable-shadow/nav2-gate';
+import { approveTelloSnapshot, reviewTelloObservation, telloReportMarkdown } from '../../packages/composable-shadow/tello-shadow';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -21,6 +22,10 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
+  rlsok profile capture-tello --manifest <selected-files-and-service.json> --output <new-observation.json> [--python <python3>]
+  rlsok profile approve-tello --observation <fresh-observation.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
+  rlsok profile review-tello --approval <approval.json> --observation <observation.json> --event <client-event.json> --output <new-directory>
+  rlsok profile watch-tello --manifest <manifest.json> --socket <private-unix-socket> --output <new-directory> [--approval <approval.json>] [--duration <seconds>] [--python <python3>]
   rlsok profile compare-nav2 --baseline <nav2-input.json> --changed <nav2-input.json> --output <new-directory>
   rlsok profile capture-nav2 --manifest <nav2-manifest.json> --output <new-observation.json> [--python <python3>]
   rlsok profile approve-nav2 --observation <fresh-observation.json> --goal <follow-path-goal.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
@@ -123,6 +128,38 @@ function printReport(directory: string, report: Awaited<ReturnType<typeof evalua
 export async function runProfileCommand(args: string[]): Promise<number> {
   const [command, ...rest] = args;
   if (!command || ['help', '--help', '-h'].includes(command)) { process.stdout.write(help); return 0; }
+  if (command === 'capture-tello') {
+    const o = options(rest, ['manifest', 'output', 'python'], ['manifest', 'output']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['--manifest', resolve(o.manifest), '--output', resolve(o.output)], join(dirname(collectorScript()), 'tello-passive/tello_context.py'));
+  }
+  if (command === 'approve-tello') {
+    const o = options(rest, ['observation', 'actor', 'expires-at', 'output'], ['observation', 'actor', 'expires-at', 'output']);
+    write(o.output, approveTelloSnapshot(read(o.observation), o.actor, o['expires-at']));
+    process.stdout.write('Reviewed the observed Tello software binding for passive local Shadow only.\n');
+    return 0;
+  }
+  if (command === 'review-tello') {
+    const o = options(rest, ['approval', 'observation', 'event', 'output'], ['approval', 'observation', 'event', 'output']);
+    const report = reviewTelloObservation({ approval: read(o.approval), observation: read(o.observation), event: read(o.event) });
+    const directory = newDirectory(o.output);
+    write(join(directory, 'report.json'), report);
+    writeFileSync(join(directory, 'report.md'), telloReportMarkdown(report), { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`${report.decision}: ${report.reasons.join(',') || 'selected configuration matched'} | passive: 0 commands sent, 0 commands blocked\n`);
+    return report.decision === 'WOULD_ALLOW' ? 0 : 1;
+  }
+  if (command === 'watch-tello') {
+    const o = options(rest, ['manifest', 'approval', 'socket', 'output', 'duration', 'python'], ['manifest', 'socket', 'output']);
+    const duration = Number(o.duration ?? 300);
+    if (!(Number.isFinite(duration) && duration > 0 && duration <= 3600)) throw new Error('invalid_tello_duration');
+    const result = spawnSync(o.python ?? (process.platform === 'win32' ? 'python' : 'python3'),
+      [join(dirname(collectorScript()), 'tello-passive/tello_watch.py'), '--manifest', resolve(o.manifest),
+        ...(o.approval ? ['--approval', resolve(o.approval)] : []), '--socket', resolve(o.socket), '--output', resolve(o.output),
+        '--node', process.execPath, '--cli', join(__dirname, 'rlsok.js'), '--duration', String(duration)],
+      { stdio: 'inherit', timeout: (duration + 45) * 1000, windowsHide: true });
+    if (result.error) throw result.error;
+    return result.status === 0 ? 0 : 2;
+  }
   if (command === 'export-node-settings') {
     const o = options(rest, ['node', 'output', 'downstream-node', 'topic', 'type', 'python'], ['node', 'output']);
     if (existsSync(o.output)) throw new Error('output_already_exists');

@@ -98,7 +98,7 @@ class PassiveTests(unittest.TestCase):
             def original_call(req):
                 calls.append(('original', req.cmd))
                 return original_future
-            def observe(service, cmd):
+            def observe(service, cmd, client_node=None):
                 calls.append(('observe', cmd))
                 if observer_raises:
                     raise RuntimeError('recorder_failure')
@@ -110,6 +110,7 @@ class PassiveTests(unittest.TestCase):
             exec(compile(ast.parse(source), 'patched_send_request', 'exec'), env)
             client = env['Client']()
             client.req = request
+            client.get_fully_qualified_name = lambda: '/minimal_client_async'
             client.cli = SimpleNamespace(call_async=original_call, srv_name='/tello_action')
             client.send_request('offline-example')
             self.assertEqual(calls, [('original', 'offline-example'), ('observe', 'offline-example'), ('spin', 'offline-example')])

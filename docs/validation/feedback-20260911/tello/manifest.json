@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "clientNode": "/rlsok_tello_test_a2b7720f95/minimal_client_async",
+  "serverNode": "/rlsok_tello_test_a2b7720f95/tello_mock",
+  "endpoint": "/rlsok_tello_test_a2b7720f95/tello_action",
+  "clientServiceName": "tello_action",
+  "files": [
+    {
+      "id": "teleop-source",
+      "path": "/root/rlsok-tello-shadow-r1.jBqr6L/results-r6/tello_simple_teleop/tello_simple_teleop.py"
+    },
+    {
+      "id": "selected-config",
+      "path": "/root/rlsok-tello-shadow-r1.jBqr6L/results-r6/selected-configuration.json"
+    }
+  ]
+}

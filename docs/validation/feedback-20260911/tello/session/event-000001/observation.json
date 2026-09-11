@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokTelloConfigurationObservation",
+  "startedAt": "2026-09-11T07:41:53.380+00:00",
+  "completedAt": "2026-09-11T07:41:53.380+00:00",
+  "binding": {
+    "manifestSha256": "69492d0b84688b25c8fa20f2d1ae08f21d7c28b9c591342dda22e91c7f11898f",
+    "environment": {
+      "rosDistro": "jazzy",
+      "rmwImplementation": "rmw_fastrtps_cpp",
+      "domainId": 214
+    },
+    "selected": {
+      "clientNode": "/rlsok_tello_test_a2b7720f95/minimal_client_async",
+      "serverNode": "/rlsok_tello_test_a2b7720f95/tello_mock",
+      "endpoint": "/rlsok_tello_test_a2b7720f95/tello_action",
+      "clientServiceName": "tello_action"
+    },
+    "clients": [
+      {
+        "node": "/rlsok_tello_test_a2b7720f95/minimal_client_async",
+        "endpoint": "/rlsok_tello_test_a2b7720f95/tello_action",
+        "type": "tello_msgs/srv/TelloAction"
+      }
+    ],
+    "servers": [
+      {
+        "node": "/rlsok_tello_test_a2b7720f95/tello_mock",
+        "endpoint": "/rlsok_tello_test_a2b7720f95/tello_action",
+        "type": "tello_msgs/srv/TelloAction"
+      }
+    ],
+    "interface": {
+      "type": "tello_msgs/srv/TelloAction",
+      "definitionSha256": "ec422c3c81f804c7218f40ee2944441567c060746ab9bb87b54c2ab798a8c24a"
+    },
+    "files": [
+      {
+        "id": "selected-config",
+        "sha256": "552579dcf3ba95f0de08194e456faa2e87ac12c7678a58dca146357b4794066d"
+      },
+      {
+        "id": "teleop-source",
+        "sha256": "0d9968436ae9aeb1d622b4da05f2661d51a7d2bcd3a728803ffede084228acb5"
+      }
+    ]
+  },
+  "issues": [],
+  "observationMethod": "read-only-ros-two-pass",
+  "authenticatedHardware": false,
+  "commandDispatches": 0
+}

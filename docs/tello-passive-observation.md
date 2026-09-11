@@ -1,5 +1,10 @@
 # Tello: observe an existing service call locally
 
+**For the full configuration baseline and per-request Shadow workflow, use
+[Tello passive configuration review](tello-passive-shadow.md).** This page
+describes the retained Python-only log utility. Its observation-only limitations
+below describe that utility, not the separate configuration-review CLI.
+
 This experimental entry point answers the service-based Tello trial: copy the
 existing client's command into a local record, with **no RLSOK command sending
 and no RLSOK command blocking**. It uses Python's standard library. It needs no

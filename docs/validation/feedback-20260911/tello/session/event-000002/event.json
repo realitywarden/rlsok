@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokTelloClientObservation",
+  "session": "5868-1789112509172663333",
+  "sequence": 2,
+  "droppedBefore": 0,
+  "observedAtUnixNs": 1789112513480894429,
+  "observedAt": "2026-09-11T07:41:53.480+00:00",
+  "clientNode": "/rlsok_tello_test_a2b7720f95/minimal_client_async",
+  "boundary": "client_call_async_returned",
+  "service": "tello_action",
+  "serviceType": "tello_msgs/srv/TelloAction",
+  "serviceNameSource": "client.srv_name",
+  "serviceResolutionVerified": false,
+  "request": {
+    "cmd": "offline-observation-probe"
+  }
+}

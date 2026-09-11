@@ -7,6 +7,7 @@ import json
 import os
 import socket
 import time
+from datetime import datetime, timezone
 
 
 class PassiveRecorder:
@@ -23,7 +24,7 @@ class PassiveRecorder:
             except Exception:
                 self.close()
 
-    def record(self, service, cmd):
+    def record(self, service, cmd, client_node=None):
         """Return observation delivery only; NEVER use this return to gate motion."""
         if not self.path:
             return False
@@ -33,10 +34,13 @@ class PassiveRecorder:
                     or len(service) > 256 or not isinstance(cmd, str)
                     or len(cmd) > 4096):
                 raise ValueError('invalid_or_oversized_observation')
+            observed_ns = time.time_ns()
             packet = json.dumps({
                 'schemaVersion': 1, 'kind': 'RlsokTelloClientObservation',
                 'session': self.session, 'sequence': self.sequence,
-                'droppedBefore': self.dropped, 'observedAtUnixNs': time.time_ns(),
+                'droppedBefore': self.dropped, 'observedAtUnixNs': observed_ns,
+                'observedAt': datetime.fromtimestamp(observed_ns / 1e9, timezone.utc).isoformat(timespec='milliseconds'),
+                'clientNode': client_node,
                 'boundary': 'client_call_async_returned',
                 'service': service, 'serviceType': 'tello_msgs/srv/TelloAction',
                 'serviceNameSource': 'client.srv_name', 'serviceResolutionVerified': False,
@@ -62,7 +66,7 @@ class PassiveRecorder:
 _recorder = PassiveRecorder()
 
 
-def record_call(service, cmd):
+def record_call(service, cmd, client_node=None):
     # The patch also guards this call: optional observation must never control
     # the owner's future, original request, call count, or spin behavior.
-    return _recorder.record(service, cmd)
+    return _recorder.record(service, cmd, client_node)

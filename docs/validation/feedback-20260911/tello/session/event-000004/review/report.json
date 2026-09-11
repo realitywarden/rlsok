@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokTelloShadowEvidence",
+  "mode": "shadow",
+  "evaluatedAt": "2026-09-11T07:41:54.279Z",
+  "decision": "WOULD_BLOCK",
+  "reasons": [
+    "server_binding_missing_or_ambiguous",
+    "selected_configuration_changed"
+  ],
+  "changedBindingGroups": [
+    "servers"
+  ],
+  "approvalSha256": "de78458c5afeacf39c3c28acaaf476ef99329966cbeee421a20b888eeb973895",
+  "approvedConfigurationSha256": "b0cebe9eb72700357958bcb5cb8abad2f8f3e4ef5bbc58c80c2f0f8a28c9f6d9",
+  "observedConfigurationSha256": "28875bd850950f37bd9c089f51dc84010a35c0176897fb01cbda9f01078bc875",
+  "requestObservationSha256": "3065371f090fbe04b540177fa0e447ef7160396fe8727878e7f5e64228873361",
+  "exactRequestAndSelectedEndpointSha256": "ee96dc0b08e1602eab6926222d2e502e91f55edca110113ab95f6dd738ae1231",
+  "observationSha256": "3e0963a7235f512b7c57827f9e362a4e758712c8334da4dd9543a04a4c5b0f23",
+  "scope": "post-call-selected-software-configuration-review",
+  "enforcement": "none",
+  "commandDispatches": 0,
+  "commandsBlocked": 0,
+  "cloudUploaded": false,
+  "limitations": [
+    "The owner submitted the request before this review. No result can block, cancel, retry, or authorize it.",
+    "WOULD_ALLOW means the selected observed software configuration matches the local baseline; it is not command safety or flight approval.",
+    "ROS graph names and local files are not authenticated physical drone identity or proof of loaded driver parameters.",
+    "The selected client-to-service association is graph correlation under an explicitly reviewed mapping, not DDS request attribution.",
+    "Only the instrumented client is covered. Server responses, flight completion, other clients, cmd_vel and driver keepalives remain outside this record.",
+    "Loss-free, complete capture and atomic state at command dispatch are not established. Hashes detect content changes, not malicious rewriting."
+  ],
+  "evidenceSha256": "62f44070f974fdae25adc394405eb798c4b70a5f67ed68b648b27d0045470acb"
+}

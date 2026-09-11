@@ -2,7 +2,7 @@
 # Install a versioned local evaluation directory; no sudo or global registration.
 set -eu
 umask 077
-RLSOK_SHADOW_VERSION='1.5.0-shadow.6'
+RLSOK_SHADOW_VERSION='1.5.0-shadow.9'
 ARCHIVE="rlsok-shadow-evaluation-${RLSOK_SHADOW_VERSION}-linux-x64.tar.gz"
 BASE="https://github.com/realitywarden/rlsok/releases/download/v${RLSOK_SHADOW_VERSION}"
 fail() { echo "RLSOK Shadow install: $1" >&2; exit 1; }

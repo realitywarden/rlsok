@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-09-11T07:41:50.813+00:00",
+  "received": 4,
+  "wouldAllow": 2,
+  "wouldBlock": 2,
+  "baselineCaptures": 0,
+  "reviewFailures": 0,
+  "commandDispatches": 0,
+  "commandsBlocked": 0,
+  "scope": "instrumented-client-post-call-review",
+  "completeCaptureVerified": false,
+  "stoppedByOperator": true,
+  "completedAt": "2026-09-11T07:41:54.547+00:00"
+}

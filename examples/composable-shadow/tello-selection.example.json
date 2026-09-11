@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "clientNode": "/REPLACE_WITH_ACTUAL_CLIENT_NODE",
+  "serverNode": "/REPLACE_WITH_ACTUAL_SERVER_NODE",
+  "endpoint": "/REPLACE_WITH_ACTUAL_SERVICE_ENDPOINT",
+  "clientServiceName": "REPLACE_WITH_EXACT_CLIENT_SRV_NAME",
+  "files": [
+    { "id": "installed-client", "path": "/absolute/path/to/installed/tello_simple_teleop.py" },
+    { "id": "installed-observer", "path": "/absolute/path/to/installed/tello_observer.py" },
+    { "id": "selected-launch", "path": "/absolute/path/to/selected/launch.py" },
+    { "id": "selected-server-source", "path": "/absolute/path/to/selected/server.cpp" }
+  ]
+}

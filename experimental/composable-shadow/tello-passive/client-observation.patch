@@ -9,7 +9,7 @@
 +    from tello_simple_teleop.tello_observer import record_call
 +except Exception:
 +    # Optional recorder absence must not stop the existing client.
-+    def record_call(service, cmd):
++    def record_call(service, cmd, client_node=None):
 +        return False
  
  
@@ -21,7 +21,7 @@
 +        try:
 +            # Observe AFTER dispatch; ignore delivery result. Never gate, retry,
 +            # cancel, or replace the original service call or future.
-+            record_call(self.cli.srv_name, self.req.cmd)
++            record_call(self.cli.srv_name, self.req.cmd, self.get_fully_qualified_name())
 +        except Exception:
 +            pass
          rclpy.spin_until_future_complete(self, self.future)
