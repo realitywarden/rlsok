@@ -1,6 +1,6 @@
 # Your first local Shadow evaluation
 
-Evaluation version: **v1.5.0-shadow.11**. Start with one command boundary in an isolated simulation. This guide covers the supplied local evaluator; Cloud-managed production authorization is a separate product path.
+Evaluation version: **v1.5.0-shadow.12**. Start with one command boundary in an isolated simulation. This guide covers the supplied local evaluator; Cloud-managed production authorization is a separate product path.
 
 For saved configuration and camera/CAN/serial identity review without starting ROS or opening hardware, use [saved setup review](saved-setup-review.md). It includes Piper, MakerMods Metal, SO-101 hardware, Dons Beast and Cartesian single/dual input preparation.
 
@@ -88,4 +88,4 @@ Keep evaluation private by default. Agree separately on public notes, repository
 
 ## Current limits
 
-This release supplies reusable tooling and instructions. An individual project's exact graph, custom interfaces, active configuration source and simulator behavior still need to be confirmed with its owner. Synthetic local checks are not customer-specific Gazebo, LeRobot, ROS hardware, or production validation. See [release validation](releases/v1.5.0-shadow.11.md).
+This release supplies reusable tooling and instructions. An individual project's exact graph, custom interfaces, active configuration source and simulator behavior still need to be confirmed with its owner. Synthetic local checks are not customer-specific Gazebo, LeRobot, ROS hardware, or production validation. See [release validation](releases/v1.5.0-shadow.12.md).

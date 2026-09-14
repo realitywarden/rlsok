@@ -17,6 +17,7 @@ import { approveTelloSnapshot, reviewTelloObservation, telloReportMarkdown } fro
 import { approveSavedSetup, captureSavedSetup, resolveSavedSetup, reviewSavedSetup, savedDocument, savedSetupMarkdown } from '../../packages/composable-shadow/saved-setup';
 import { prepareSavedSetup } from '../../packages/composable-shadow/saved-setup-recipes';
 import { preparePiperSetup } from '../../packages/composable-shadow/piper-setup';
+import { inspectSavedInputs, savedInputMarkdown } from '../../packages/composable-shadow/saved-input-review';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -27,6 +28,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile source-recipes
   rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
   rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise> --source <checkout> --input <selected-files.json> --output <new-directory>
+  rlsok profile inspect-saved-inputs --recipe <aditya-so101|beast|cartesian> --source <checkout> --input <selected-files.json> --output <new-directory>
   rlsok profile discover-setup-devices --output <new-inventory.json> [--python <python3>]
   rlsok profile resolve-setup --manifest <manifest.json> --inventory <inventory.json> --output <new-directory>
   rlsok profile capture-setup --manifest <manifest.json> [--inventory <inventory.json>] --output <new-observation.json>
@@ -151,6 +153,15 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     const o = options(rest, ['manifest', 'inventory', 'output'], ['manifest', 'inventory', 'output']);
     process.stdout.write(JSON.stringify(resolveSavedSetup(savedDocument(o.manifest, 'json'), resolve(o.manifest), savedDocument(o.inventory, 'json'), resolve(o.output)), null, 2) + '\n');
     return 0;
+  }
+  if (command === 'inspect-saved-inputs') {
+    const o = options(rest, ['recipe', 'source', 'input', 'output'], ['recipe', 'source', 'input', 'output']);
+    const report = inspectSavedInputs(o.recipe, o.source, o.input);
+    const directory = newDirectory(o.output);
+    write(join(directory, 'report.json'), report);
+    writeFileSync(join(directory, 'report.md'), savedInputMarkdown(report), { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`${report.decision} | static selected inputs | hardware dispatch: NO\n`);
+    return report.decision === 'NO_STATIC_ISSUES' ? 0 : 1;
   }
   if (command === 'capture-setup') {
     const o = options(rest, ['manifest', 'inventory', 'output'], ['manifest', 'output']);

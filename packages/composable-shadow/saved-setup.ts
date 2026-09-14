@@ -75,7 +75,7 @@ export function savedBytes(path: string): Buffer {
 export function savedDocument(path: string, format: 'json' | 'yaml' | 'text'): Json {
   return parseSaved(savedBytes(path), format);
 }
-function parseSaved(bytes: Buffer, format: 'json' | 'yaml' | 'text'): Json {
+export function parseSaved(bytes: Buffer, format: 'json' | 'yaml' | 'text'): Json {
   const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/^\uFEFF/, '');
   if (format === 'text') return text;
   if (format === 'json') JSON.parse(text); // Require JSON syntax as well as unique keys.
@@ -106,7 +106,7 @@ const observationSchema = z.object({
   scope: z.literal('saved-configuration-only'), hardwareDispatch: z.literal(false),
   status: z.enum(['READY_FOR_REVIEW', 'NEEDS_MATERIAL']), issues: z.array(z.string()),
   semantic: jsonSchema,
-  files: z.array(z.object({ id: name, path: name, sha256: sha }).strict()),
+  files: z.array(z.object({ id: name, path: name, sha256: sha.nullable() }).strict()),
   resolvedBindings: z.array(z.object({ role: name, kind, identity, locator: name, aliases: z.array(name) }).strict()),
   inventory: z.object({ observedAt: z.string(), method: z.string(), warnings: z.array(z.string()) }).strict().nullable(),
   snapshotHash: sha,
@@ -125,17 +125,26 @@ export function captureSavedSetup(manifestValue: unknown, manifestPath: string, 
   unique(manifest.files.map(f => f.id), 'setup_duplicate_file_id');
   unique(manifest.bindings.map(b => b.role), 'setup_duplicate_role');
   const documents: Record<string, Json> = {};
+  const issues: string[] = [];
+  const unavailable = new Set<string>();
   const files = manifest.files.map(file => {
     if (['__proto__', 'constructor', 'prototype'].includes(file.id)) throw new Error('setup_reserved_file_id');
     const path = resolve(dirname(manifestPath), file.path);
-    const bytes = savedBytes(path);
-    documents[file.id] = parseSaved(bytes, file.format);
-    return { id: file.id, path, sha256: createHash('sha256').update(bytes).digest('hex') };
+    try {
+      const bytes = savedBytes(path);
+      documents[file.id] = parseSaved(bytes, file.format);
+      return { id: file.id, path, sha256: createHash('sha256').update(bytes).digest('hex') };
+    } catch (error) {
+      unavailable.add(file.id);
+      documents[file.id] = null;
+      const reason = error instanceof Error ? error.message : String(error);
+      issues.push(`file ${file.id}: unavailable_or_invalid: ${reason.slice(0,1200)}`);
+      return { id: file.id, path, sha256: null };
+    }
   });
   const inventory = inventoryValue === undefined ? undefined : setupInventorySchema.parse(inventoryValue);
   if (manifest.bindings.length && !inventory) throw new Error('setup_inventory_required_for_device_bindings');
   if (inventory) unique(inventory.devices.map(d => `${d.kind}:${d.locator}`), 'setup_duplicate_inventory_endpoint');
-  const issues: string[] = [];
   const occupied = new Set<string>();
   const replaced = new Set<string>();
   const resolvedBindings: Observation['resolvedBindings'] = [];
@@ -160,12 +169,21 @@ export function captureSavedSetup(manifestValue: unknown, manifestPath: string, 
       replaced.add(slotKey);
       const document = documents[use.file];
       if (document === undefined || manifest.files.find(f => f.id === use.file)?.format === 'text') throw new Error('setup_binding_requires_structured_file');
-      const { object, key: field } = pointerSlot(document, use.pointer);
+      if (unavailable.has(use.file)) continue;
+      let slot: ReturnType<typeof pointerSlot>;
+      try { slot = pointerSlot(document, use.pointer); }
+      catch { issues.push(`${binding.role}: configured_field_missing at ${slotKey}`); continue; }
+      const { object, key: field } = slot;
       const value = object[field];
       // Numeric camera indices and explicit saved /dev paths are compared only
       // against this inventory's observed aliases, never against the selector.
       if (!['string', 'number'].includes(typeof value) || ![device.locator, ...device.aliases].includes(String(value))) {
         issues.push(`${binding.role}: configured_locator_does_not_match_identity at ${slotKey}`);
+        continue;
+      }
+      const aliasOwners = inventory!.devices.filter(d => d.kind === binding.kind && [d.locator, ...d.aliases].includes(String(value)));
+      if (aliasOwners.length !== 1) {
+        issues.push(`${binding.role}: configured_locator_is_ambiguous at ${slotKey}`);
         continue;
       }
       object[field] = { rlsokDeviceRole: binding.role, kind: binding.kind, identity: { ...wanted } };
@@ -223,6 +241,8 @@ export function resolveSavedSetup(manifestValue: unknown, manifestPath: string, 
         if (binding.kind !== 'camera' || numeric.length !== 1 || !Number.isSafeInteger(Number(numeric[0]))) throw new Error('setup_unique_camera_index_required');
         after = Number(numeric[0]);
       }
+      if (inventory.devices.filter(d => d.kind === binding.kind && [d.locator, ...d.aliases].includes(String(after))).length !== 1)
+        throw new Error(`setup_resolved_locator_ambiguous:${binding.role}`);
       object[field] = after;
       edits.push({ role: binding.role, file: use.file, pointer: use.pointer, before, after });
     }
@@ -266,6 +286,36 @@ function changedPaths(a: Json, b: Json, path = ''): string[] {
   }
   return [path || '/'];
 }
+function atPath(value: Json, path: string): { present: boolean; value?: Json } {
+  if (path === '/') return { present: true, value };
+  let current = value;
+  for (const key of path.slice(1).split('/').map(p => p.replace(/~1/g,'/').replace(/~0/g,'~'))) {
+    if (!current || typeof current !== 'object' || !Object.hasOwn(current,key)) return { present: false };
+    current = (current as Record<string,Json>)[key];
+  }
+  return { present: true, value: current };
+}
+function detail(a: Json, b: Json, path: string) {
+  const before = atPath(a,path), after = atPath(b,path);
+  const describe = (item: ReturnType<typeof atPath>) => {
+    if (!item.present) return { present: false, preview: '(absent)', truncated: false };
+    const serialized = JSON.stringify(item.value);
+    return { present: true, preview: serialized.slice(0,1600), truncated: serialized.length > 1600 };
+  };
+  if (before.present && after.present && typeof before.value === 'string' && typeof after.value === 'string') {
+    const left = before.value.split('\n'), right = after.value.split('\n');
+    let start = 0, tail = 0;
+    while (start < Math.min(left.length,right.length) && left[start] === right[start]) start++;
+    while (tail < Math.min(left.length,right.length)-start && left[left.length-1-tail] === right[right.length-1-tail]) tail++;
+    const excerpt = (lines: string[]) => {
+      const selected = lines.slice(start,lines.length-tail);
+      const text = selected.slice(0,12).join('\n');
+      return { firstLine: start+1, changedLines: selected.length, text: text.slice(0,1600), truncated: selected.length > 12 || text.length > 1600 };
+    };
+    return { path, before: describe(before), after: describe(after), textChange: { before: excerpt(left), after: excerpt(right) } };
+  }
+  return { path, before: describe(before), after: describe(after) };
+}
 export function reviewSavedSetup(approvalValue: unknown, observationValue: unknown) {
   const approval = approvalSchema.parse(approvalValue);
   const { approvalHash, ...body } = approval;
@@ -275,7 +325,8 @@ export function reviewSavedSetup(approvalValue: unknown, observationValue: unkno
   const current = checkedObservation(observationValue);
   if (baseline.id !== current.id) throw new Error('setup_id_mismatch');
   const changes = changedPaths(baseline.semantic, current.semantic);
-  const byteChanges = current.files.filter(f => baseline.files.find(old => old.id === f.id)?.sha256 !== f.sha256).map(f => f.id);
+  const byteChanges = [...new Set([...baseline.files, ...current.files].map(f => f.id))]
+    .filter(id => baseline.files.find(f => f.id === id)?.sha256 !== current.files.find(f => f.id === id)?.sha256);
   const locatorChanges = current.resolvedBindings.flatMap(b => {
     const old = baseline.resolvedBindings.find(o => o.role === b.role);
     return old && old.locator !== b.locator ? [{ role: b.role, before: old.locator, after: b.locator }] : [];
@@ -284,16 +335,26 @@ export function reviewSavedSetup(approvalValue: unknown, observationValue: unkno
     schemaVersion: 1, id: current.id, scope: 'saved-configuration-only', hardwareDispatch: false,
     decision: current.issues.length ? 'NEEDS_MATERIAL' : changes.length ? 'REVIEW_REQUIRED' : 'UNCHANGED',
     baselineHash: baseline.snapshotHash, currentHash: current.snapshotHash,
-    changes, issues: current.issues, byteChanges, locatorChanges,
+    changes, details: changes.map(path => detail(baseline.semantic,current.semantic,path)),
+    issues: current.issues, byteChanges, locatorChanges,
     limitations: ['Saved files and enumeration are self-attested, not active robot state.',
       'USB path binds a port/topology, not a physical unit. Replacing a unit on that port needs operator review.',
       'An unchanged report is not permission to move, live compatibility, a command gate or customer acceptance.'],
   };
 }
 export function savedSetupMarkdown(report: ReturnType<typeof reviewSavedSetup>): string {
+  const block = (text: string) => text.split('\n').map(line => '    '+line).join('\n');
+  const details = report.details.map(d => {
+    if (d.textChange) {
+      const show = (v: typeof d.textChange.before) => `line ${v.firstLine}, ${v.changedLines} changed line(s)${v.truncated ? ' (excerpt truncated)' : ''}\n\n${block(v.text || '(empty)')}`;
+      return `### ${d.path}\n\nBefore: ${show(d.textChange.before)}\n\nAfter: ${show(d.textChange.after)}\n`;
+    }
+    return `### ${d.path}\n\nBefore${d.before.truncated ? ' (truncated)' : ''}:\n\n${block(d.before.preview)}\n\nAfter${d.after.truncated ? ' (truncated)' : ''}:\n\n${block(d.after.preview)}\n`;
+  }).join('\n');
   return `# Saved configuration review\n\n${report.decision} · ${report.id}\n\nHardware dispatch: **none**.\n\n`
     + `Semantic changes:\n${report.changes.map(p => `- ${p}`).join('\n') || '- None in the selected scope.'}\n\n`
-    + `Unresolved bindings:\n${report.issues.map(p => `- ${p}`).join('\n') || '- None.'}\n\n`
+    + details + '\n'
+    + `Unresolved files or bindings:\n${report.issues.map(p => `- ${p}`).join('\n') || '- None.'}\n\n`
     + `Device renumbering:\n${report.locatorChanges.map(p => `- ${p.role}: ${p.before} → ${p.after}`).join('\n') || '- None observed.'}\n\n`
     + `Changed file bytes: ${report.byteChanges.join(', ') || 'none'} (formatting and resolved aliases can change without a semantic change).\n\n`
     + report.limitations.map(p => `- ${p}`).join('\n') + '\n';

@@ -176,15 +176,16 @@ Reviewed public source: [MakerModsLab at e4a14679](https://github.com/makermods-
 
 `files.record` is the selected saved robot-record JSON. Require explicit
 `arm_type: metal`, `mode: single|bimanual`, `arms: both|leader|follower`,
-`leader_kind: star|metal`, and a `cameras` array (empty is valid). Other
-families/leader kinds are not substituted. Save an explicitly resolved copy
-if an old record relies on defaults.
+`leader_kind: star|metal|star_vertical`, and a `cameras` array (empty is valid).
+Empty/missing leader kind follows the source's Star default without rewriting
+the record. Other families/leader kinds and missing mode fields are refused.
 
 For each active slot, supply `files.leader_calibration`,
 `files.follower_calibration`, `files.right_leader_calibration`, and/or
 `files.right_follower_calibration`. Names must match the record's assigned
 configuration. Preserve the immediate library directory in copied paths:
-`metal_follower`, `metal_leader`, or `rebot_102_leader` for a Star leader.
+`metal_follower`, `metal_leader`, `rebot_102_leader` for a Star leader, or
+`rebot_102_leader_vertical` for a vertical Star leader.
 Two slots cannot silently share a port or selected calibration file.
 
 Optional selector roles are `leader`, `follower`, `right_leader`,
@@ -249,6 +250,15 @@ customer-specific baseline. PoseStamped/WrenchStamped/JointMove authorization
 is not implemented by comparing these files.
 
 ## Use your own selected configuration
+
+For source-specific SO101, Beast and Cartesian consistency checks before
+baseline approval, use [selected-input inspection](selected-input-inspection.md).
+The Cartesian inspector can also review saved native PoseStamped,
+WrenchStamped and JointMove fields without publishing or calling ROS.
+
+Comparison reports include before/after field values and changed source-line
+excerpts. Missing/invalid selected files or mapped fields produce a retained
+`NEEDS_MATERIAL` observation; fix the issue and capture to a new output file.
 
 You can write `manifest.json` directly instead of using a recipe. Its schema
 is defined in `packages/composable-shadow/saved-setup.ts`: unique file IDs,

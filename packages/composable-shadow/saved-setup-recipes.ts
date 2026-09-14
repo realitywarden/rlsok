@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { z } from 'zod';
-import { savedBytes, savedDocument, setupBindingSchema, setupManifestSchema, type SetupManifest } from './saved-setup';
+import { parseSaved, savedBytes, savedDocument, setupBindingSchema, setupManifestSchema, type SetupManifest } from './saved-setup';
+import { inspectSavedInputs, savedInputMarkdown } from './saved-input-review';
 
 const selector = setupBindingSchema.shape.identity;
 const requestSchema = z.object({
@@ -42,7 +43,7 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     if (files.some(f => f.id === id)) throw new Error('duplicate_setup_file');
     const bytes = savedBytes(path);
     // Structured files are validated now, including duplicate keys.
-    if (format !== 'text') savedDocument(path, format);
+    parseSaved(bytes, format);
     const filename = `${files.length.toString().padStart(2, '0')}-${id}.${format === 'text' ? 'txt' : format}`;
     files.push({ id, path: filename, format });
     content.set(filename, bytes);
@@ -107,7 +108,7 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     choice(record.arm_type, ['metal'], 'arm_type');
     const mode = choice(record.mode, ['single', 'bimanual'], 'mode');
     const arms = choice(record.arms, ['both', 'leader', 'follower'], 'arms');
-    const leader = choice(record.leader_kind, ['star', 'metal'], 'leader_kind');
+    const leader = choice(record.leader_kind === undefined || record.leader_kind === '' ? 'star' : record.leader_kind, ['star', 'metal', 'star_vertical'], 'leader_kind');
     const slots = (mode === 'bimanual' ? ['', 'right_'] : ['']).flatMap(prefix =>
       (arms === 'both' ? ['leader', 'follower'] : [arms]).map(side => ({ prefix, side })));
     const ports: string[] = [], selectedCalibrations: string[] = [];
@@ -117,7 +118,8 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
       const stem = text(record[role + '_config'], role + '_config').replace(/\.json$/, '');
       if (!stem || /[\\/]/.test(stem) || stem.includes('..')) throw new Error('unsafe_calibration_name');
       const path = input(role + '_calibration', 'json');
-      const library = side === 'follower' ? 'metal_follower' : leader === 'metal' ? 'metal_leader' : 'rebot_102_leader';
+      const library = side === 'follower' ? 'metal_follower' : leader === 'metal' ? 'metal_leader'
+        : leader === 'star_vertical' ? 'rebot_102_leader_vertical' : 'rebot_102_leader';
       if (basename(path) !== `${stem}.json` || basename(dirname(path)) !== library) throw new Error(`selected_calibration_path_mismatch:${role}:${library}/${stem}.json`);
       object(savedDocument(path, 'json'), role + '_calibration');
       selectedCalibrations.push(path);
@@ -135,7 +137,8 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
       if (request.selectors['camera:' + cameraName]) bind('camera:' + cameraName, 'camera', 'record', `/cameras/${index}/camera_index`);
     });
     if (new Set(cameraNames).size !== cameraNames.length) throw new Error('duplicate_camera_role');
-    for (const path of ['utils/config.py', 'utils/robot_factory.py', 'arms/metal.py', 'arms/can_common.py', 'arms/registry.py']) src('makermodslab/' + path);
+    for (const path of ['utils/config.py', 'utils/robot_factory.py', 'arms/metal.py', 'arms/can_common.py', 'arms/registry.py', 'arms/base.py']) src('makermodslab/' + path);
+    if (leader === 'star_vertical') src('makermodslab/star_gripper.py');
     src('pyproject.toml');
     facts.push(`Selected Metal ${mode}, ${arms}, ${leader} leader. Maker-family calibrations are not substituted.`,
       'Metal calibration zero offsets can be identical across physical arms; matching calibration bytes does not identify a unit.',
@@ -156,6 +159,7 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     const calibrationPath = resolve(dirname(inputPath), request.files.calibration);
     if (basename(calibrationPath) !== settings.robot_id + '.json') throw new Error('calibration_filename_does_not_match_selected_robot_id');
     input('controllers', 'yaml'); input('model', 'text'); input('launch', 'text');
+    if (request.files.ros2_control) input('ros2_control', 'text');
     bind('follower', 'serial', 'bridge', '/port');
     src('so101_bridge/so101_bridge/feetech_bridge_node.py');
     src('so101_hardware/src/so101_hardware_interface.cpp');
@@ -194,7 +198,9 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     const launch = object(savedDocument(input('settings', 'json'), 'json'), 'settings');
     choice(launch.config_type, ['single_arm', 'dual_arm'], 'config_type');
     input('controllers', 'yaml'); input('model', 'text'); input('launch', 'text');
+    if (request.files.commands) input('commands', 'json');
     src('cartesian_motion_base/src/cartesian_motion_base.cpp');
+    src('cartesian_motion_test/include/cartesian_motion_test/cartesian_motion_config.hpp');
     facts.push('Selected single/dual controller YAML, joint order, frames, model and launch settings are compared as saved files.',
       'PoseStamped, WrenchStamped and JointMove command authorization is not implemented by this saved-file review. Current customer-specific dual-arm configuration is still required.');
   }
@@ -206,6 +212,12 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     source: { repository: repositories[recipe], commit: request.sourceCommit },
     scope: 'saved-configuration-only', files, bindings });
   mkdirSync(output, { recursive: true, mode: 0o700 });
+  const inspection = ['aditya-so101', 'beast', 'cartesian'].includes(recipe) ? inspectSavedInputs(recipe, source, inputPath) : undefined;
+  if (inspection) {
+    writeFileSync(join(output, 'inspection.json'), JSON.stringify(inspection, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
+    writeFileSync(join(output, 'inspection.md'), savedInputMarkdown(inspection), { flag: 'wx', mode: 0o600 });
+    facts.unshift(`Static selected-input inspection: ${inspection.decision}. Read inspection.md before approving any baseline; capture readiness means only that selected files can be compared.`);
+  }
   for (const [filename, bytes] of content) writeFileSync(join(output, filename), bytes, { flag: 'wx', mode: 0o600 });
   writeFileSync(join(output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
   writeFileSync(join(output, 'REVIEW.md'), `# ${recipe}: selected configuration copies\n\nReview the copied inputs and manifest before capturing or approving. The supplied source commit is self-attested; copied source bytes are also bound by the snapshot.\n\n${facts.map(f => '- ' + f).join('\n')}\n\nNo source modules were imported or executed. No hardware or live ROS checks were performed.\n`, { flag: 'wx', mode: 0o600 });

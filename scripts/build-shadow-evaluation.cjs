@@ -85,7 +85,11 @@ const copy = (source, target) => {
     fs.writeFileSync(path.join(output, 'SAVED-SETUP-REVIEW.md'),
       fs.readFileSync(path.join(root, 'docs/saved-setup-review.md'), 'utf8')
         .replace('(piper-confirmed-roles.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/piper-confirmed-roles.md)`)
-        .replace('(kuka-sunrise-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/kuka-sunrise-saved-review.md)`));
+        .replace('(kuka-sunrise-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/kuka-sunrise-saved-review.md)`)
+        .replace('(selected-input-inspection.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/selected-input-inspection.md)`));
+    fs.writeFileSync(path.join(output, 'SELECTED-INPUT-INSPECTION.md'),
+      fs.readFileSync(path.join(root, 'docs/selected-input-inspection.md'), 'utf8')
+        .replace('(saved-setup-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/saved-setup-review.md)`));
     copy(path.join(root, 'docs/piper-confirmed-roles.md'), path.join(output, 'PIPER-CONFIRMED-ROLES.md'));
     copy(path.join(root, 'docs/kuka-sunrise-saved-review.md'), path.join(output, 'KUKA-SUNRISE-REVIEW.md'));
     copy(path.join(root, 'docs/email-feedback-evaluation-20260910.md'), path.join(output, 'FEEDBACK-EVALUATION.md'));
