@@ -14,6 +14,8 @@ import { prepareSo101ControllerSwap } from '../../packages/composable-shadow/so1
 import { compareNav2ReviewInputs, nav2ReviewMarkdown } from '../../packages/composable-shadow/nav2-review';
 import { approveNav2Goal, checkNav2BeforeShadowHandoff } from '../../packages/composable-shadow/nav2-gate';
 import { approveTelloSnapshot, reviewTelloObservation, telloReportMarkdown } from '../../packages/composable-shadow/tello-shadow';
+import { approveSavedSetup, captureSavedSetup, resolveSavedSetup, reviewSavedSetup, savedDocument, savedSetupMarkdown } from '../../packages/composable-shadow/saved-setup';
+import { prepareSavedSetup } from '../../packages/composable-shadow/saved-setup-recipes';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -22,6 +24,12 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
+  rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian> --source <checkout> --input <selected-files.json> --output <new-directory>
+  rlsok profile discover-setup-devices --output <new-inventory.json> [--python <python3>]
+  rlsok profile resolve-setup --manifest <manifest.json> --inventory <inventory.json> --output <new-directory>
+  rlsok profile capture-setup --manifest <manifest.json> [--inventory <inventory.json>] --output <new-observation.json>
+  rlsok profile approve-setup --observation <observation.json> --actor <name> --output <new-baseline.json>
+  rlsok profile review-setup --baseline <baseline.json> --observation <observation.json> --output <new-directory>
   rlsok profile capture-tello --manifest <selected-files-and-service.json> --output <new-observation.json> [--python <python3>]
   rlsok profile approve-tello --observation <fresh-observation.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
   rlsok profile review-tello --approval <approval.json> --observation <observation.json> --event <client-event.json> --output <new-directory>
@@ -128,6 +136,43 @@ function printReport(directory: string, report: Awaited<ReturnType<typeof evalua
 export async function runProfileCommand(args: string[]): Promise<number> {
   const [command, ...rest] = args;
   if (!command || ['help', '--help', '-h'].includes(command)) { process.stdout.write(help); return 0; }
+  if (command === 'prepare-saved-setup') {
+    const o = options(rest, ['recipe', 'source', 'input', 'output'], ['recipe', 'source', 'input', 'output']);
+    process.stdout.write(JSON.stringify(prepareSavedSetup(o.recipe, resolve(o.source), resolve(o.input), resolve(o.output)), null, 2) + '\n');
+    return 0;
+  }
+  if (command === 'discover-setup-devices') {
+    const o = options(rest, ['output', 'python'], ['output']);
+    return python(o, ['--output', resolve(o.output)], join(dirname(collectorScript()), 'setup_devices.py'));
+  }
+  if (command === 'resolve-setup') {
+    const o = options(rest, ['manifest', 'inventory', 'output'], ['manifest', 'inventory', 'output']);
+    process.stdout.write(JSON.stringify(resolveSavedSetup(savedDocument(o.manifest, 'json'), resolve(o.manifest), savedDocument(o.inventory, 'json'), resolve(o.output)), null, 2) + '\n');
+    return 0;
+  }
+  if (command === 'capture-setup') {
+    const o = options(rest, ['manifest', 'inventory', 'output'], ['manifest', 'output']);
+    const snapshot = captureSavedSetup(savedDocument(o.manifest, 'json'), resolve(o.manifest), o.inventory ? savedDocument(o.inventory, 'json') : undefined);
+    write(o.output, snapshot);
+    process.stdout.write(`${snapshot.status} | selected saved files only | hardware dispatch: NO\n`);
+    for (const issue of snapshot.issues) process.stdout.write(`  ${issue}\n`);
+    return snapshot.status === 'READY_FOR_REVIEW' ? 0 : 1;
+  }
+  if (command === 'approve-setup') {
+    const o = options(rest, ['observation', 'actor', 'output'], ['observation', 'actor', 'output']);
+    write(o.output, approveSavedSetup(savedDocument(o.observation, 'json'), o.actor));
+    process.stdout.write('Saved your reviewed configuration baseline. This is not robot execution approval.\n');
+    return 0;
+  }
+  if (command === 'review-setup') {
+    const o = options(rest, ['baseline', 'observation', 'output'], ['baseline', 'observation', 'output']);
+    const report = reviewSavedSetup(savedDocument(o.baseline, 'json'), savedDocument(o.observation, 'json'));
+    const directory = newDirectory(o.output);
+    write(join(directory, 'report.json'), report);
+    writeFileSync(join(directory, 'report.md'), savedSetupMarkdown(report), { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`${report.decision} | selected saved files only | hardware dispatch: NO\n`);
+    return report.decision === 'UNCHANGED' ? 0 : 1;
+  }
   if (command === 'capture-tello') {
     const o = options(rest, ['manifest', 'output', 'python'], ['manifest', 'output']);
     if (existsSync(o.output)) throw new Error('output_already_exists');

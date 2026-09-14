@@ -82,6 +82,7 @@ const copy = (source, target) => {
     copy(path.join(root, 'docs/fanuc-shadow-self-service.md'), path.join(output, 'INSTALLATION.md'));
     copy(path.join(root, 'docs/interface-onboarding.md'), path.join(output, 'INTERFACE-ONBOARDING.md'));
     copy(path.join(root, 'docs/source-shadow-workspaces.md'), path.join(output, 'SOURCE-WORKSPACES.md'));
+    copy(path.join(root, 'docs/saved-setup-review.md'), path.join(output, 'SAVED-SETUP-REVIEW.md'));
     copy(path.join(root, 'docs/email-feedback-evaluation-20260910.md'), path.join(output, 'FEEDBACK-EVALUATION.md'));
     copy(path.join(root, 'docs/email-feedback-afternoon-20260910.md'), path.join(output, 'AFTERNOON-FEEDBACK.md'));
     copy(path.join(root, 'docs/pliant-propulsors-review.md'), path.join(output, 'PROPULSOR-REVIEW.md'));
