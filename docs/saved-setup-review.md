@@ -17,7 +17,11 @@ rlsok profile prepare-saved-setup --recipe piper \
   --source /path/to/bimanual-vla --input selected-files.json --output setup-01
 ```
 
-Recipes: `piper`, `metal`, `aditya-so101`, `beast`, `cartesian`.
+Recipes: `piper`, `metal`, `aditya-so101`, `beast`, `cartesian`, `kuka-sunrise`.
+For a confirmed Piper role map without a native launch configuration, use
+[the Piper role workflow](piper-confirmed-roles.md) instead of inventing launch arguments.
+For paired ROS bridge and Java application copies, see
+[the KUKA Sunrise workflow](kuka-sunrise-saved-review.md).
 `--source` is a checkout to read, never execute. Input paths are relative to
 `selected-files.json` (absolute paths also work). `sourceCommit` is the actual
 selected checkout's 40-character Git commit, supplied by the operator; the

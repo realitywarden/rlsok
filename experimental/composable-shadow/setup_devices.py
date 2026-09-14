@@ -72,6 +72,10 @@ def collect():
                     serial = attribute(parent / "serial")
                     if serial:
                         item["serial"] = serial
+                # Stop at the endpoint's USB device. A parent hub serial must
+                # never be substituted when this device has no unit serial.
+                if (parent / "idVendor").exists():
+                    break
             if kind == "camera":
                 index = attribute(entry / "index")
                 if index:

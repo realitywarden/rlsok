@@ -13,6 +13,7 @@ const repositories: Record<string, string> = {
   piper: 'SUNNYsyy2005/bimanual-vla', metal: 'makermods-robotics/makermodslab',
   'aditya-so101': 'iAdityaDev/so_101_arm', beast: 'Dwilliestyle/Dons_Beast',
   cartesian: 'leledeyuan00/cartesian_motion_base',
+  'kuka-sunrise': 'LufsSeccus/Ros2_Kuka_External_Control_Bridge_API',
 };
 type Obj = Record<string, any>;
 function object(value: unknown, label: string): Obj {
@@ -174,6 +175,21 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     facts.push('Duplicate YAML keys are refused: the reviewed public file defines low_voltage_threshold twice. Select an unambiguous local copy; no value is chosen automatically.',
       'The public bridge declares cmd_vel_timeout, not watchdog_timeout. An omitted cmd_vel_timeout uses the bridge default; this saved review does not establish the live value.',
       'Firmware, UART delivery, odometry, collision stopping and physical compatibility are outside this snapshot.');
+  } else if (recipe === 'kuka-sunrise') {
+    for (const [id, path] of Object.entries({
+      bridge: 'kuka_udp_bridge_node/src/udp_bridge_node.cpp', sunrise: 'UDP_bridge.java',
+      launch: 'kuka_udp_bridge_node/launch/dual_robot.launch.py',
+      package: 'kuka_udp_bridge_node/package.xml', build: 'kuka_udp_bridge_node/CMakeLists.txt',
+    })) {
+      if (request.files[id]) input(id, 'text');
+      else add(id, resolve(source, path), 'text');
+    }
+    if (request.files.settings) input('settings', 'json');
+    facts.push('Pairs copied ROS bridge, launch and Sunrise Java source. No ROS process, UDP socket or cabinet connection is created.',
+      'The supplied commit and source files are a saved comparison baseline, not proof of the deployed cabinet application.',
+      'At reviewed source 26863e16 the bridge declares robot_ip, robot_port, client_port and network_interface. README robot_id is not declared in that bridge.',
+      'Select actual local overrides in a settings JSON when available; no live parameter values or message logs are inferred.',
+      'This is saved-file comparison, not interception of cmd_vel, goal_pose, arm_cmd_joints, arm_goal_pose or speed messages.');
   } else {
     const launch = object(savedDocument(input('settings', 'json'), 'json'), 'settings');
     choice(launch.config_type, ['single_arm', 'dual_arm'], 'config_type');

@@ -16,6 +16,7 @@ import { approveNav2Goal, checkNav2BeforeShadowHandoff } from '../../packages/co
 import { approveTelloSnapshot, reviewTelloObservation, telloReportMarkdown } from '../../packages/composable-shadow/tello-shadow';
 import { approveSavedSetup, captureSavedSetup, resolveSavedSetup, reviewSavedSetup, savedDocument, savedSetupMarkdown } from '../../packages/composable-shadow/saved-setup';
 import { prepareSavedSetup } from '../../packages/composable-shadow/saved-setup-recipes';
+import { preparePiperSetup } from '../../packages/composable-shadow/piper-setup';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -24,7 +25,8 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
-  rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian> --source <checkout> --input <selected-files.json> --output <new-directory>
+  rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
+  rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise> --source <checkout> --input <selected-files.json> --output <new-directory>
   rlsok profile discover-setup-devices --output <new-inventory.json> [--python <python3>]
   rlsok profile resolve-setup --manifest <manifest.json> --inventory <inventory.json> --output <new-directory>
   rlsok profile capture-setup --manifest <manifest.json> [--inventory <inventory.json>] --output <new-observation.json>
@@ -246,6 +248,11 @@ export async function runProfileCommand(args: string[]): Promise<number> {
   if (command === 'source-recipes') {
     options(rest, [], []);
     process.stdout.write(`${JSON.stringify(sourceRecipes, null, 2)}\nPublic source mappings only; verify the actual local graph and files.\n`);
+    return 0;
+  }
+  if (command === 'prepare-piper-setup') {
+    const o = options(rest, ['input', 'source', 'source-commit', 'id', 'output'], ['input', 'source', 'source-commit', 'id', 'output']);
+    process.stdout.write(JSON.stringify(preparePiperSetup(o.input, o.source, o['source-commit'], o.id, o.output), null, 2) + '\n');
     return 0;
   }
   if (command === 'compare-controllers') {

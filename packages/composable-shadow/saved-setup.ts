@@ -76,7 +76,7 @@ export function savedDocument(path: string, format: 'json' | 'yaml' | 'text'): J
   return parseSaved(savedBytes(path), format);
 }
 function parseSaved(bytes: Buffer, format: 'json' | 'yaml' | 'text'): Json {
-  const text = bytes.toString('utf8').replace(/^\uFEFF/, '');
+  const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/^\uFEFF/, '');
   if (format === 'text') return text;
   if (format === 'json') JSON.parse(text); // Require JSON syntax as well as unique keys.
   // json:false deliberately rejects duplicate YAML/JSON mapping keys.

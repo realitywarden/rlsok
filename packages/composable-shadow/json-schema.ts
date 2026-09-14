@@ -2,11 +2,13 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
 import { approvalSchema, observationSchema, profileSchema, proposalBatchSchema } from './schema';
 import { catalogSchema, connectionSchema } from './onboarding';
 import { setupInventorySchema, setupManifestSchema } from './saved-setup';
+import { piperSetupSchema } from './piper-setup';
 
 /** Derive the structural contracts from the same schemas consumed by the CLI.
  * Zod refinements remain runtime checks; never imply JSON Schema covers them. */
 export function interfaceSchemas(): Record<string, unknown> {
   return {
+    'piper-setup.schema.json': zodToJsonSchema(piperSetupSchema, { name: 'PiperSavedRoles', target: 'jsonSchema7' }),
     'saved-setup-manifest.schema.json': zodToJsonSchema(setupManifestSchema, { name: 'SavedSetupManifest', target: 'jsonSchema7' }),
     'saved-setup-inventory.schema.json': zodToJsonSchema(setupInventorySchema, { name: 'SavedSetupInventory', target: 'jsonSchema7' }),
     'catalog.schema.json': zodToJsonSchema(catalogSchema, { name: 'InterfaceCatalog', target: 'jsonSchema7' }),
