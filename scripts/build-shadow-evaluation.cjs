@@ -13,17 +13,19 @@ const run = (file, args, options = {}) => execFileSync(file, args, { cwd: root, 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const json = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
 const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
-if (!/^\d+\.\d+\.\d+-shadow\.\d+$/.test(pkg.version)) throw new Error('shadow_prerelease_version_required');
+if (!/^\d+\.\d+\.\d+(?:-shadow\.\d+)?$/.test(pkg.version)) throw new Error('local_check_version_required');
 assertCleanGitStatus(run('git', ['status', '--porcelain', '--untracked-files=all']));
 const sourceCommit = run('git', ['rev-parse', 'HEAD']).trim();
 const version = pkg.version;
+const prerelease = version.includes('-');
+const bundlePrefix = prerelease ? 'rlsok-shadow-evaluation' : 'rlsok-local-check';
 const output = path.join(root, 'artifacts', 'shadow-evaluation', version);
 if (fs.existsSync(output)) throw new Error('evaluation_output_already_exists');
 const nodeName = 'node-v22.22.0-linux-x64.tar.gz';
 const nodeSha256 = 'c33c39ed9c80deddde77c960d00119918b9e352426fd604ba41638d6526a4744';
 const nodeUrl = `https://nodejs.org/dist/v22.22.0/${nodeName}`;
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'rlsok-shadow-package-'));
-const stage = path.join(temporary, `rlsok-shadow-evaluation-${version}`);
+const stage = path.join(temporary, `${bundlePrefix}-${version}`);
 const copy = (source, target) => {
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.cpSync(source, target, { recursive: true, filter: name => !name.includes('__pycache__') && !name.endsWith('.pyc') });
@@ -57,11 +59,12 @@ const copy = (source, target) => {
     const { interfaceSchemas } = require('../dist/packages/composable-shadow/json-schema.js');
     for (const [name, document] of Object.entries(interfaceSchemas())) json(path.join(stage, 'schemas', name), document);
     fs.mkdirSync(path.join(stage, 'bin'));
-    fs.writeFileSync(path.join(stage, 'bin/rlsok'), '#!/bin/sh\nset -eu\ncase "${1:-}" in profile|verify-evidence|--version|-V|version) ;; *) echo "Local Shadow evaluation: use profile help, profile commands, or verify-evidence." >&2; exit 2 ;; esac\nSELF=$(readlink -f -- "$0")\nROOT=$(CDPATH= cd -- "$(dirname -- "$SELF")/.." && pwd)\nexec "$ROOT/bin/node" "$ROOT/lib/rlsok/dist/apps/cli/rlsok.js" "$@"\n');
+    fs.writeFileSync(path.join(stage, 'bin/rlsok'), '#!/bin/sh\nset -eu\ncase "${1:-}" in ""|--help|-h|help) set -- profile help ;; profile|verify-evidence|--version|-V|version) ;; *) echo "RLSOK Local Check: use profile help, profile commands, or verify-evidence." >&2; exit 2 ;; esac\nSELF=$(readlink -f -- "$0")\nROOT=$(CDPATH= cd -- "$(dirname -- "$SELF")/.." && pwd)\nexec "$ROOT/bin/node" "$ROOT/lib/rlsok/dist/apps/cli/rlsok.js" "$@"\n');
     fs.writeFileSync(path.join(stage, 'VERSION'), version + '\n');
     fs.writeFileSync(path.join(stage, 'SOURCE_COMMIT'), sourceCommit + '\n');
-    fs.writeFileSync(path.join(stage, 'README.md'), '# RLSOK local Shadow evaluation\n\nStart with [the first-evaluation guide](docs/local-shadow-first-evaluation.md).\n\nThis prerelease is for local, self-attested zero-dispatch evaluation. Humble, private interfaces, installation and physical FANUC operation have not been validated for this release. See BUILD-MANIFEST.json.\n');
-    const build = { schemaVersion: 1, version, sourceCommit,
+    fs.writeFileSync(path.join(stage, 'START-HERE.md'), '# Start here\n\nOpen [the included example guide](docs/local-check-start.md). It explains which computer to use, what to run and how to read the two results.\n');
+    fs.writeFileSync(path.join(stage, 'README.md'), '# RLSOK Local Check\n\nSee what changed in your robot settings. Start with [the included example](docs/local-check-start.md). No robot or account is needed for the example.\n\nThis package compares local files and example inputs; it sends no robot commands. It is separate from the existing robot runtime and Windows management app. See BUILD-MANIFEST.json for the exact checks performed and their limits.\n');
+    const build = { schemaVersion: 1, product: 'RLSOK Local Check', channel: prerelease ? 'preview' : 'release', version, sourceCommit,
       sourceUrl: `https://github.com/realitywarden/rlsok/commit/${sourceCommit}`,
       builtAt: new Date().toISOString(), buildHost: `${process.platform}-${process.arch}`,
       node: { version: '22.22.0', url: nodeUrl, archiveSha256: nodeSha256 }, dependencies,
@@ -73,12 +76,18 @@ const copy = (source, target) => {
     const nodeBytes = Buffer.from(await response.arrayBuffer());
     if (hash(nodeBytes) !== nodeSha256) throw new Error('node_archive_checksum_mismatch');
     fs.writeFileSync(path.join(temporary, nodeName), nodeBytes);
-    const archiveName = `rlsok-shadow-evaluation-${version}-linux-x64.tar.gz`;
+    const archiveName = `${bundlePrefix}-${version}-linux-x64.tar.gz`;
     run(process.env.RLSOK_PACKAGING_PYTHON || (process.platform === 'win32' ? 'python' : 'python3'),
       [path.join(__dirname, 'archive-shadow-evaluation.py'), stage, path.join(temporary, nodeName), nodeSha256, path.join(output, archiveName)], { stdio: 'inherit' });
     run('git', ['archive', '--format=tar.gz', `--prefix=rlsok-source-${version}/`, `--output=${path.join(output, `rlsok-source-${version}.tar.gz`)}`, sourceCommit]);
-    copy(path.join(root, 'packaging/install-shadow.sh'), path.join(output, 'install-shadow.sh'));
-    copy(path.join(root, 'docs/local-shadow-first-evaluation.md'), path.join(output, 'START-HERE.md'));
+    const installerTemplate = fs.readFileSync(path.join(root, 'packaging/install-shadow.sh'), 'utf8');
+    for (const token of ['__RLSOK_VERSION__', '__RLSOK_BUNDLE_PREFIX__']) {
+      if (installerTemplate.split(token).length !== 2) throw new Error(`installer_template_token_invalid:${token}`);
+    }
+    const installer = installerTemplate.replace('__RLSOK_VERSION__', version).replace('__RLSOK_BUNDLE_PREFIX__', bundlePrefix);
+    if (/__RLSOK_[A-Z_]+__/.test(installer)) throw new Error('installer_template_unresolved');
+    for (const name of ['install-local.sh', 'install-shadow.sh']) fs.writeFileSync(path.join(output, name), installer);
+    fs.writeFileSync(path.join(output, 'START-HERE.md'), fs.readFileSync(path.join(root, 'docs/local-check-start.md'), 'utf8').replace('(releases/', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/releases/`));
     copy(path.join(root, 'docs/fanuc-shadow-self-service.md'), path.join(output, 'INSTALLATION.md'));
     copy(path.join(root, 'docs/interface-onboarding.md'), path.join(output, 'INTERFACE-ONBOARDING.md'));
     copy(path.join(root, 'docs/source-shadow-workspaces.md'), path.join(output, 'SOURCE-WORKSPACES.md'));

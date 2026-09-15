@@ -12,7 +12,7 @@ firmware and host source; it does not modify or run the upstream software.
 
 ## 1. Prepare the public-source example
 
-Use the [v1.5.0-shadow.14 evaluation bundle](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0-shadow.14).
+Use the [v1.5.0 Local Check bundle](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0).
 From its extracted directory on Linux x64, with Python 3 and Git available:
 
 ```sh

@@ -122,7 +122,7 @@ function usage(exitCode = 1): never {
 async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2);
   if (command === '--version' || command === '-V' || command === 'version') {
-    process.stdout.write(`rlsok runtime ${packageMetadata.version} (product v1.3.0)\n`);
+    process.stdout.write(`RLSOK ${packageMetadata.version}\n`);
   }
   else if (command === '--help' || command === '-h' || command === 'help') usage(0);
   else if (command === 'check' && args.length === 1) check(args[0]);
