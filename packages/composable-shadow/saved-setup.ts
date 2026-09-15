@@ -22,7 +22,7 @@ export const setupManifestSchema = z.object({
   schemaVersion: z.literal(1), id: name,
   source: z.object({ repository: name, commit: z.string().regex(/^[a-f0-9]{40}$/) }).strict(),
   scope: z.literal('saved-configuration-only'),
-  files: z.array(z.object({ id: name, path: name, format: z.enum(['json', 'yaml', 'text']) }).strict()).min(1).max(80),
+  files: z.array(z.object({ id: name, path: name, format: z.enum(['json', 'yaml', 'text']) }).strict()).min(1).max(200),
   bindings: z.array(setupBindingSchema).max(30),
 }).strict();
 export type SetupManifest = z.infer<typeof setupManifestSchema>;

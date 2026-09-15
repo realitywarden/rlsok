@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { dirname, resolve } from 'node:path';
 import { z } from 'zod';
 import { parseSaved, savedBytes, savedDocument } from './saved-setup';
+import { beastNodeParameters } from './beast-parameters';
 
 // Static selected-file inspection. No robot module is imported or executed.
 const requestSchema = z.object({ id: z.string().min(1), sourceCommit: z.string().regex(/^[a-f0-9]{40}$/),
@@ -101,14 +102,28 @@ export function inspectSavedInputs(recipe: string, source: string, inputPath: st
     const declared = [...sourceText.matchAll(/self\.declare_parameter\(\s*['"]([^'"]+)['"]\s*,\s*([^\n)]+)\)/g)].map(m => ({ name: m[1], defaultExpression: m[2].trim() }));
     facts.bridgeParameterDeclarations = declared;
     const selectedParameters = read('parameters','yaml');
-    const parameters = object(selectedParameters), p = object(parameters['/**']?.ros__parameters);
+    const selected = beastNodeParameters(selectedParameters, 'esp32_bridge'), p = selected.values;
     read('model','text'); read('launch','text');
-    if (Object.keys(parameters).length && !Object.keys(p).length) add('MISSING_PARAMETER_NAMESPACE','parameters','Expected selected /**.ros__parameters, or supply the effective wildcard file used by this bridge.');
+    if (selectedParameters !== undefined) for (const issue of selected.issues) add('PARAMETER_SELECTION_UNRESOLVED','parameters',issue);
     if (Object.hasOwn(p,'watchdog_timeout') && !declared.some(d => d.name === 'watchdog_timeout')) add('UNUSED_WATCHDOG_PARAMETER','parameters',`watchdog_timeout=${p.watchdog_timeout} is not declared by this bridge; cmd_vel_timeout is a different parameter.`);
     if (selectedParameters !== undefined && !Object.hasOwn(p,'cmd_vel_timeout')) add('TIMEOUT_NOT_EXPLICIT','parameters',`cmd_vel_timeout is absent. Source default: ${declared.find(d => d.name === 'cmd_vel_timeout')?.defaultExpression ?? 'unresolved'}; launch overrides are not inferred.`);
-    for (const key of ['baud_rate','track_radius','track_separation','max_linear_speed','max_angular_speed']) if (Object.keys(p).length && !(typeof p[key] === 'number' && Number.isFinite(p[key]) && p[key] > 0)) add('INVALID_DRIVE_PARAMETER','parameters',`${key} must be explicit and positive.`);
+    if (selectedParameters !== undefined && (typeof p.serial_port !== 'string' || !p.serial_port.trim())) add('MISSING_SERIAL_PORT','parameters','esp32_bridge.serial_port must be explicit.');
+    for (const key of ['baud_rate','cmd_vel_timeout']) if (Object.hasOwn(p,key) && !(typeof p[key] === 'number' && Number.isFinite(p[key]) && p[key] > 0)) add('INVALID_DRIVE_PARAMETER','parameters',`esp32_bridge.${key} must be positive.`);
+    if (selectedParameters !== undefined && !Object.hasOwn(p,'baud_rate')) add('MISSING_BAUD_RATE','parameters','esp32_bridge.baud_rate must be explicit.');
+    facts.parameterSelectors = selected.selectors;
+    facts.parameterPointers = selected.pointers;
+    facts.otherSavedNodeParameters = {};
+    for (const [node, fields] of Object.entries({ joy_teleop: ['max_linear_speed','max_angular_speed'], odom_publisher: ['track_separation'], keyboard_ctrl: ['linear_speed_limit','angular_speed_limit'] })) {
+      const selection = beastNodeParameters(selectedParameters,node);
+      if (selection.selectors.length) {
+        facts.otherSavedNodeParameters[node] = selection;
+        for (const issue of selection.issues) add('PARAMETER_SELECTION_UNRESOLVED','parameters',issue);
+        for (const key of fields) if (Object.hasOwn(selection.values,key) && !(typeof selection.values[key] === 'number' && Number.isFinite(selection.values[key]) && (selection.values[key] as number) > 0)) add('INVALID_DRIVE_PARAMETER','parameters',`${node}.${key} must be positive.`);
+      }
+    }
     facts.selectedBridgeParameters = selectedParameters === undefined ? { unavailable: true } : Object.fromEntries(declared.map(d => [d.name, Object.hasOwn(p,d.name) ? { selected: p[d.name] } : { absent: true, defaultExpression: d.defaultExpression }]));
     facts.voltagePolicy = 'Duplicate low_voltage_threshold keys are rejected with source line information. No voltage value is chosen automatically.';
+    facts.selectionScope = 'Saved root-node and wildcard blocks only. Values from joy_teleop, keyboard_ctrl and odom_publisher are not ESP32 bridge parameters. Launch-time overrides and node activation are not evaluated.';
   } else {
     const settings = object(read('settings','json')), controllers = object(read('controllers','yaml'));
     read('model','text'); read('launch','text');

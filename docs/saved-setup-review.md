@@ -17,7 +17,10 @@ rlsok profile prepare-saved-setup --recipe piper \
   --source /path/to/bimanual-vla --input selected-files.json --output setup-01
 ```
 
-Recipes: `piper`, `metal`, `aditya-so101`, `beast`, `cartesian`, `kuka-sunrise`.
+Recipes: `piper`, `metal`, `aditya-so101`, `beast`, `cartesian`, `kuka-sunrise`,
+`armpilot-remote`, `armpilot-3d`.
+For independent ArmPilot configuration copies, see
+[the ArmPilot walkthrough](armpilot-saved-review.md).
 For a confirmed Piper role map without a native launch configuration, use
 [the Piper role workflow](piper-confirmed-roles.md) instead of inventing launch arguments.
 For paired ROS bridge and Java application copies, see
@@ -222,14 +225,22 @@ position only: inspect the selected configuration before a user-run launch.
 
 ## Dons Beast
 
-Reviewed source: [Dons_Beast at 1ecf5e4f](https://github.com/Dwilliestyle/Dons_Beast/tree/1ecf5e4fd374f1bfa77630a51794ffd2e4b017dc).
+Current reviewed source: [Dons_Beast at f16b4e4a](https://github.com/Dwilliestyle/Dons_Beast/tree/f16b4e4a0010570fd47e2843ac4ade635e17b997).
 
 Files: `parameters` (selected `beast_params.yaml`), `model` (URDF/text), `launch`
-(text). Optional selector: `esp32` (serial). Duplicate YAML keys are rejected;
-the reviewed public file contains `low_voltage_threshold` twice. Select an
-unambiguous copy instead of relying on a parser's last-value behavior. The
-bridge declares `cmd_vel_timeout`; the public YAML's `watchdog_timeout` does
-not establish that parameter's live value.
+(text). Optional selector: `esp32` (serial). The current file separates
+`esp32_bridge`, `joy_teleop`, `keyboard_ctrl` and `odom_publisher` parameters.
+The bridge selection recognizes `esp32_bridge`, `/esp32_bridge` and `/**`.
+Conflicting overlapping values are refused instead of guessing launch
+precedence; identical overlapping serial fields are all updated during an
+explicit device-resolution operation. Other nodes' speed/geometry fields
+remain in their own saved groups and the complete YAML is compared.
+
+The earlier 1ecf5e4f file had duplicate `low_voltage_threshold` keys and
+`watchdog_timeout`. Upstream f16b4e4a removes the duplicate and selects
+`low_voltage_threshold: 10.0`, `cmd_vel_timeout: 0.5` for `esp32_bridge`.
+Those values come from the owner's public source, not an RLSOK choice.
+Duplicate keys are still rejected, and no saved value establishes a live value.
 
 `prepare-source --recipe dons-beast` additionally maps Twist into
 `esp32_bridge` and requires an existing read-only node-settings export for the

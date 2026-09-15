@@ -71,16 +71,23 @@ conversion and is not treated as a sixth arm joint.
 Use `--recipe beast` with `files.parameters`, `files.model`, `files.launch` and
 the selected Dons_Beast source checkout. The report lists the bridge's literal
 `declare_parameter` names/default expressions and selected wildcard values.
-It flags `watchdog_timeout` when the bridge instead declares
+Root-node blocks `esp32_bridge`, `/esp32_bridge` and the earlier `/**` wildcard
+are supported. The report records each selected value's pointer. Conflicting
+overlaps require an explicit effective file; the inspector does not guess
+precedence or execute a launch. Other nodes' speed/geometry values are kept in
+their own groups. It flags `watchdog_timeout` when the bridge instead declares
 `cmd_vel_timeout`, and flags an omitted explicit command timeout. Launch-time
 overrides are not evaluated. If YAML cannot be parsed, selected parameter
 values are reported as unavailable, not silently taken from the last duplicate.
 
-The [reviewed public file](https://github.com/Dwilliestyle/Dons_Beast/blob/1ecf5e4fd374f1bfa77630a51794ffd2e4b017dc/beast_bringup/config/beast_params.yaml)
-contains two `low_voltage_threshold` entries. The inspection preserves the
-parse error and line information. The project owner must supply the intended
-value/current file; RLSOK does not choose between 9 and 10 volts. No serial
-bridge, firmware update or velocity command is run.
+The [earlier public file](https://github.com/Dwilliestyle/Dons_Beast/blob/1ecf5e4fd374f1bfa77630a51794ffd2e4b017dc/beast_bringup/config/beast_params.yaml)
+contained two `low_voltage_threshold` entries. The owner's
+[updated f16b4e4a file](https://github.com/Dwilliestyle/Dons_Beast/blob/f16b4e4a0010570fd47e2843ac4ade635e17b997/beast_bringup/config/beast_params.yaml)
+removes the duplicate, uses per-node blocks, and explicitly selects 10.0 volts
+and `cmd_vel_timeout: 0.5` for the bridge. It produces `NO_STATIC_ISSUES` in
+the listed saved-file checks. Historical duplicate files still produce a
+parse error with line information. No serial bridge, firmware update or
+velocity command is run; launch overrides and actual stopping remain unobserved.
 
 ## Cartesian single/dual configuration and saved native messages
 

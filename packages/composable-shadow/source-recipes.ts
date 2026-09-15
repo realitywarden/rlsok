@@ -31,14 +31,14 @@ export const sourceRecipes: Record<string, SourceRecipe> = {
     boundary: 'Only the five-joint arm action. Different source and joint names from adoodevv/so101_ros2. The bridge owns LeRobot serial communication; direct JointState commands and gripper actions are separate paths. Use prepare-saved-setup aditya-so101 for the selected robot_id, calibration and motor map. Source controller state lists velocity while the C++ hardware exports position only: review before any customer-run launch. No physical connection is performed.'
   },
   'dons-beast': {
-    repository: 'Dwilliestyle/Dons_Beast', referenceCommit: '1ecf5e4fd374f1bfa77630a51794ffd2e4b017dc',
+    repository: 'Dwilliestyle/Dons_Beast', referenceCommit: 'f16b4e4a0010570fd47e2843ac4ade635e17b997',
     model: 'Dons Beast ESP32 bridge Twist input', endpoint: '/cmd_vel',
     interfaceType: 'geometry_msgs/msg/Twist', subscriber: 'esp32_bridge',
     nodeSettings: { node: '/esp32_bridge', parameters: { serial_port: 4, baud_rate: 2,
       feedback_rate: 3, min_angular_threshold: 3, low_voltage_threshold: 3, warning_cooldown: 3, cmd_vel_timeout: 3 } },
     files: ['beast_bringup/config/beast_params.yaml', 'beast_bringup/launch/robot.launch.py',
       'beast_bringup/scripts/esp32_bridge.py', 'beast_description/urdf/ugv_beast.urdf'],
-    boundary: 'ROS Twist input only; UART writes, firmware and physical stopping are not intercepted or attested. Read-only node settings must come from an already available isolated graph: do not launch esp32_bridge for discovery because construction opens serial. The public YAML has duplicate low_voltage_threshold entries and uses watchdog_timeout while the bridge declares cmd_vel_timeout. Select an unambiguous reviewed configuration.'
+    boundary: 'ROS Twist input only; UART writes, firmware and physical stopping are not intercepted or attested. Read-only node settings must come from an already available isolated graph: do not launch esp32_bridge for discovery because construction opens serial. The selected f16b4e4a YAML uses per-node parameters and an explicit cmd_vel_timeout. Saved parameters do not establish live values or launch overrides.'
   },
   'xarm1s-moveit-arm': {
     repository: 'allProgramming/ros2_xarm_1s_demos', referenceCommit: '3836e35a61064af2810c7d6174b5d5e841b1bf7b',

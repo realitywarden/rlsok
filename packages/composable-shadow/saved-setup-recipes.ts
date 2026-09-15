@@ -1,8 +1,9 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { z } from 'zod';
 import { parseSaved, savedBytes, savedDocument, setupBindingSchema, setupManifestSchema, type SetupManifest } from './saved-setup';
 import { inspectSavedInputs, savedInputMarkdown } from './saved-input-review';
+import { beastNodeParameters } from './beast-parameters';
 
 const selector = setupBindingSchema.shape.identity;
 const requestSchema = z.object({
@@ -15,6 +16,7 @@ const repositories: Record<string, string> = {
   'aditya-so101': 'iAdityaDev/so_101_arm', beast: 'Dwilliestyle/Dons_Beast',
   cartesian: 'leledeyuan00/cartesian_motion_base',
   'kuka-sunrise': 'LufsSeccus/Ros2_Kuka_External_Control_Bridge_API',
+  'armpilot-remote': 'zc110747/MeArmPilot', 'armpilot-3d': 'zc110747/MeArmPilot',
 };
 type Obj = Record<string, any>;
 function object(value: unknown, label: string): Obj {
@@ -39,6 +41,7 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
   const bindings: SetupManifest['bindings'] = [];
   const facts: string[] = [];
   const usedInputs = new Set<string>(), usedSelectors = new Set<string>();
+  const sourcePaths: Array<{id: string; path: string}> = [];
   function add(id: string, path: string, format: 'json' | 'yaml' | 'text') {
     if (files.some(f => f.id === id)) throw new Error('duplicate_setup_file');
     const bytes = savedBytes(path);
@@ -55,7 +58,18 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     return add(id, path, format);
   }
   function src(path: string) {
-    add(`source-${files.length}`, resolve(source, path), 'text');
+    const id = `source-${files.length}`;
+    add(id, resolve(source, path), 'text');
+    sourcePaths.push({id, path});
+  }
+  function sourceTree(directory: string, extensions: RegExp) {
+    for (const entry of readdirSync(resolve(source, directory), { withFileTypes: true }).sort((a,b) => a.name.localeCompare(b.name))) {
+      if (entry.name.startsWith('.') || ['tests','test','tools','node_modules','__pycache__'].includes(entry.name)) continue;
+      const path = directory + '/' + entry.name;
+      if (entry.isSymbolicLink()) throw new Error(`source_symlink_not_supported:${path}`);
+      if (entry.isDirectory()) sourceTree(path, extensions);
+      else if (extensions.test(entry.name) && !/(?:_test\.|\.test\.|\.spec\.)/.test(entry.name)) src(path);
+    }
   }
   function bind(role: string, kind: 'serial' | 'camera' | 'can', file: string, pointer: string, required = false) {
     const identity = request.selectors[role];
@@ -168,17 +182,81 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
       'Gripper uses a separate percentage/radian conversion. This is not the lowercase-joint adoodevv SO101 recipe.');
   } else if (recipe === 'beast') {
     const parameters = object(savedDocument(input('parameters', 'yaml'), 'yaml'), 'parameters');
-    const p = object(parameters['/**']?.ros__parameters, '/**.ros__parameters');
+    const selection = beastNodeParameters(parameters, 'esp32_bridge');
+    if (selection.issues.length) throw new Error(`beast_parameter_selection:${selection.issues.join('; ')}`);
+    const p = selection.values;
     text(p.serial_port, 'serial_port');
-    for (const key of ['baud_rate', 'track_radius', 'track_separation', 'max_linear_speed', 'max_angular_speed']) {
+    for (const key of ['baud_rate']) {
       if (typeof p[key] !== 'number' || !Number.isFinite(p[key]) || p[key] <= 0) throw new Error(`positive_parameter_required:${key}`);
     }
     input('model', 'text'); input('launch', 'text');
-    bind('esp32', 'serial', 'parameters', '/~1**/ros__parameters/serial_port');
+    bind('esp32', 'serial', 'parameters', selection.pointers.serial_port[0]);
+    // Identical overlapping selectors must all be rewritten when explicitly resolving.
+    if (request.selectors.esp32) bindings[bindings.length - 1].uses = selection.pointers.serial_port.map(pointer => ({ file: 'parameters', pointer }));
     src('beast_bringup/scripts/esp32_bridge.py');
-    facts.push('Duplicate YAML keys are refused: the reviewed public file defines low_voltage_threshold twice. Select an unambiguous local copy; no value is chosen automatically.',
+    facts.push('Root-node esp32_bridge, /esp32_bridge and /** parameter blocks are recognized. Conflicting overlapping values are refused; launch precedence is not inferred. Duplicate YAML keys remain errors.',
       'The public bridge declares cmd_vel_timeout, not watchdog_timeout. An omitted cmd_vel_timeout uses the bridge default; this saved review does not establish the live value.',
       'Firmware, UART delivery, odometry, collision stopping and physical compatibility are outside this snapshot.');
+  } else if (recipe === 'armpilot-remote' || recipe === 'armpilot-3d') {
+    const configuration = object(savedDocument(input('configuration', 'yaml'), 'yaml'), 'configuration');
+    const remote = recipe === 'armpilot-remote';
+    const serial = object(remote ? configuration.serial : configuration.device?.serial, 'serial');
+    text(serial.port, 'serial.port');
+    if (!Number.isSafeInteger(serial.baud) || serial.baud <= 0) throw new Error('positive_integer_serial_baud_required');
+    bind('arm', 'serial', 'configuration', remote ? '/serial/port' : '/device/serial/port');
+    if (remote) {
+      const joystick = object(configuration.joystick, 'joystick');
+      const ids = ['lx','ly','rx','ry'].map(axis => {
+        const id = joystick[axis + '_servo'];
+        if (!Number.isSafeInteger(id) || ![6,7,8,9].includes(id)) throw new Error(`reviewed_firmware_servo_id_required:${axis}`);
+        if (typeof joystick['invert_' + axis] !== 'boolean') throw new Error(`explicit_joystick_direction_required:${axis}`);
+        return id;
+      });
+      if (new Set(ids).size !== ids.length) throw new Error('duplicate_joystick_servo_assignment');
+      if (typeof joystick.deadband_deg !== 'number' || !Number.isFinite(joystick.deadband_deg) || joystick.deadband_deg < 0) throw new Error('nonnegative_joystick_deadband_required');
+      src('MeArm-RemoteControl/main.go');
+      src('MeArm-RemoteControl/go.mod'); src('MeArm-RemoteControl/go.sum');
+      sourceTree('MeArm-RemoteControl/internal', /\.go$/);
+      sourceTree('MeArm-RemoteControl/web/static/js', /\.js$/);
+      facts.push('RemoteControl: the complete selected YAML includes serial/ACK settings, web/TCP endpoints, joystick servo IDs, direction and deadband. The host and firmware source are copied, never run.');
+    } else {
+      choice(configuration.device?.mode, ['sim','mujoco','serial'], 'device_mode');
+      const selection = object(savedDocument(input('selection', 'json'), 'json'), 'selection');
+      const robotId = text(selection.robotId, 'selection.robotId');
+      if (robotId !== 'mearm-v1') throw new Error('armpilot_recipe_requires_reviewed_mearm_v1_package');
+      if (Object.keys(selection).some(key => key !== 'robotId')) throw new Error('unsupported_armpilot_selection_field');
+      const registry = object(savedDocument(input('robot_selector', 'yaml'), 'yaml'), 'robot_selector');
+      const selectedRobot = object(registry.robots?.[robotId], 'selected_robot');
+      const manifest = object(savedDocument(input('robot_manifest', 'yaml'), 'yaml'), 'robot_manifest');
+      const model = object(savedDocument(input('robot_model', 'yaml'), 'yaml'), 'robot_model');
+      input('physics','yaml'); input('model','text');
+      if (manifest.id !== robotId) throw new Error('armpilot_robot_identity_mismatch');
+      text(model.robot?.id, 'robot_model.robot.id');
+      if (selectedRobot.config !== manifest.model?.config || selectedRobot.physics !== manifest.model?.physics) throw new Error('armpilot_selector_manifest_mismatch');
+      if (!Array.isArray(model.actuators) || !model.actuators.length) throw new Error('armpilot_actuator_map_required');
+      src('MeArm-3D/backend/main.go');
+      src('MeArm-3D/backend/go.mod'); src('MeArm-3D/backend/go.sum');
+      sourceTree('MeArm-3D/backend/internal', /\.go$/);
+      sourceTree('MeArm-3D/frontend/src/robot', /\.ts$/);
+      sourceTree('MeArm-3D/frontend/src/store', /\.ts$/);
+      src('MeArm-3D/frontend/src/hooks/useAutoConnect.ts');
+      src('MeArm-3D/frontend/package.json');
+      sourceTree('MeArm-3D/robot-package/mearm-v1/kinematics', /\.ts$/);
+      sourceTree('MeArm-3D/simulation/mujoco', /\.py$/);
+      facts.push(`3D backend: selected robot ${robotId}, saved device mode ${configuration.device.mode}. Selection is an operator record; command-line overrides and the installed model are not discovered.`,
+        `Package id ${manifest.id} and model-internal id ${model.robot.id} are distinct upstream identifiers; they are recorded without forcing them to be identical.`,
+        'The selected registry, package manifest, robot model/calibration, physics and URDF are separate copied inputs. Model dimensions, joint coupling, actuator offset/scale/reverse, limits and home pose are compared without calculating motion or running a model generator.',
+        'The repository is being restructured. This recipe compares the explicitly selected files; it does not certify that deprecated config_path or other runtime selection fields are effective.');
+    }
+    sourceTree('MeArm-Device/core', /\.(?:c|h|cpp)$/);
+    sourceTree('MeArm-Device/bsp', /\.(?:c|h|cpp)$/);
+    src('MeArm-Device/platformio.ini');
+    const mapName = 'source-files.json';
+    files.push({id: 'source-map', path: mapName, format: 'json'});
+    content.set(mapName, Buffer.from(JSON.stringify(sourcePaths,null,2)+'\n'));
+    facts.push('This independent prototype copies selected source/configuration files only. It does not modify ArmPilot, launch its frontend/backend or simulator, open WebSocket/TCP/serial connections, flash firmware or send servo commands.',
+      'Firmware source changes invalidate the saved comparison; the installed firmware binary, EEPROM calibration and physical unit are not observed. Source defaults are not measured hardware facts.',
+      'The reviewed MeArm serial state is an internal target for an open-loop servo, not encoder evidence that the arm reached a position. UNCHANGED means selected copies match, not that motion is safe or authorized.');
   } else if (recipe === 'kuka-sunrise') {
     for (const [id, path] of Object.entries({
       bridge: 'kuka_udp_bridge_node/src/udp_bridge_node.cpp', sunrise: 'UDP_bridge.java',
