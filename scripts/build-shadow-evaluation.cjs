@@ -86,6 +86,7 @@ const copy = (source, target) => {
       fs.readFileSync(path.join(root, 'docs/saved-setup-review.md'), 'utf8')
         .replace('(piper-confirmed-roles.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/piper-confirmed-roles.md)`)
         .replace('(armpilot-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/armpilot-saved-review.md)`)
+        .replace('(pioneer-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/pioneer-saved-review.md)`)
         .replace('(kuka-sunrise-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/kuka-sunrise-saved-review.md)`)
         .replace('(selected-input-inspection.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/selected-input-inspection.md)`));
     fs.writeFileSync(path.join(output, 'SELECTED-INPUT-INSPECTION.md'),
@@ -95,6 +96,9 @@ const copy = (source, target) => {
     copy(path.join(root, 'docs/kuka-sunrise-saved-review.md'), path.join(output, 'KUKA-SUNRISE-REVIEW.md'));
     fs.writeFileSync(path.join(output, 'ARMPILOT-SAVED-REVIEW.md'),
       fs.readFileSync(path.join(root, 'docs/armpilot-saved-review.md'), 'utf8')
+        .replaceAll('(saved-setup-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/saved-setup-review.md)`));
+    fs.writeFileSync(path.join(output, 'PIONEER-SAVED-REVIEW.md'),
+      fs.readFileSync(path.join(root, 'docs/pioneer-saved-review.md'), 'utf8')
         .replaceAll('(saved-setup-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/saved-setup-review.md)`));
     copy(path.join(root, 'docs/email-feedback-evaluation-20260910.md'), path.join(output, 'FEEDBACK-EVALUATION.md'));
     copy(path.join(root, 'docs/email-feedback-afternoon-20260910.md'), path.join(output, 'AFTERNOON-FEEDBACK.md'));

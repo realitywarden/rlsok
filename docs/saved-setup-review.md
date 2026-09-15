@@ -18,7 +18,9 @@ rlsok profile prepare-saved-setup --recipe piper \
 ```
 
 Recipes: `piper`, `metal`, `aditya-so101`, `beast`, `cartesian`, `kuka-sunrise`,
-`armpilot-remote`, `armpilot-3d`.
+`armpilot-remote`, `armpilot-3d`, `pioneer-x`.
+
+For Pioneer-X tracker selection, see [the offline comparison guide](pioneer-saved-review.md).
 For independent ArmPilot configuration copies, see
 [the ArmPilot walkthrough](armpilot-saved-review.md).
 For a confirmed Piper role map without a native launch configuration, use

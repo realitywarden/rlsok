@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { parseSaved, savedBytes, savedDocument, setupBindingSchema, setupManifestSchema, type SetupManifest } from './saved-setup';
 import { inspectSavedInputs, savedInputMarkdown } from './saved-input-review';
 import { beastNodeParameters } from './beast-parameters';
+import { pioneerSettingsSchema } from './pioneer-settings';
 
 const selector = setupBindingSchema.shape.identity;
 const requestSchema = z.object({
@@ -17,6 +18,7 @@ const repositories: Record<string, string> = {
   cartesian: 'leledeyuan00/cartesian_motion_base',
   'kuka-sunrise': 'LufsSeccus/Ros2_Kuka_External_Control_Bridge_API',
   'armpilot-remote': 'zc110747/MeArmPilot', 'armpilot-3d': 'zc110747/MeArmPilot',
+  'pioneer-x': 'DaneelOlivawXJose/pioneer-ros2-diff-drive',
 };
 type Obj = Record<string, any>;
 function object(value: unknown, label: string): Obj {
@@ -257,6 +259,23 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
     facts.push('This independent prototype copies selected source/configuration files only. It does not modify ArmPilot, launch its frontend/backend or simulator, open WebSocket/TCP/serial connections, flash firmware or send servo commands.',
       'Firmware source changes invalidate the saved comparison; the installed firmware binary, EEPROM calibration and physical unit are not observed. Source defaults are not measured hardware facts.',
       'The reviewed MeArm serial state is an internal target for an open-loop servo, not encoder evidence that the arm reached a position. UNCHANGED means selected copies match, not that motion is safe or authorized.');
+  } else if (recipe === 'pioneer-x') {
+    const settings = pioneerSettingsSchema.parse(savedDocument(input('settings','json'),'json'));
+    input('firmware','text');
+    for (const pkg of ['master_esp32','navegacion_completa_pkg','planificador_rutas','joy_controller']) {
+      const directory = 'ros2_ws/src/' + pkg;
+      sourceTree(directory, /\.(?:cpp|hpp|h)$/);
+      src(directory + '/package.xml'); src(directory + '/CMakeLists.txt');
+    }
+    src('ros2_ws/src/navegacion_completa_pkg/action/NavigateToNode.action');
+    files.push({id: 'source-map', path: 'source-files.json', format: 'json'});
+    content.set('source-files.json', Buffer.from(JSON.stringify(sourcePaths,null,2)+'\n'));
+    facts.push(`Selected saved algorithm: ${settings.algorithm}. The settings file is the JSON body used at /web/settings/algoritmo; every reviewed tracker field is explicit. No MPC callback defaults are substituted.`,
+      'The master forwards PURE_PURSUIT to /settings/pure_pursuit and MPC to /settings/mpc_controller; their cmd_vel output reaches the ESP32 Twist subscription. This is a source description, not an observed connection or installed gate.',
+      'Both reviewed trackers and the surrounding master/navigation/teleop source are copied with a path map. Algorithm, settings, firmware and source changes require a new comparison; the old baseline is not updated.',
+      'CARROT/PROPORTIONAL is not accepted by this saved-settings recipe. At the reviewed public source the master publishes /planificador/ruta_prop while the proportional node subscribes /planificador/ruta, and no proportional settings callback is present. Its actual updated source/remapping is needed before claiming that selection.',
+      'SCADA source and a live settings export are absent from the reviewed public checkout. Example settings are source-derived examples, not the owner’s running configuration. The supplied firmware file/hash and Git commit do not establish the flashed binary or dependency/toolchain versions.',
+      'No SCADA, ROS, micro-ROS, node launch, firmware execution, network connection or motor command occurs. Live algorithm switching, command arbitration, physical identity and tracking performance are not evaluated. Keep any private WiFi values in firmware copies local.');
   } else if (recipe === 'kuka-sunrise') {
     for (const [id, path] of Object.entries({
       bridge: 'kuka_udp_bridge_node/src/udp_bridge_node.cpp', sunrise: 'UDP_bridge.java',
