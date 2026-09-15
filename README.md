@@ -1,12 +1,26 @@
 # RLSOK
 
 [![CI](https://github.com/realitywarden/rlsok/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/realitywarden/rlsok/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/realitywarden/rlsok?display_name=tag)](https://github.com/realitywarden/rlsok/releases/latest)
+[![Local Check 1.5.0](https://img.shields.io/badge/Local_Check-1.5.0-blue)](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
-RLSOK binds learned-policy execution to the exact release, robot, controller,
-and approval intended to run. The robot-side gate rechecks Hosted Cloud before
-ROS 2 dispatch and writes verifiable Evidence.
+RLSOK helps you see when robot settings no longer match the version you reviewed.
+It includes local configuration checks and a separate workflow for reviewing
+robot software execution approvals.
+
+**[Website](https://rlsok.com) · [Try the example](https://rlsok.com/download) · [Documentation](https://rlsok.com/docs) · [What changed](https://rlsok.com/updates)**
+
+## Try the included example
+
+Start at **[rlsok.com/download](https://rlsok.com/download)**. The current local
+checking tool is **RLSOK Local Check 1.5.0**. On Ubuntu 22.04 or 24.04, Intel/AMD
+64-bit, the approximately 45 MB download includes its runtime. The example
+needs no robot, ROS installation or account and sends no robot commands.
+Windows and Mac users can watch the example on the same page.
+
+The two reports show matching settings and a changed calibration value.
+Follow [the first-run guide](docs/local-check-start.md), then choose a guide
+for your own project files. Older releases and emailed links remain available.
 
 ## Zero-to-Shadow
 
@@ -16,9 +30,9 @@ For reusable interface selection and field mapping, open the
 processed in the browser; exported workspaces are consumed by the local CLI.
 
 For the FANUC/Humble composable workflow, download the separate
-[v1.5.0-shadow.6 evaluation package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0-shadow.6)
+[Local Check 1.5.0 package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0)
 and follow the [installation-to-Evidence guide](docs/fanuc-shadow-self-service.md).
-This locally reviewed/built prerelease has not been validated on Humble or a
+This local workflow has not been validated on Humble or a
 physical FANUC. It does not change the stable Cloud or v1.4.5 installer below.
 
 Start with [inputs, offline use and result interpretation](docs/local-shadow-first-evaluation.md).
