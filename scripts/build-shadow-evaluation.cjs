@@ -71,9 +71,14 @@ const copy = (source, target) => {
       scope: 'local-self-attested-shadow-evaluation', cloudUploaded: false,
       validation: { typescriptBuild: 'completed', localTests: 'see_committed_release_notes', validationRecord: `docs/releases/v${version}.md`, githubActions: 'not_run', installedBundle: 'not_run', humble: 'not_validated', privateInterfaces: 'unknown', physicalRobot: 'not_validated' } };
     json(path.join(stage, 'BUILD-MANIFEST.json'), build);
-    const response = await fetch(nodeUrl, { signal: AbortSignal.timeout(120000) });
-    if (!response.ok) throw new Error(`node_download_http_${response.status}`);
-    const nodeBytes = Buffer.from(await response.arrayBuffer());
+    let nodeBytes;
+    if (process.env.RLSOK_NODE_ARCHIVE) {
+      nodeBytes = fs.readFileSync(process.env.RLSOK_NODE_ARCHIVE);
+    } else {
+      const response = await fetch(nodeUrl, { signal: AbortSignal.timeout(120000) });
+      if (!response.ok) throw new Error(`node_download_http_${response.status}`);
+      nodeBytes = Buffer.from(await response.arrayBuffer());
+    }
     if (hash(nodeBytes) !== nodeSha256) throw new Error('node_archive_checksum_mismatch');
     fs.writeFileSync(path.join(temporary, nodeName), nodeBytes);
     const archiveName = `${bundlePrefix}-${version}-linux-x64.tar.gz`;
