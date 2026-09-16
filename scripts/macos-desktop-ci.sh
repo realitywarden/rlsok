@@ -91,7 +91,7 @@ sudo installer -pkg "$package" -target / 2>&1 | tee "$evidence/reinstall.log"
 "$resources/bin/node" "$resources/desktop.mjs" stop
 test "$("$resources/bin/node" "$resources/desktop.mjs" status)" = '{"api":false,"web":false,"database":false}'
 test "$app" = /Applications/RLSOK.app
-mv "$app" "$RUNNER_TEMP/RLSOK.removed.app"
+sudo mv "$app" "$RUNNER_TEMP/RLSOK.removed.app"
 test ! -e "$app"
 test -f "$state/desktop.json"
 sudo pkgutil --forget com.rlsok.desktop > "$evidence/removal.txt"
