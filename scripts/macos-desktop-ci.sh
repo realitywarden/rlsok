@@ -48,6 +48,21 @@ uname -m >> "$evidence/macos.txt"
 printf '%s\n' "$GITHUB_SHA" > "$evidence/workflow-source.txt"
 printf '%s\n' "$CANDIDATE_SHA256" > "$evidence/input-archive-sha256.txt"
 
+# Apply the exact source from this checkout to the checksummed base distribution.
+# Record the base separately; the native installer is bound to this source SHA.
+cp "$GITHUB_WORKSPACE/scripts/macos-desktop-launcher.mjs" "$bundle/RLSOK.app/Contents/Resources/desktop.mjs"
+cp "$GITHUB_WORKSPACE/scripts/macos-desktop-web-launcher.mjs" "$bundle/RLSOK.app/Contents/Resources/web-launcher.mjs"
+python3 - "$bundle/RLSOK.app/Contents/Resources/BUILD-MANIFEST.json" "$GITHUB_SHA" <<'PY'
+import json,sys
+path,source=sys.argv[1:]
+with open(path) as f: manifest=json.load(f)
+manifest['basePackagingSourceCommit']=manifest['packagingSourceCommit']
+manifest['packagingSourceCommit']=source
+manifest['packagingRepository']='realitywarden/rlsok'
+manifest['nativeInstallerSources']=['scripts/macos-desktop-pkg.sh','scripts/macos-desktop-launcher.mjs','scripts/macos-desktop-web-launcher.mjs']
+with open(path,'w') as f: json.dump(manifest,f,indent=2); f.write('\n')
+PY
+
 bash "$GITHUB_WORKSPACE/scripts/macos-desktop-pkg.sh" "$bundle" 2>&1 | tee "$evidence/pkgbuild.log"
 package="$bundle/rlsok-1.3.2-macos-$MAC_ARCH.pkg"
 (cd "$bundle" && shasum -a 256 "$(basename "$package")" > "$(basename "$package").sha256")

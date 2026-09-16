@@ -7,6 +7,8 @@ on:
       - '.github/workflows/macos-desktop-install.yml'
       - 'scripts/macos-desktop-ci.*'
       - 'scripts/macos-desktop-pkg.sh'
+      - 'scripts/macos-desktop-launcher.mjs'
+      - 'scripts/macos-desktop-web-launcher.mjs'
       - 'scripts/verify-macos-local-workspace.mjs'
   workflow_dispatch:
 
