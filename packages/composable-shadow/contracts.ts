@@ -41,6 +41,13 @@ export const pathSchema = z.discriminatedUnion('adapter', [
     maxRotationDeg: z.number().finite().positive(),
     maxVelocityMmS: z.number().finite().positive()
   }).strict() }).strict(),
+  z.object({ ...commonPath, adapter: z.literal('cartesian_absolute_wpr'), fields: z.object({
+    position: z.tuple([pointer, pointer, pointer]),
+    rotation: z.tuple([pointer, pointer, pointer]),
+    velocity: pointer, frame: pointer, expectedFrame: text,
+    defaultVelocityMmS: z.number().int().min(1).max(65535),
+    maxVelocityMmS: z.number().int().min(1).max(65535)
+  }).strict() }).strict(),
   z.object({ ...commonPath, adapter: z.literal('tp_program'), fields: z.object({
     program: pointer, allowedPrograms: z.array(text).min(1).max(128)
   }).strict() }).strict()
@@ -77,6 +84,11 @@ export const profileSchema = z.object({
     if (a.checks.some(c => !p.facts.some(f => f.id === c))) issue(`unknown fact: ${a.id}`);
     if (a.adapter === 'joint_trajectory' && a.actionType !== 'control_msgs/action/FollowJointTrajectory') issue(`trajectory adapter requires FollowJointTrajectory: ${a.id}`);
     if (a.adapter === 'tp_program' && new Set(a.fields.allowedPrograms).size !== a.fields.allowedPrograms.length) issue(`duplicate programs: ${a.id}`);
+    if (a.adapter === 'cartesian_absolute_wpr') {
+      if (a.fields.defaultVelocityMmS > a.fields.maxVelocityMmS) issue(`default velocity exceeds selected maximum: ${a.id}`);
+      const pointers = [...a.fields.position, ...a.fields.rotation, a.fields.velocity, a.fields.frame];
+      if (new Set(pointers).size !== pointers.length) issue(`duplicate absolute WPR mapped fields: ${a.id}`);
+    }
   }
   if (p.facts.some(f => !p.paths.some(a => a.checks.includes(f.id)))) issue('unused fact: assign every fact to at least one path');
 });

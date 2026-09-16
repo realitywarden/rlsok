@@ -27,7 +27,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
   rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
-  rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x> --source <checkout> --input <selected-files.json> --output <new-directory>
+  rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x|modular-diffbot|piper-cpp> --source <checkout> --input <selected-files.json> --output <new-directory>
   rlsok profile inspect-saved-inputs --recipe <aditya-so101|beast|cartesian> --source <checkout> --input <selected-files.json> --output <new-directory>
   rlsok profile discover-setup-devices --output <new-inventory.json> [--python <python3>]
   rlsok profile resolve-setup --manifest <manifest.json> --inventory <inventory.json> --output <new-directory>

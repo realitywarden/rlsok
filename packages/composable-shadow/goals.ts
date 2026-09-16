@@ -48,6 +48,18 @@ export function validateGoal(p: Profile, path: Path, goal: Record<string, unknow
     if (typeof velocity !== 'number' || !Number.isFinite(velocity) || velocity <= 0 || velocity > path.fields.maxVelocityMmS) return 'cartesian_delta_velocity_invalid';
     return atPointer(goal, path.fields.frame) === path.fields.expectedFrame ? null : 'cartesian_delta_frame_mismatch';
   }
+  if (path.adapter === 'cartesian_absolute_wpr') {
+    // Native absolute XYZ (mm) and FANUC W/P/R (degrees). Never reinterpret as
+    // relative displacement, normalize angles, convert to a quaternion or send.
+    const position = path.fields.position.map(pointer => atPointer(goal, pointer));
+    const rotation = path.fields.rotation.map(pointer => atPointer(goal, pointer));
+    const velocity = atPointer(goal, path.fields.velocity);
+    if (!finiteVector(position, 3) || !finiteVector(rotation, 3)) return 'cartesian_absolute_wpr_pose_invalid';
+    if (typeof velocity !== 'number' || !Number.isInteger(velocity) || velocity < 0 || velocity > 65535) return 'cartesian_absolute_wpr_velocity_invalid';
+    const effectiveVelocity = velocity === 0 ? path.fields.defaultVelocityMmS : velocity;
+    if (effectiveVelocity > path.fields.maxVelocityMmS) return 'cartesian_absolute_wpr_velocity_out_of_bounds';
+    return atPointer(goal, path.fields.frame) === path.fields.expectedFrame ? null : 'cartesian_absolute_wpr_frame_mismatch';
+  }
   const names = atPointer(goal, path.fields.jointNames);
   if (!Array.isArray(names) || names.length !== p.jointOrder.length || names.some((name, index) => name !== p.jointOrder[index])) return 'trajectory_joint_order_mismatch';
   const points = atPointer(goal, path.fields.points);

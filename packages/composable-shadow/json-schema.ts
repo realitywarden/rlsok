@@ -38,6 +38,7 @@ export function interfaceSchemas(): Record<string, unknown> {
         topic_twist: 'Standard Twist/TwistStamped linear XYZ in m/s and angular XYZ in rad/s; explicit receiver and command frame. Stamped frame and timestamp structure are checked; no velocity safety bounds.',
         cartesian_pose: 'Absolute position in meters; quaternion in x,y,z,w order. A pointer selects a numeric array or a ROS x/y/z[/w] object; alternatively supply one pointer per component.',
         cartesian_delta: 'Relative translation in millimeters, W/P/R rotation in degrees, positive velocity in millimeters per second.',
+        cartesian_absolute_wpr: 'Absolute XYZ in millimeters and native FANUC W/P/R in degrees, without conversion or angle normalization. uint16 velocity in mm/s; zero uses the explicitly reviewed default. The frame label must match; it does not verify the active controller frame/tool or perform TF. Finite targets and selected velocity limits do not establish reachability or motion safety.',
         tp_program: 'Exact program selector from the approved allowlist.',
         joint_trajectory: 'ROS FollowJointTrajectory shape with configured joint order, radians and increasing time_from_start.'
       },

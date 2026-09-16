@@ -1,0 +1,16 @@
+{
+  "mode": "real-saved-copies",
+  "parameters": {
+    "esp_ip": "127.0.0.1",
+    "esp_port": 8080,
+    "socket_timeout_sec": 2.0,
+    "reconnect_interval_sec": 3.0,
+    "wheel_base": 0.1,
+    "wheel_radius": 0.0325,
+    "max_pwm": 200,
+    "speed_to_pwm_scale": 14.0
+  },
+  "teleop": {"speed": 0.3, "turn": 3.45},
+  "remappings": {},
+  "provenance": "source-default-example"
+}

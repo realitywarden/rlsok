@@ -161,6 +161,7 @@ function mappedPointers(path: Path): string[] {
   if (path.adapter === 'joint_trajectory') return [path.fields.jointNames, path.fields.points];
   if (path.adapter === 'tp_program') return [path.fields.program];
   if (path.adapter === 'cartesian_delta') return [...path.fields.translation, ...path.fields.rotation, path.fields.velocity, path.fields.frame];
+  if (path.adapter === 'cartesian_absolute_wpr') return [...path.fields.position, ...path.fields.rotation, path.fields.velocity, path.fields.frame];
   return [path.fields.position, path.fields.orientation].flat().concat(path.fields.frame);
 }
 

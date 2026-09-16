@@ -116,10 +116,10 @@ export async function evaluateProfile(input: {
       metadata: { name: `${p.id}.${path.id}`, releaseId: `${p.id}.${path.id}.${a.profileSha256.slice(0, 16)}`, createdAt: a.approvedAt },
       model: { artifact: 'profile.json', sha256: profileDigest, framework: 'ros2', policyType: `shadow/${path.adapter}`, codeRevision: 'composable-shadow/v1' },
       actionContract: { representation: path.adapter === 'topic_twist' ? 'twist' : path.adapter === 'joint_trajectory' ? 'trajectory' : path.adapter === 'tp_program' ? 'program' : path.adapter,
-        dimension: path.adapter === 'joint_trajectory' ? p.jointOrder.length : path.adapter === 'cartesian_pose' ? 7 : ['cartesian_delta', 'topic_twist'].includes(path.adapter) ? 6 : 1,
+        dimension: path.adapter === 'joint_trajectory' ? p.jointOrder.length : path.adapter === 'cartesian_pose' ? 7 : ['cartesian_delta', 'cartesian_absolute_wpr', 'topic_twist'].includes(path.adapter) ? 6 : 1,
         jointOrder: path.adapter === 'joint_trajectory' ? p.jointOrder : [],
-        units: { position: path.adapter === 'joint_trajectory' ? 'radian' : ['cartesian_pose', 'topic_twist'].includes(path.adapter) ? 'meter' : path.adapter === 'cartesian_delta' ? 'millimeter' : 'none',
-          velocity: path.adapter === 'joint_trajectory' ? 'radian_per_second' : path.adapter === 'cartesian_delta' ? 'mm_per_second' : path.adapter === 'topic_twist' ? 'linear:m/s;angular:rad/s' : 'none' },
+        units: { position: path.adapter === 'joint_trajectory' ? 'radian' : ['cartesian_pose', 'topic_twist'].includes(path.adapter) ? 'meter' : ['cartesian_delta', 'cartesian_absolute_wpr'].includes(path.adapter) ? 'millimeter' : 'none',
+          velocity: path.adapter === 'joint_trajectory' ? 'radian_per_second' : ['cartesian_delta', 'cartesian_absolute_wpr'].includes(path.adapter) ? 'mm_per_second' : path.adapter === 'topic_twist' ? 'linear:m/s;angular:rad/s' : 'none' },
         normalizerSha256: hashObject(path.fields), preprocessorSha256: hashObject(path.adapter), postprocessorSha256: hashObject('zero-dispatch') },
       robot: { profileId: p.id, profileSha256: profileDigest, urdfSha256: p.robot.urdfSha256, controllerType: p.robot.controller, controllerConfigSha256: binding },
       runtimePolicy: { policySha256: profileDigest, maxStateAgeMs: p.maxObservationAgeMs, maxConfigurationAgeMs: p.maxObservationAgeMs, failClosed: true },
@@ -171,7 +171,8 @@ export async function evaluateProfile(input: {
       'Topic proposals are supplied local message examples; no live messages are intercepted, forwarded or published. Other nodes can still command a robot: use an isolated simulation.',
       'Twist uses the operator-declared command frame; only TwistStamped includes a checked frame ID. Limits, collision checks and readiness remain the existing controller responsibility.',
       'File hashes prove local file content; timestamped JSON facts require a trusted read-only exporter of active controller state.',
-      'Goal adapters check declared fields and configuration eligibility, not complete ROS serialization or physical motion safety.'
+      'Goal adapters check declared fields and configuration eligibility, not complete ROS serialization or physical motion safety.',
+      'Absolute WPR checks preserve native mm/degrees and a selected velocity default; matching a ROS frame label does not verify active controller tool/frame, transform coordinates, establish reachability or validate physical speed. A zero pose is an absolute target, not a no-op. TP selector eligibility does not prove program execution or session recovery.'
     ]
   };
 }

@@ -19,6 +19,7 @@ const repositories: Record<string, string> = {
   'kuka-sunrise': 'LufsSeccus/Ros2_Kuka_External_Control_Bridge_API',
   'armpilot-remote': 'zc110747/MeArmPilot', 'armpilot-3d': 'zc110747/MeArmPilot',
   'pioneer-x': 'DaneelOlivawXJose/pioneer-ros2-diff-drive',
+  'modular-diffbot': 'E-Moynul/ros2_modular_diffbot', 'piper-cpp': 'justagist/piper_cpp',
 };
 type Obj = Record<string, any>;
 function object(value: unknown, label: string): Obj {
@@ -276,6 +277,57 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
       'CARROT/PROPORTIONAL is not accepted by this saved-settings recipe. At the reviewed public source the master publishes /planificador/ruta_prop while the proportional node subscribes /planificador/ruta, and no proportional settings callback is present. Its actual updated source/remapping is needed before claiming that selection.',
       'SCADA source and a live settings export are absent from the reviewed public checkout. Example settings are source-derived examples, not the owner’s running configuration. The supplied firmware file/hash and Git commit do not establish the flashed binary or dependency/toolchain versions.',
       'No SCADA, ROS, micro-ROS, node launch, firmware execution, network connection or motor command occurs. Live algorithm switching, command arbitration, physical identity and tracking performance are not evaluated. Keep any private WiFi values in firmware copies local.');
+  } else if (recipe === 'modular-diffbot') {
+    const settings = z.object({
+      mode: z.literal('real-saved-copies'),
+      parameters: z.object({
+        esp_ip: z.string().min(1), esp_port: z.number().int().min(1).max(65535),
+        socket_timeout_sec: z.number().finite().positive(), reconnect_interval_sec: z.number().finite().positive(),
+        wheel_base: z.number().finite().positive(), wheel_radius: z.number().finite().positive(),
+        max_pwm: z.number().int().min(1).max(255), speed_to_pwm_scale: z.number().finite().positive()
+      }).strict(),
+      teleop: z.object({ speed: z.number().finite().positive(), turn: z.number().finite().positive() }).strict(),
+      remappings: z.record(z.string().min(1)),
+      provenance: z.enum(['source-default-example', 'operator-selected'])
+    }).strict().parse(savedDocument(input('settings','json'),'json'));
+    for (const id of ['bridge','firmware','launch','model','model_core','model_gazebo']) input(id,'text');
+    src('package.xml'); src('setup.py'); src('setup.cfg');
+    facts.push(`Selected real-path saved copies (${settings.provenance}); all parameter, teleop and remapping entries are retained. No node or firmware is executed.`,
+      'Bridge, firmware, real launch and all three model Xacro copies are compared together. The bridge performs open-loop PWM conversion; this review does not measure speed or discover the flashed binary.',
+      'At reviewed upstream source 84b2fe17, bridge max_pwm defaults to 200 but firmware setMotor caps it again at 100. These are separate settings; review both source copies rather than treating max_pwm as measured motor output.',
+      'The selected real launch does not start robot_state_publisher; model copies document intended geometry, not an observed live model. Gazebo plugin settings are not the real TCP/WiFi path.',
+      'Selected firmware may contain WiFi credentials. All copied files and reports stay local; do not upload or email the raw workspace. No TCP, WiFi, serial, ROS, motor connection, firmware flashing or live command interception occurs.');
+  } else if (recipe === 'piper-cpp') {
+    const selection = z.object({
+      entrypoint: z.enum(['piper_cpp_ros/piper_control.launch.py', 'piper_cpp_moveit/piper_moveit.launch.py']),
+      arguments: z.object({
+        description_package: z.string().min(1), description_file: z.string().min(1), controllers_file: z.string().min(1),
+        use_real_hardware: z.boolean(), can_interface: z.string().min(1),
+        speed_pct: z.number().int().min(1).max(100), go_to_zero_on_activate: z.boolean(),
+        with_gripper: z.boolean(), gripper_max_effort: z.number().finite().min(0).max(5), home_gripper_on_activate: z.boolean()
+      }).passthrough(), provenance: z.enum(['source-default-example', 'operator-selected'])
+    }).strict().parse(savedDocument(input('selection','json'),'json'));
+    input('controllers','yaml'); input('model','text');
+    if (selection.entrypoint.startsWith('piper_cpp_moveit/')) {
+      for (const id of ['moveit_controllers','joint_limits','kinematics','planning']) input(id,'yaml');
+      input('semantic_model','text');
+    }
+    for (const pkg of ['piper_cpp','piper_cpp_ros','piper_cpp_moveit']) {
+      src(pkg + '/CMakeLists.txt');
+      if (pkg !== 'piper_cpp') src(pkg + '/package.xml');
+    }
+    sourceTree('piper_cpp/include', /\.(?:h|hpp)$/); sourceTree('piper_cpp/src', /\.(?:cpp|h|hpp)$/);
+    sourceTree('piper_cpp_ros/include', /\.(?:h|hpp)$/); sourceTree('piper_cpp_ros/src', /\.(?:cpp|h|hpp)$/);
+    sourceTree('piper_cpp_ros/urdf', /\.xacro$/); sourceTree('piper_cpp_ros/launch', /\.py$/);
+    sourceTree('piper_cpp_moveit/launch', /\.py$/); sourceTree('piper_cpp_moveit/srdf', /\.xacro$/);
+    files.push({id:'source-map',path:'source-files.json',format:'json'});
+    content.set('source-files.json',Buffer.from(JSON.stringify(sourcePaths,null,2)+'\n'));
+    bind('arm-can','can','selection','/arguments/can_interface');
+    facts.push(`Selected ${selection.entrypoint}; gripper=${selection.arguments.with_gripper}, real hardware=${selection.arguments.use_real_hardware}, provenance=${selection.provenance}. These are saved declarations, not a controller observation.`,
+      'Explicit selection retains CAN name, speed cap, activation-to-zero and gripper homing choices. Arm/gripper toggles and description/controller overrides are compared together; an override can change the meaning of a toggle.',
+      'The selected model must be the complete saved expanded robot_description, including external piper_description content. Xacro is never executed by this tool. Source copies do not establish installed package resolution, hardware calibration or firmware.',
+      'CAN interface names alone are not physical device identity. Optional operator-supplied selectors may bind a saved inventory; no CAN socket is opened.',
+      'The SDK, hardware interface and launch sources are read as bytes only. No driver is loaded, arm enabled, CAN configured, activation/home command sent or MoveIt/controller launched. This is an independent free file comparison, not an upstream contribution or safety approval.');
   } else if (recipe === 'kuka-sunrise') {
     for (const [id, path] of Object.entries({
       bridge: 'kuka_udp_bridge_node/src/udp_bridge_node.cpp', sunrise: 'UDP_bridge.java',

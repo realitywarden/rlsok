@@ -283,3 +283,10 @@ All files must be regular files under 8 MiB; symlink inputs, malformed JSON,
 duplicate YAML/JSON keys, non-JSON YAML types and excessively nested documents
 are refused. Keep generated snapshots private: they can contain local paths,
 device serials and any configuration values you selected.
+
+## Additional source-specific selections
+
+- [Modular DiffBot: selected bridge/PWM/firmware copies](diffbot-saved-review.md)
+- [Piper CPP: arm/gripper, controller and model copies](piper-cpp-saved-review.md)
+
+Both are local file comparison recipes, not installed hardware integrations.

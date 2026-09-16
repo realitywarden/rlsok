@@ -1,6 +1,6 @@
 # FANUC / Humble: install, configure and evaluate three paths
 
-Local Check release: **v1.5.0**. Target: Ubuntu 22.04 x86_64 with
+Local Check release: **v1.5.1**. Target: Ubuntu 22.04 x86_64 with
 ROS 2 Humble and an isolated/simulated graph. This is a local, self-attested,
 zero-dispatch local check tool, with a bundled Node runtime. No account, Cloud
 upload, physical controller or global runtime upgrade is needed. This exact
@@ -9,7 +9,7 @@ definitions and physical FANUC operation have not been validated**. Prior
 Jazzy results do not establish validation of this release.
 
 The public stable installation remains runtime v1.4.5. Use the pinned
-[evaluation release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.0)
+[evaluation release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.1)
 for the composable functionality. RLSOK is not a certified functional-safety
 product. This evaluation checks declared inputs and configuration, not motion
 safety, kinematics, collisions or every controller command path.
@@ -20,12 +20,12 @@ Download the installer and its checksum into a new directory:
 
 ```sh
 mkdir rlsok-shadow-download && cd rlsok-shadow-download
-BASE=https://github.com/realitywarden/rlsok/releases/download/v1.5.0
+BASE=https://github.com/realitywarden/rlsok/releases/download/v1.5.1
 curl -fLO "$BASE/install-shadow.sh"
 curl -fLO "$BASE/install-shadow.sh.sha256"
 sha256sum -c install-shadow.sh.sha256
-sh install-shadow.sh "$HOME/rlsok-shadow-1.5.0"
-EVAL="$HOME/rlsok-shadow-1.5.0"
+sh install-shadow.sh "$HOME/rlsok-shadow-1.5.1"
+EVAL="$HOME/rlsok-shadow-1.5.1"
 rlsok() { "$EVAL/bin/rlsok" "$@"; }
 rlsok profile help
 ```
@@ -40,7 +40,7 @@ is involved. For offline transfer, download the archive and `.sha256` from
 the release, verify with `sha256sum -c`, and extract with `tar -xzf`.
 
 The release includes `evaluation-release.json`, checksums, SBOM, dependency
-licenses, the npm package and `rlsok-source-1.5.0.tar.gz`.
+licenses, the npm package and `rlsok-source-1.5.1.tar.gz`.
 `SOURCE_COMMIT` and `BUILD-MANIFEST.json` inside the Linux archive identify
 the source and packaging scope. GitHub's release asset digests provide another
 checksum comparison. The evaluation launcher exposes only profile operations,
@@ -103,9 +103,11 @@ schema or firmware. Confirm matching remote package provenance independently.
 
 The example `AbsoluteCartesian` action is synthetic. The public bridge's
 relative `JogCartesian` is a different contract. Confirm absolute semantics,
-position units, orientation and frame conventions. `cartesian_pose` currently
-requires meters and a normalized quaternion; W/P/R, millimeters or incompatible
-custom fields require an explicit adapter change. Do not rename or silently
+position units, orientation and frame conventions. `cartesian_pose` requires meters and a normalized quaternion. For a complete
+absolute target in millimeters and native FANUC W/P/R degrees, use the
+[explicit absolute-WPR adapter](absolute-wpr-review.md) added in 1.5.1.
+Select and bind the actual velocity default and maximum; do not silently
+convert units or substitute source defaults for running configuration. Do not rename or silently
 convert a relative action to make the absolute path appear supported.
 
 ## 3. Export actual facts and fill the profile
@@ -288,4 +290,4 @@ metadata-only. No three-path Hosted upload adapter is required by this guide.
 These are source-level findings, not confirmation of a particular deployed
 revision, retention period or deletion SLA; those operational terms remain
 to be confirmed if Hosted evaluation is selected. See the inventory in
-[the integration guide](https://github.com/realitywarden/rlsok/blob/v1.5.0/docs/fanuc-humble-integration.md).
+[the integration guide](https://github.com/realitywarden/rlsok/blob/v1.5.1/docs/fanuc-humble-integration.md).

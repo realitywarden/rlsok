@@ -1,0 +1,16 @@
+{
+  "entrypoint": "piper_cpp_ros/piper_control.launch.py",
+  "arguments": {
+    "description_package": "piper_cpp_ros",
+    "description_file": "piper_with_ros2_control.urdf.xacro",
+    "controllers_file": "piper_controllers.yaml",
+    "use_real_hardware": true,
+    "can_interface": "can0",
+    "speed_pct": 30,
+    "go_to_zero_on_activate": true,
+    "with_gripper": false,
+    "gripper_max_effort": 1.0,
+    "home_gripper_on_activate": false
+  },
+  "provenance": "source-default-example"
+}

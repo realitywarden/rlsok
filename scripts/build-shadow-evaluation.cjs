@@ -94,6 +94,8 @@ const copy = (source, target) => {
     for (const name of ['install-local.sh', 'install-shadow.sh']) fs.writeFileSync(path.join(output, name), installer);
     fs.writeFileSync(path.join(output, 'START-HERE.md'), fs.readFileSync(path.join(root, 'docs/local-check-start.md'), 'utf8').replace('(releases/', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/releases/`));
     copy(path.join(root, 'docs/fanuc-shadow-self-service.md'), path.join(output, 'INSTALLATION.md'));
+    fs.writeFileSync(path.join(output, 'INSTALLATION.md'), fs.readFileSync(path.join(output, 'INSTALLATION.md'), 'utf8')
+      .replaceAll('(absolute-wpr-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/absolute-wpr-review.md)`));
     copy(path.join(root, 'docs/interface-onboarding.md'), path.join(output, 'INTERFACE-ONBOARDING.md'));
     copy(path.join(root, 'docs/source-shadow-workspaces.md'), path.join(output, 'SOURCE-WORKSPACES.md'));
     fs.writeFileSync(path.join(output, 'SAVED-SETUP-REVIEW.md'),
@@ -103,6 +105,15 @@ const copy = (source, target) => {
         .replace('(pioneer-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/pioneer-saved-review.md)`)
         .replace('(kuka-sunrise-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/kuka-sunrise-saved-review.md)`)
         .replace('(selected-input-inspection.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/selected-input-inspection.md)`));
+    for (const [file, asset] of [['diffbot-saved-review.md', 'DIFFBOT-SAVED-REVIEW.md'], ['piper-cpp-saved-review.md', 'PIPER-CPP-SAVED-REVIEW.md'], ['absolute-wpr-review.md', 'ABSOLUTE-WPR-REVIEW.md']]) {
+      const body = fs.readFileSync(path.join(root, 'docs', file), 'utf8')
+        .replaceAll('(saved-setup-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/saved-setup-review.md)`)
+        .replaceAll('(fanuc-shadow-self-service.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/fanuc-shadow-self-service.md)`);
+      fs.writeFileSync(path.join(output, asset), body);
+    }
+    fs.writeFileSync(path.join(output, 'SAVED-SETUP-REVIEW.md'), fs.readFileSync(path.join(output, 'SAVED-SETUP-REVIEW.md'), 'utf8')
+      .replaceAll('(diffbot-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/diffbot-saved-review.md)`)
+      .replaceAll('(piper-cpp-saved-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/piper-cpp-saved-review.md)`));
     fs.writeFileSync(path.join(output, 'SELECTED-INPUT-INSPECTION.md'),
       fs.readFileSync(path.join(root, 'docs/selected-input-inspection.md'), 'utf8')
         .replace('(saved-setup-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/saved-setup-review.md)`));

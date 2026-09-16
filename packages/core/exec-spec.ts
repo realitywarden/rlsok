@@ -33,6 +33,7 @@ export const executablePolicySpecSchema = z.object({
       'joint_velocity',
       'cartesian_pose',
       'cartesian_delta',
+      'cartesian_absolute_wpr',
       'twist',
       'trajectory',
       'program'
