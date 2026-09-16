@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+case "${1:-}" in
+  ""|--help|-h|help) set -- profile help ;;
+  profile|verify-evidence|--version|-V|version) ;;
+  *) echo 'RLSOK Local Check: use profile help, profile commands, or verify-evidence.' >&2; exit 2 ;;
+esac
+# BSD readlink has no -f. Resolve each link with portable shell operations.
+SELF=$0
+count=0
+while [ -L "$SELF" ]; do
+  count=$((count + 1))
+  [ "$count" -le 40 ] || { echo 'Launcher symlink loop.' >&2; exit 1; }
+  DIR=$(CDPATH= cd -P "$(dirname "$SELF")" && pwd)
+  TARGET=$(readlink "$SELF")
+  case "$TARGET" in /*) SELF=$TARGET ;; *) SELF=$DIR/$TARGET ;; esac
+done
+ROOT=$(CDPATH= cd -P "$(dirname "$SELF")/.." && pwd)
+[ "$(uname -s)" = Darwin ] || { echo 'This package requires macOS.' >&2; exit 1; }
+exec "$ROOT/bin/node" "$ROOT/lib/rlsok/dist/apps/cli/rlsok.js" "$@"
