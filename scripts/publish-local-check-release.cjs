@@ -7,7 +7,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
-const run = (file, args, input) => execFileSync(file, args, { cwd: root, encoding: 'utf8', input, windowsHide: true });
+const run = (file, args, input) => execFileSync(file, args, { cwd: root, encoding: 'utf8', input, windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
 const gh = process.env.RLSOK_GH || 'gh';
 const api = (endpoint, body) => JSON.parse(run(gh, ['api', endpoint, ...(body ? ['--method', 'POST', '--input', '-'] : [])], body ? JSON.stringify(body) : undefined));
 const repo = 'realitywarden/rlsok';
@@ -29,7 +29,7 @@ for (const line of fs.readFileSync(path.join(dir, 'SHA256SUMS'), 'utf8').trim().
   const match = /^([a-f0-9]{64})  (.+)$/.exec(line);
   if (!match || assets.find(a => a.name === match[2])?.digest !== 'sha256:' + match[1]) throw new Error('local_checksum_mismatch');
 }
-const releases = JSON.parse(run(gh, ['api', `repos/${repo}/releases?per_page=100`]));
+const releases = JSON.parse(run(gh, ['api', `repos/${repo}/releases?per_page=100`, '--jq', '[.[] | {id, tag_name, draft}]']));
 let release = releases.find(r => r.tag_name === 'v' + version);
 if (release && !release.draft) throw new Error('published_release_must_not_be_modified_or_reused');
 if (!release) {
