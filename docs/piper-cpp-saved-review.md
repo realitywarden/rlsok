@@ -12,7 +12,7 @@ merge or a completed physical integration.
 
 ## Choose the actual files
 
-Use [Local Check 1.5.1](https://github.com/realitywarden/rlsok/releases/tag/v1.5.1),
+Use [Local Check 1.5.2](https://github.com/realitywarden/rlsok/releases/tag/v1.5.2),
 Python 3 and Git. From the extracted bundle:
 
 ```sh

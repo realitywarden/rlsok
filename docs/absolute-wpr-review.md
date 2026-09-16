@@ -1,6 +1,6 @@
 # Check an absolute Cartesian W/P/R input without sending it
 
-Local Check 1.5.1 adds `cartesian_absolute_wpr` for custom actions whose
+Local Check 1.5.2 adds `cartesian_absolute_wpr` for custom actions whose
 absolute XYZ target uses millimetres and whose native FANUC W/P/R values use
 degrees. It keeps these values as supplied. It does not convert a quaternion,
 transform frames, normalize angles or turn the target into a relative jog.

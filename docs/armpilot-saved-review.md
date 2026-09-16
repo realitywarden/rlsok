@@ -19,8 +19,8 @@ model's internal `mearm` ID are distinct; neither is renamed.
 
 ## 1. Select the configuration you want to compare
 
-Use RLSOK **v1.5.1** or later. Download the evaluation bundle from
-[releases](https://github.com/realitywarden/rlsok/releases/tag/v1.5.1).
+Use RLSOK **v1.5.2** or later. Download the evaluation bundle from
+[releases](https://github.com/realitywarden/rlsok/releases/tag/v1.5.2).
 The selection helper is in `materials/armpilot-selection.py` in the Linux
 bundle, or `examples/composable-shadow/armpilot-selection.py` in the source.
 It uses Python's standard library and reads the checkout's Git commit.

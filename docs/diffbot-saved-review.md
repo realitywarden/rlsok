@@ -4,7 +4,7 @@ Keep the bridge settings, ESP32 sketch and model copies together. Compare a
 later setup against the baseline you reviewed, and see exactly what changed.
 The checker never starts ROS, opens WiFi/TCP, flashes firmware or sends PWM.
 
-Use [Local Check 1.5.1](https://github.com/realitywarden/rlsok/releases/tag/v1.5.1)
+Use [Local Check 1.5.2](https://github.com/realitywarden/rlsok/releases/tag/v1.5.2)
 on the supported Linux x64 computer. Python 3 and Git are needed for the small
 selection helper. No account or upload is needed. This independent recipe
 was reviewed against [upstream 84b2fe17](https://github.com/E-Moynul/ros2_modular_diffbot/tree/84b2fe17bb512ccb7f5461d4684507b2273ef5b3).

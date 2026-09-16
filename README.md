@@ -1,7 +1,7 @@
 # RLSOK
 
 [![CI](https://github.com/realitywarden/rlsok/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/realitywarden/rlsok/actions/workflows/ci.yml)
-[![Local Check 1.5.1](https://img.shields.io/badge/Local_Check-1.5.1-blue)](https://github.com/realitywarden/rlsok/releases/tag/v1.5.1)
+[![Local Check 1.5.2](https://img.shields.io/badge/Local_Check-1.5.2-blue)](https://github.com/realitywarden/rlsok/releases/tag/v1.5.2)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 RLSOK helps you see when robot settings no longer match the version you reviewed.
@@ -13,7 +13,7 @@ robot software execution approvals.
 ## Try the included example
 
 Start at **[rlsok.com/download](https://rlsok.com/download)**. The current local
-checking tool is **RLSOK Local Check 1.5.1**. On Ubuntu 22.04 or 24.04, Intel/AMD
+checking tool is **RLSOK Local Check 1.5.2**. On Ubuntu 22.04 or 24.04, Intel/AMD
 64-bit, the approximately 45 MB download includes its runtime. The example
 needs no robot, ROS installation or account and sends no robot commands.
 Windows and Mac users can watch the example on the same page.
@@ -30,7 +30,7 @@ For reusable interface selection and field mapping, open the
 processed in the browser; exported workspaces are consumed by the local CLI.
 
 For the FANUC/Humble composable workflow, download the separate
-[Local Check 1.5.1 package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.1)
+[Local Check 1.5.2 package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.2)
 and follow the [installation-to-Evidence guide](docs/fanuc-shadow-self-service.md).
 This local workflow has not been validated on Humble or a
 physical FANUC. It does not change the stable Cloud or v1.4.5 installer below.
