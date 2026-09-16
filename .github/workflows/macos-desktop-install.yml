@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/macos-desktop-install.yml'
       - 'scripts/macos-desktop-ci.*'
+      - 'scripts/macos-desktop-pkg.sh'
       - 'scripts/verify-macos-local-workspace.mjs'
   workflow_dispatch:
 

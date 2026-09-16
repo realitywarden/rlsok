@@ -48,11 +48,13 @@ uname -m >> "$evidence/macos.txt"
 printf '%s\n' "$GITHUB_SHA" > "$evidence/workflow-source.txt"
 printf '%s\n' "$CANDIDATE_SHA256" > "$evidence/input-archive-sha256.txt"
 
-bash "$bundle/build-pkg.sh" 2>&1 | tee "$evidence/pkgbuild.log"
+bash "$GITHUB_WORKSPACE/scripts/macos-desktop-pkg.sh" "$bundle" 2>&1 | tee "$evidence/pkgbuild.log"
 package="$bundle/rlsok-1.3.2-macos-$MAC_ARCH.pkg"
 (cd "$bundle" && shasum -a 256 "$(basename "$package")" > "$(basename "$package").sha256")
 sudo installer -pkg "$package" -target / 2>&1 | tee "$evidence/installer.log"
 pkgutil --pkg-info com.rlsok.desktop > "$evidence/receipt.txt"
+pkgutil --files com.rlsok.desktop | head -n 25 > "$evidence/installed-paths.txt" || true
+ls -ld "$app" "$app/Contents" "$app/Contents/Info.plist" > "$evidence/app-location.txt" 2>&1 || true
 grep -q '^version: 1.3.2$' "$evidence/receipt.txt"
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")" = 1.3.2
 
