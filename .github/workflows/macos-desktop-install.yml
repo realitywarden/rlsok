@@ -1,0 +1,80 @@
+name: Mac desktop native installation
+
+on:
+  push:
+    branches: [ci/macos-desktop-install-20260916]
+    paths:
+      - '.github/workflows/macos-desktop-install.yml'
+      - 'scripts/macos-desktop-ci.*'
+      - 'scripts/verify-macos-local-workspace.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: macos-desktop-native-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  install:
+    if: github.repository == 'realitywarden/rlsok' && github.event.repository.private == false
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            arch: x64
+            sha256: fdb20e112f908ac3dcf8c4d09ff4b9f8a6c60fed88cda884a04a90a8441e0234
+          - runner: macos-15
+            arch: arm64
+            sha256: c93909130edc8816fed8befa15a770f06cc4b422e3ea0d9611aba2746fc2f090
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    env:
+      MAC_ARCH: ${{ matrix.arch }}
+      CANDIDATE_SHA256: ${{ matrix.sha256 }}
+      CANDIDATE_TAG: macos-v1.3.2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Download exact unpublished candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(gh repo view --json visibility --jq .visibility)" = PUBLIC
+          test "$(gh release view "$CANDIDATE_TAG" --json isDraft --jq .isDraft)" = true
+          mkdir -p "$RUNNER_TEMP/rlsok-candidate"
+          gh release download "$CANDIDATE_TAG" --pattern "rlsok-1.3.2-macos-$MAC_ARCH.tar.gz" --dir "$RUNNER_TEMP/rlsok-candidate"
+          cd "$RUNNER_TEMP/rlsok-candidate"
+          printf '%s  %s\n' "$CANDIDATE_SHA256" "rlsok-1.3.2-macos-$MAC_ARCH.tar.gz" | shasum -a 256 -c -
+          tar -xzf "rlsok-1.3.2-macos-$MAC_ARCH.tar.gz"
+      - name: Build, install and verify the complete local workspace
+        shell: bash
+        run: bash scripts/macos-desktop-ci.sh
+      - name: Preserve focused evidence in the existing draft
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          evidence="$RUNNER_TEMP/rlsok-evidence-$MAC_ARCH"
+          if [ -d "$evidence" ]; then
+            archive="$RUNNER_TEMP/macos-$MAC_ARCH-run-$GITHUB_RUN_ID-attempt-$GITHUB_RUN_ATTEMPT-evidence.tar.gz"
+            tar -czf "$archive" -C "$RUNNER_TEMP" "rlsok-evidence-$MAC_ARCH"
+            gh release upload "$CANDIDATE_TAG" "$archive"
+          fi
+      - name: Preserve verified native installer in the draft
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          package="$RUNNER_TEMP/rlsok-candidate/rlsok-1.3.2-macos-$MAC_ARCH/rlsok-1.3.2-macos-$MAC_ARCH.pkg"
+          gh release upload "$CANDIDATE_TAG" "$package" "$package.sha256"
