@@ -1,6 +1,6 @@
 # Review a public ROS 2 project's configuration locally
 
-These thirteen mappings come from inspected public source. They create a separate RLSOK workspace without editing the upstream checkout, installing a controller, generating an approval or sending a command. They are not customer case studies, hardware certifications or evidence that an owner has run RLSOK.
+These fourteen mappings come from inspected public source. They create a separate RLSOK workspace without editing the upstream checkout, installing a controller, generating an approval or sending a command. They are not customer case studies, hardware certifications or evidence that an owner has run RLSOK.
 
 | Recipe | Inspected source | Selected boundary | Material scope limit |
 | --- | --- | --- | --- |
@@ -12,6 +12,7 @@ These thirteen mappings come from inspected public source. They create a separat
 | `qarol-rover-udp` | [rover_ws, 56f175dd](https://github.com/qarol46/rover_ws/tree/56f175dda29445496fe1966ed52b1f29c323ad24) | `/diff_cont/cmd_vel_unstamped` Twist → active six-wheel controller → selected UDP hardware source | Fresh controller binding is required; UDP peer, firmware, geometry and calibration are not authenticated |
 | `mira-offboard-velocity` | [mira, 52a3503e](https://github.com/Lucas-Kido/mira/tree/52a3503e966a00dca6faba7b8850fed54540f34d) | `/cmd_vel` body Twist → `/offboard_velocity_control` | Fresh `bench_mode` is required; services, PX4/XRCE link, estimator, flight controller and flight are separate |
 | `dual-lbr-trajectory` | [lbr_fri_ros2_stack, 340589a1](https://github.com/lbr-stack/lbr_fri_ros2_stack/tree/340589a1ecb1a130d6ecc14c00561d49eaaee42e) | One `/joint_trajectory_controller/follow_joint_trajectory` goal with 14 ordered joints | Fresh controller state is required; files do not authenticate either FRI peer or physical arm |
+| `autodelivery-serial-command` | [AUTOdeliverynew, 4b537863](https://github.com/fishyJLI/AUTOdeliverynew/tree/4b537863ac2d82494a66257d4b4b018ebc391115) | `/cmd_vel` Twist → selected Python serial bridge, with its serial/timing parameters and upstream mux/safety files | The public bridge has no controller/firmware handshake; a USB path or responsive Arduino is not authenticated identity |
 
 The new PAROL6, Kortex seven-axis and xArm 1S MoveIt mappings, exact input requirements and command boundaries are described in [the feedback evaluation guide](email-feedback-evaluation-20260910.md).
 
@@ -39,6 +40,7 @@ Provide these actual inputs; the command does not fill them with synthetic examp
 - Hexapod also requires a fresh `export-node-settings` result for the gait parameters and its selected JointTrajectory link; follow [the observed Hexapod workflow](hexapod-observed-shadow.md).
 - For every recipe with a `controllerState` specification (`so101-arm`, `trik-drive`, `parol6-arm`, `kinova-gen3-7dof`, `xarm1s-moveit-arm`, `hexapod-gait`, `qarol-rover-udp`, `dual-lbr-trajectory`), a fresh `profile export-controller` result from the selected controller manager and controller node. This is required: a YAML copy cannot establish which controller currently owns the command interfaces.
 - `mira-offboard-velocity` also requires a fresh `profile export-node-settings --node /offboard_velocity_control` result so the reviewed workspace binds the active `bench_mode` value. Treat `bench_mode: true` as an explicit ground-test exception, never as a flight-ready setting.
+- `autodelivery-serial-command` requires a fresh `profile export-node-settings --node /cmdvel_serial_bridge` result. Its public defaults include `/dev/ttyUSB0`, 115200 baud, 30 Hz writes and a 0.5 s command timeout; use the actual active values and keep the controller unreachable for the first review.
 
 The SO-101 recipe uses the joint order declared in its public controller configuration: `shoulder_pan`, `shoulder_lift`, `elbow_flex`, `wrist_flex`, `wrist_roll`. Its example needs `trajectory.joint_names` and `trajectory.points` with positions and increasing `time_from_start`. A similarly named state message is not a command example.
 

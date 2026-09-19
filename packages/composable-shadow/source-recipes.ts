@@ -189,6 +189,21 @@ export const sourceRecipes: Record<string, SourceRecipe> = {
       'lbr_demos/lbr_dual_arm/lbr_dual_arm_moveit_config/config/moveit_controllers.yaml'],
     boundary: 'One FollowJointTrajectory action spanning the ordered fourteen-joint list for both LBRs, bound to the active controller and its position claims. It does not cover separate per-arm goals, torque/wrench/twist controllers or direct FRI commands. The two selected system files preserve distinct FRI ports and hosts, but file hashes do not authenticate either controller, active client-command mode, safety configuration or physical arm. Mock and hardware launches are alternatives; no launch or motion is performed.'
   },
+  'autodelivery-serial-command': {
+    repository: 'fishyJLI/AUTOdeliverynew', referenceCommit: '4b537863ac2d82494a66257d4b4b018ebc391115',
+    model: 'Public AUTOdelivery ROS 2 Twist-to-Arduino serial boundary', endpoint: '/cmd_vel',
+    interfaceType: 'geometry_msgs/msg/Twist', subscriber: 'cmdvel_serial_bridge',
+    nodeSettings: { node: '/cmdvel_serial_bridge', parameters: {
+      port: 4, baudrate: 2, cmd_topic: 4, led_topic: 4, send_rate_hz: 3, timeout_s: 3
+    } },
+    files: ['README.md', 'src/robot_mvp/setup.py', 'src/robot_mvp/config/demo_params.yaml',
+      'src/robot_mvp/config/nav2_params.yaml', 'src/robot_mvp/config/frames.md',
+      'src/robot_mvp/launch/robot_bringup.launch.py', 'src/robot_mvp/launch/sensors.launch.py',
+      'src/robot_mvp/launch/system_bringup.launch.py', 'src/robot_mvp/robot_mvp/cmd_vel_mux.py',
+      'src/robot_mvp/robot_mvp/mode_cmdvel_mux.py', 'src/robot_mvp/robot_mvp/cmdvel_serial_bridge.py',
+      'src/robot_mvp/robot_mvp/lidar_safety_node.py', 'src/robot_mvp/robot_mvp/depth_stop_turn.py'],
+    boundary: 'Twist input at /cmd_vel to the selected Python serial bridge, including its port, baud rate, LED topic, send rate and stale-command timeout plus the upstream mux/safety and sensor bringup source. The public bridge opens a configured port and continuously writes vx/wz/LED text; it has no controller challenge or firmware identity. A USB path, responsive Arduino or healthy sensor samples cannot prove the intended physical controller. This source comparison opens no serial or sensor device and publishes no command.'
+  },
   'rover-gazebo': {
     repository: 'skunal3318/ROS2-Autonomous-Rover', referenceCommit: '1384dbbcb9daaeabfcede0904c202521c51e27ca',
     model: 'Public autonomous rover Gazebo bridge input', endpoint: '/cmd_vel', interfaceType: 'geometry_msgs/msg/Twist',
