@@ -18,6 +18,7 @@ import { approveSavedSetup, captureSavedSetup, resolveSavedSetup, reviewSavedSet
 import { prepareSavedSetup } from '../../packages/composable-shadow/saved-setup-recipes';
 import { preparePiperSetup } from '../../packages/composable-shadow/piper-setup';
 import { inspectSavedInputs, savedInputMarkdown } from '../../packages/composable-shadow/saved-input-review';
+import { evaluateNavigationPreflight, navigationPreflightMarkdown } from '../../packages/composable-shadow/navigation-preflight';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -27,7 +28,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile source-recipes
   rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
-  rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x|modular-diffbot|piper-cpp> --source <checkout> --input <selected-files.json> --output <new-directory>
+  rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x|modular-diffbot|piper-cpp|robstride-command-envelope|dobot-magician-homing|lerobot-so101-direct> --source <checkout> --input <selected-files.json> --output <new-directory>
   rlsok profile inspect-saved-inputs --recipe <aditya-so101|beast|cartesian> --source <checkout> --input <selected-files.json> --output <new-directory>
   rlsok profile discover-setup-devices --output <new-inventory.json> [--python <python3>]
   rlsok profile resolve-setup --manifest <manifest.json> --inventory <inventory.json> --output <new-directory>
@@ -39,6 +40,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile review-tello --approval <approval.json> --observation <observation.json> --event <client-event.json> --output <new-directory>
   rlsok profile watch-tello --manifest <manifest.json> --socket <private-unix-socket> --output <new-directory> [--approval <approval.json>] [--duration <seconds>] [--python <python3>]
   rlsok profile compare-nav2 --baseline <nav2-input.json> --changed <nav2-input.json> --output <new-directory>
+  rlsok profile check-navigation-preflight --input <observation.json> --output <new-directory>
   rlsok profile capture-nav2 --manifest <nav2-manifest.json> --output <new-observation.json> [--python <python3>]
   rlsok profile approve-nav2 --observation <fresh-observation.json> --goal <follow-path-goal.json> --actor <name> --expires-at <RFC3339> --output <new-approval.json>
   rlsok profile shadow-nav2 --manifest <nav2-manifest.json> --approval <approval.json> --goal <follow-path-goal.json> --output <new-directory> [--python <python3>]
@@ -292,6 +294,15 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     writeFileSync(join(directory, 'nav2-review.md'), nav2ReviewMarkdown(report), { flag: 'wx', mode: 0o600 });
     process.stdout.write(`${report.result} | supplied Nav2 inputs | hardware dispatch: NO | not execution approval\n${directory}\n`);
     return report.result === 'INCOMPLETE' ? 2 : report.result === 'REVIEW_REQUIRED' ? 1 : 0;
+  }
+  if (command === 'check-navigation-preflight') {
+    const o = options(rest, ['input', 'output'], ['input', 'output']);
+    const report = evaluateNavigationPreflight(read(o.input));
+    const directory = newDirectory(o.output);
+    write(join(directory, 'navigation-preflight.json'), report);
+    writeFileSync(join(directory, 'navigation-preflight.md'), navigationPreflightMarkdown(report), { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`${report.decision} | navigation preflight | hardware dispatch: NO\n${directory}\n`);
+    return report.decision === 'WOULD_ALLOW' ? 0 : 1;
   }
   if (command === 'prepare-source') {
     const o = options(rest, ['recipe', 'source', 'catalog', 'urdf', 'settings', 'example', 'device-id', 'output', 'frame', 'subscriber', 'controller-state', 'node-settings'],

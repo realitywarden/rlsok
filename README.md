@@ -18,6 +18,17 @@ checking tool is **RLSOK Local Check 1.5.2**. On Ubuntu 22.04 or 24.04, Intel/AM
 needs no robot, ROS installation or account and sends no robot commands.
 Windows and Mac users can watch the example on the same page.
 
+Prefer to inspect or build what runs locally? See the
+[source-to-binary map](docs/source-transparency.md) for the collector,
+comparison, evidence and platform packaging entry points.
+
+For EtherCAT arms, the [EtherCAT + ros2_control guide](docs/ethercat-ros2-control-shadow.md)
+defines the zero-command selection and live-observer boundary.
+
+For mobile-robot bringup, the [navigation preflight](docs/navigation-preflight.md)
+checks DDS peers, clock skew, lidar, TF, scan/odometry and Nav2 lifecycle facts
+without publishing a command.
+
 The two reports show matching settings and a changed calibration value.
 Follow [the first-run guide](docs/local-check-start.md), then choose a guide
 for your own project files. Older releases and emailed links remain available.

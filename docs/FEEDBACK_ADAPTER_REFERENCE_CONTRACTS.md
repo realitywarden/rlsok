@@ -4,6 +4,29 @@ These are runnable normalization references, not new supported robots. Core
 continues to consume only selected configuration identity and normalized
 `RuntimeAttestation` capability/freshness/continuity facts.
 
+## Authenticated controller/device handshake
+
+The shared `deviceHandshakeRuntimeAttestation` reference covers the recurring
+serial, RS485 and CAN feedback without pretending that a port name or bus ID is
+a physical identity. An integration supplies controller ID, hardware revision,
+firmware version (and digest when available), protocol version, the selected
+configuration digest and capabilities. It also reports how the response was
+authenticated and whether verification succeeded.
+
+Only a proof-verified signed challenge or authenticated session emits
+`device.identity.authenticated` or any device capability. A configured ID,
+plain self-report, USB path, CAN ID or RS485 address emits no trusted capability
+and therefore fails closed when authentication is required. The observation
+nonce is evidence of freshness but does not rotate continuity by itself;
+changing the authenticated session, device fields, firmware, protocol,
+configuration or selected capabilities changes the continuity digest.
+
+This is an adapter contract, not a claim that existing ebot_serial, Ruiyan,
+DDSM115, VESC, CubeMars or ESP32 firmware already implements it. When firmware
+cannot authenticate itself, bind the strongest available static source and
+topology facts, describe them as weak identity, and do not enable the trusted
+runtime capability.
+
 ## Signed edge authorization
 
 `packages/edge-authorization/snapshot.ts` defines a Cloud/approval-side Ed25519

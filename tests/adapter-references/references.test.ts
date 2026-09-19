@@ -5,6 +5,7 @@ import {
   collectInferenceProvenance,
   commandPathRuntimeAttestation,
   degradationRuntimeAttestation,
+  deviceHandshakeRuntimeAttestation,
   fastDdsCommandPathObservation,
   golemUpperBodyRuntimeAttestation,
   selectedObservedStateRuntimeAttestation
@@ -170,6 +171,46 @@ test('GOLEM reference consumes an external upper-body verdict without inferring 
   }).allowed, true);
 });
 
+test('device handshake trusts verified sessions, not configured IDs or bus addresses', () => {
+  const report = {
+    schemaVersion: 1 as const,
+    sourceIdentity: 'serial-bridge-monitor',
+    observedAt,
+    monitorVersion: 'fixture-v1',
+    sessionContinuityToken: 'serial-session-7',
+    challengeNonce: 'nonce-observation-41',
+    authentication: { method: 'signed-challenge' as const, proofVerified: true, keyId: 'controller-key-3' },
+    device: {
+      controllerId: 'controller-17', hardwareRevision: 'rev-c', firmwareVersion: '2.4.1',
+      firmwareDigest: '1'.repeat(64), protocolVersion: 'handshake-v2', configurationDigest: '2'.repeat(64),
+      capabilities: ['base.motion', 'diagnostics.read', 'base.motion']
+    }
+  };
+  const trusted = deviceHandshakeRuntimeAttestation(report);
+  assert.deepEqual(trusted.availableCapabilities, ['base.motion', 'device.identity.authenticated', 'diagnostics.read']);
+  assert.equal(evaluateRuntimeAttestation({
+    requiredCapabilities: ['device.identity.authenticated', 'base.motion'], attestation: trusted, maxAgeMs: 5_000, now
+  }).allowed, true);
+
+  assert.equal(deviceHandshakeRuntimeAttestation({
+    ...report, challengeNonce: 'nonce-observation-42'
+  }).continuityToken, trusted.continuityToken);
+  assert.notEqual(deviceHandshakeRuntimeAttestation({
+    ...report, device: { ...report.device, firmwareVersion: '2.5.0' }
+  }).continuityToken, trusted.continuityToken);
+
+  for (const authentication of [
+    { method: 'configured' as const, proofVerified: false },
+    { method: 'none' as const, proofVerified: false }
+  ]) {
+    const weak = deviceHandshakeRuntimeAttestation({ ...report, authentication });
+    assert.deepEqual(weak.availableCapabilities, []);
+    assert.equal(evaluateRuntimeAttestation({
+      requiredCapabilities: ['device.identity.authenticated'], attestation: weak, maxAgeMs: 5_000, now
+    }).reason, 'runtime_capability_missing');
+  }
+});
+
 test('inference provenance is explicit, stable and rejects missing or changed allowlisted dependencies', () => {
   const declarations = [
     { kind: 'numpy', name: 'numpy', expectedVersion: '2.1.0' },
@@ -206,6 +247,8 @@ test('remaining integration references declare selected identity, volatile exclu
     'schunk-svh-selected-command-path',
     'crane-x7-selected-limits',
     'device-serial-calibration',
+    'authenticated-device-handshake',
+    'ethercat-ros2-control-binding',
     'physical-execution-identity',
     'ros2-control-runtime-compatibility'
   ]);
@@ -286,6 +329,7 @@ test('technical contributor attribution is opt-in, factual and does not imply en
   ) as { contributors: Array<Record<string, unknown>> };
   const contributors = document.contributors;
   assert.deepEqual(contributors.map(({ displayName }) => displayName), [
+    'Aleksandr & Alisa',
     'Xiaoyang',
     'Laurentiu Popa',
     'Ruddrho Mollik',
@@ -297,41 +341,43 @@ test('technical contributor attribution is opt-in, factual and does not imply en
     'Tetsu Yamaguchi'
   ]);
   assert.equal(contributors.every(({ optInConfirmed }) => optInConfirmed === true), true);
-  assert.equal(contributors[0]?.preferredUrl, 'https://github.com/xiao-yang25');
-  assert.equal('preferredUrl' in contributors[1]!, false);
+  const byName = (displayName: string) => contributors.find((entry) => entry.displayName === displayName)!;
+  assert.equal(byName('Aleksandr & Alisa').preferredUrl, 'https://github.com/cyberbanana777/so-arm101-ros2-pkgs');
+  assert.equal(byName('Xiaoyang').preferredUrl, 'https://github.com/xiao-yang25');
+  assert.equal('preferredUrl' in byName('Laurentiu Popa'), false);
   assert.equal(
-    contributors[2]?.preferredUrl,
+    byName('Ruddrho Mollik').preferredUrl,
     'https://github.com/ruddrho/ros2-vision-guided-robot-arm-color-sorting-robot'
   );
-  assert.equal(contributors[2]?.project, 'A ROS 2 Vision-Guided Pick-and-Place Robotic Arm');
-  assert.equal(contributors[3]?.preferredUrl, 'https://github.com/AdityaJindal07');
-  assert.equal(contributors[3]?.project, 'Independent contributor');
-  assert.equal(contributors[4]?.preferredUrl, 'https://github.com/selfpatch/ros2_medkit');
-  assert.equal(contributors[4]?.project, 'selfpatch.ai / ros2_medkit');
-  assert.equal('preferredUrl' in contributors[5]!, false);
-  assert.equal(contributors[6]?.organization, 'RT Corporation');
-  assert.equal(contributors[6]?.preferredUrl, 'https://rt-net.jp');
-  assert.equal(contributors[7]?.organization, 'Universal Robots');
+  assert.equal(byName('Ruddrho Mollik').project, 'A ROS 2 Vision-Guided Pick-and-Place Robotic Arm');
+  assert.equal(byName('Aditya Jindal').preferredUrl, 'https://github.com/AdityaJindal07');
+  assert.equal(byName('Aditya Jindal').project, 'Independent contributor');
+  assert.equal(byName('Bartosz Burda').preferredUrl, 'https://github.com/selfpatch/ros2_medkit');
+  assert.equal(byName('Bartosz Burda').project, 'selfpatch.ai / ros2_medkit');
+  assert.equal('preferredUrl' in byName('Dr. Denis Stogl'), false);
+  assert.equal(byName('Atsushi Kuwagata').organization, 'RT Corporation');
+  assert.equal(byName('Atsushi Kuwagata').preferredUrl, 'https://rt-net.jp');
+  assert.equal(byName('Rune Søe-Knudsen').organization, 'Universal Robots');
   assert.equal(
-    contributors[7]?.contribution,
+    byName('Rune Søe-Knudsen').contribution,
     'Provided technical review and clarification regarding Universal Robots ROS 2 driver speed-scaling behavior and the scaled trajectory controller.'
   );
   assert.equal(
-    contributors[7]?.attributionBoundary,
+    byName('Rune Søe-Knudsen').attributionBoundary,
     'This attribution should not be interpreted as an endorsement by either Rune Søe-Knudsen or Universal Robots.'
   );
-  assert.equal(contributors[7]?.preferredUrl, 'https://www.universal-robots.com/');
-  assert.equal(contributors[8]?.project, 'Engineering Assurance Layer (adjacent tool)');
+  assert.equal(byName('Rune Søe-Knudsen').preferredUrl, 'https://www.universal-robots.com/');
+  assert.equal(byName('Tetsu Yamaguchi').project, 'Engineering Assurance Layer (adjacent tool)');
   assert.equal(
-    contributors[8]?.preferredUrl,
+    byName('Tetsu Yamaguchi').preferredUrl,
     'https://github.com/ty-knowgic/engineering-assurance-layer'
   );
   assert.match(
-    String(contributors[8]?.contribution),
+    String(byName('Tetsu Yamaguchi').contribution),
     /following ros-navigation\/navigation2#6357/
   );
   assert.equal(
-    contributors[8]?.attributionBoundary,
+    byName('Tetsu Yamaguchi').attributionBoundary,
     "Has not reviewed RLSOK's implementation and does not endorse it."
   );
   for (const contributor of contributors) {
@@ -340,7 +386,7 @@ test('technical contributor attribution is opt-in, factual and does not imply en
     assert.equal('supportedIntegration' in contributor, false);
   }
   assert.equal(
-    contributors.slice(0, 6).every((contributor) => !('organization' in contributor)),
+    contributors.slice(0, 7).every((contributor) => !('organization' in contributor)),
     true
   );
   assert.equal(

@@ -71,6 +71,26 @@
   },
   {
     "schemaVersion": 1,
+    "integration": "authenticated-device-handshake",
+    "status": "reference-contract",
+    "stableApprovedInputs": ["controller ID and hardware revision", "firmware version and optional firmware digest", "protocol version", "selected configuration digest", "declared execution capabilities", "authentication method and key identity"],
+    "runtimeCapabilities": ["device.identity.authenticated", "only capabilities reported by a proof-verified signed challenge or authenticated session"],
+    "excludedVolatileInputs": ["challenge nonce", "USB path or enumeration order", "CAN or RS485 address by itself", "configured identity without a verified response", "unselected telemetry"],
+    "mismatchBehavior": "block-before-dispatch",
+    "externalTestGate": "The integration must reject replayed, invalid and missing proofs; swap a physical controller or selected firmware/configuration while preserving the port or bus ID and require denial before dispatch."
+  },
+  {
+    "schemaVersion": 1,
+    "integration": "ethercat-ros2-control-binding",
+    "status": "reference-contract",
+    "stableApprovedInputs": ["complete expanded ros2_control robot description", "ordered joint-to-slave mapping", "encoder offset and scale per joint", "EtherCAT slave alias, position, vendor ID and product code", "selected PDO/SDO mapping and operation mode", "distributed-clock and synchronization settings", "master identity and selected network interface", "controller type, ordered joints, command/state interfaces and command endpoint", "hardware plugin and EtherCAT driver source/build identity"],
+    "runtimeCapabilities": [],
+    "excludedVolatileInputs": ["live encoder position and velocity samples", "cycle counters and timestamps", "unselected EtherCAT slaves", "network-interface name without master or topology evidence", "controller topic or action name by itself"],
+    "mismatchBehavior": "block-before-dispatch",
+    "externalTestGate": "Using the owner-selected source revision and a zero-command observer, change one encoder offset, slave identity/PDO mapping or controller joint binding and require denial before dispatch. A matching saved file set alone does not prove the live EtherCAT topology, active controller or physical arm."
+  },
+  {
+    "schemaVersion": 1,
     "integration": "physical-execution-identity",
     "status": "reference-contract",
     "stableApprovedInputs": ["selected base robot-description digest", "selected actuator and sensor configuration digests", "controller interface and command-semantics digests", "execution-relevant runtime, software and configuration identities"],

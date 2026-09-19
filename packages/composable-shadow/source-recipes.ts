@@ -131,6 +131,64 @@ export const sourceRecipes: Record<string, SourceRecipe> = {
       'src/lelyrobot/lelyrobot/arduino_bridge.py', 'src/lelyrobot/lelyrobot/cmd_vel_mux.py', 'src/lelyrobot/lelyrobot/avoidance_node.py'],
     boundary: 'Twist input to the default ament_python Arduino bridge. The alternative C++ bridge has different scaling and requires a separate reviewed mapping. Serial writes and active firmware are not attested.'
   },
+  'qarol-rover-udp': {
+    repository: 'qarol46/rover_ws', referenceCommit: '56f175dda29445496fe1966ed52b1f29c323ad24',
+    model: 'Public six-wheel rover ros2_control UDP hardware path', endpoint: '/diff_cont/cmd_vel_unstamped',
+    interfaceType: 'geometry_msgs/msg/Twist', subscriber: 'diff_cont',
+    controllerState: { name: 'diff_cont', type: 'diff_drive_controller/DiffDriveController',
+      claimedInterfaces: [
+        'base_to_left_forward_wheel', 'base_to_left_middle_wheel', 'base_to_left_rear_wheel',
+        'base_to_right_forward_wheel', 'base_to_right_middle_wheel', 'base_to_right_rear_wheel'
+      ].map(joint => `${joint}/velocity`),
+      parameters: {
+        left_wheel_names: ['base_to_left_forward_wheel', 'base_to_left_middle_wheel', 'base_to_left_rear_wheel'],
+        right_wheel_names: ['base_to_right_forward_wheel', 'base_to_right_middle_wheel', 'base_to_right_rear_wheel'],
+        command_interfaces: ['velocity']
+      } },
+    files: ['real_rover/config/controllers.yaml', 'real_rover/launch/launch_rover.launch.py',
+      'real_rover/launch/teleop.launch.py', 'real_rover/urdf/ros2_control.xacro',
+      'ros2_control_wheeled_robot_hardware/plugins.xml',
+      'ros2_control_wheeled_robot_hardware/include/ros2_control_wheeled_robot_hardware/message.hpp',
+      'ros2_control_wheeled_robot_hardware/include/ros2_control_wheeled_robot_hardware/udp_wheeled_robot.hpp',
+      'ros2_control_wheeled_robot_hardware/include/ros2_control_wheeled_robot_hardware/wheeled_robot_hardware.hpp',
+      'ros2_control_wheeled_robot_hardware/src/udp_wheeled_robot.cpp',
+      'ros2_control_wheeled_robot_hardware/src/wheeled_robot_hardware.cpp', 'echo_server/src/plat_server.cpp'],
+    boundary: 'Unstamped Twist input to the active six-wheel diff_cont controller, bound to the live wheel-name and velocity-interface export plus the selected UDP hardware source. The source defaults to 127.0.0.1:8889 with local port 8888, but copied Xacro does not authenticate the running UDP peer, firmware, wheel geometry or calibration. echo_server is a local protocol peer for isolated review, not physical-rover evidence. No socket is opened and no command is sent.'
+  },
+  'mira-offboard-velocity': {
+    repository: 'Lucas-Kido/mira', referenceCommit: '52a3503e966a00dca6faba7b8850fed54540f34d',
+    model: 'Public MIRA PX4 offboard body-velocity input', endpoint: '/cmd_vel',
+    interfaceType: 'geometry_msgs/msg/Twist', subscriber: 'offboard_velocity_control',
+    nodeSettings: { node: '/offboard_velocity_control', parameters: { bench_mode: 1 } },
+    files: ['README.md', 'docker/Dockerfile', 'docker/docker-compose.yml', 'docker/entrypoint.sh',
+      'install_jetson.sh', 'mira_gazebo/CMakeLists.txt', 'mira_gazebo/package.xml',
+      'mira_gazebo/src/offboard_velocity_control.cpp', 'mira_msgs/srv/SetVelocity.srv',
+      'mira_msgs/srv/Takeoff.srv'],
+    boundary: 'Body-frame Twist input to offboard_velocity_control only, bound to a fresh bench_mode observation and the selected PX4 bridge source. The node clamps velocity, times out continuous commands and translates them to PX4 trajectory setpoints. arm, takeoff, set_velocity, land and estop are separate services and are not covered by this recipe. The Micro XRCE-DDS/PX4 link, estimator, battery, failsafes, flight controller, vehicle identity and physical flight are not authenticated or certified. Keep the flight controller unreachable for initial review; no command or service call is made.'
+  },
+  'dual-lbr-trajectory': {
+    repository: 'lbr-stack/lbr_fri_ros2_stack', referenceCommit: '340589a1ecb1a130d6ecc14c00561d49eaaee42e',
+    model: 'Public dual KUKA LBR fourteen-joint ros2_control configuration',
+    endpoint: '/joint_trajectory_controller/follow_joint_trajectory',
+    interfaceType: 'control_msgs/action/FollowJointTrajectory',
+    joints: ['lbr_one_A1', 'lbr_one_A2', 'lbr_one_A3', 'lbr_one_A4', 'lbr_one_A5', 'lbr_one_A6', 'lbr_one_A7',
+      'lbr_two_A1', 'lbr_two_A2', 'lbr_two_A3', 'lbr_two_A4', 'lbr_two_A5', 'lbr_two_A6', 'lbr_two_A7'],
+    controllerState: { name: 'joint_trajectory_controller', type: 'joint_trajectory_controller/JointTrajectoryController',
+      actionEndpoint: '/joint_trajectory_controller/follow_joint_trajectory',
+      claimedInterfaces: ['lbr_one_A1', 'lbr_one_A2', 'lbr_one_A3', 'lbr_one_A4', 'lbr_one_A5', 'lbr_one_A6', 'lbr_one_A7',
+        'lbr_two_A1', 'lbr_two_A2', 'lbr_two_A3', 'lbr_two_A4', 'lbr_two_A5', 'lbr_two_A6', 'lbr_two_A7'].map(joint => `${joint}/position`),
+      parameters: { joints: ['lbr_one_A1', 'lbr_one_A2', 'lbr_one_A3', 'lbr_one_A4', 'lbr_one_A5', 'lbr_one_A6', 'lbr_one_A7',
+        'lbr_two_A1', 'lbr_two_A2', 'lbr_two_A3', 'lbr_two_A4', 'lbr_two_A5', 'lbr_two_A6', 'lbr_two_A7'], command_interfaces: ['position'] } },
+    files: ['lbr_demos/lbr_dual_arm/lbr_dual_arm/config/dual_arm_controllers.yaml',
+      'lbr_demos/lbr_dual_arm/lbr_dual_arm/config/lbr_one_system_config.yaml',
+      'lbr_demos/lbr_dual_arm/lbr_dual_arm/config/lbr_two_system_config.yaml',
+      'lbr_demos/lbr_dual_arm/lbr_dual_arm/launch/hardware.launch.py',
+      'lbr_demos/lbr_dual_arm/lbr_dual_arm/launch/mock.launch.py',
+      'lbr_demos/lbr_dual_arm/lbr_dual_arm/urdf/lbr_dual_arm.xacro',
+      'lbr_demos/lbr_dual_arm/lbr_dual_arm_moveit_config/config/joint_limits.yaml',
+      'lbr_demos/lbr_dual_arm/lbr_dual_arm_moveit_config/config/moveit_controllers.yaml'],
+    boundary: 'One FollowJointTrajectory action spanning the ordered fourteen-joint list for both LBRs, bound to the active controller and its position claims. It does not cover separate per-arm goals, torque/wrench/twist controllers or direct FRI commands. The two selected system files preserve distinct FRI ports and hosts, but file hashes do not authenticate either controller, active client-command mode, safety configuration or physical arm. Mock and hardware launches are alternatives; no launch or motion is performed.'
+  },
   'rover-gazebo': {
     repository: 'skunal3318/ROS2-Autonomous-Rover', referenceCommit: '1384dbbcb9daaeabfcede0904c202521c51e27ca',
     model: 'Public autonomous rover Gazebo bridge input', endpoint: '/cmd_vel', interfaceType: 'geometry_msgs/msg/Twist',

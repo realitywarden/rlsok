@@ -20,6 +20,9 @@ const repositories: Record<string, string> = {
   'armpilot-remote': 'zc110747/MeArmPilot', 'armpilot-3d': 'zc110747/MeArmPilot',
   'pioneer-x': 'DaneelOlivawXJose/pioneer-ros2-diff-drive',
   'modular-diffbot': 'E-Moynul/ros2_modular_diffbot', 'piper-cpp': 'justagist/piper_cpp',
+  'robstride-command-envelope': 's2015-turtle/robstride_ros2',
+  'dobot-magician-homing': 'jkaniuka/magician_ros2',
+  'lerobot-so101-direct': 'huggingface/lerobot',
 };
 type Obj = Record<string, any>;
 function object(value: unknown, label: string): Obj {
@@ -328,6 +331,102 @@ export function prepareSavedSetup(recipe: string, source: string, inputPath: str
       'The selected model must be the complete saved expanded robot_description, including external piper_description content. Xacro is never executed by this tool. Source copies do not establish installed package resolution, hardware calibration or firmware.',
       'CAN interface names alone are not physical device identity. Optional operator-supplied selectors may bind a saved inventory; no CAN socket is opened.',
       'The SDK, hardware interface and launch sources are read as bytes only. No driver is loaded, arm enabled, CAN configured, activation/home command sent or MoveIt/controller launched. This is an independent free file comparison, not an upstream contribution or safety approval.');
+  } else if (recipe === 'lerobot-so101-direct') {
+    const workflow = z.object({
+      mode: z.enum(['teleoperate', 'record', 'replay', 'policy-evaluate']),
+      follower: z.object({ type: z.literal('so101_follower'), id: z.string().min(1), port: z.string().min(1),
+        use_degrees: z.boolean(), max_relative_target: z.union([z.number().finite().positive(), z.record(z.number().finite().positive()), z.null()]) }).strict(),
+      leader: z.object({ type: z.literal('so101_leader'), id: z.string().min(1), port: z.string().min(1), use_degrees: z.boolean() }).strict().optional(),
+      policy: z.object({ path: z.string().min(1), revision: z.string().min(1) }).strict().optional(),
+      offline: z.boolean(), provenance: z.enum(['source-default-example', 'operator-selected'])
+    }).strict().parse(savedDocument(input('workflow','json'),'json'));
+    if (['teleoperate','record'].includes(workflow.mode) && !workflow.leader) throw new Error('lerobot_leader_required_for_selected_mode');
+    if (workflow.mode === 'policy-evaluate' && !workflow.policy) throw new Error('lerobot_policy_required_for_evaluation');
+    const followerCalibration = object(savedDocument(input('follower_calibration','json'),'json'),'follower_calibration');
+    if (!Object.keys(followerCalibration).length) throw new Error('lerobot_follower_calibration_empty');
+    bind('follower','serial','workflow','/follower/port');
+    if (workflow.leader) {
+      const leaderCalibration = object(savedDocument(input('leader_calibration','json'),'json'),'leader_calibration');
+      if (!Object.keys(leaderCalibration).length) throw new Error('lerobot_leader_calibration_empty');
+      bind('leader','serial','workflow','/leader/port');
+      if (workflow.leader.id === workflow.follower.id) throw new Error('lerobot_leader_follower_id_must_differ');
+      if (workflow.leader.port === workflow.follower.port) throw new Error('lerobot_leader_follower_port_must_differ');
+    }
+    for (const path of [
+      'src/lerobot/robots/robot.py',
+      'src/lerobot/robots/so_follower/config_so_follower.py',
+      'src/lerobot/robots/so_follower/so_follower.py',
+      'src/lerobot/teleoperators/teleoperator.py',
+      'src/lerobot/teleoperators/so_leader/config_so_leader.py',
+      'src/lerobot/teleoperators/so_leader/so_leader.py',
+      'src/lerobot/scripts/lerobot_teleoperate.py',
+      'src/lerobot/scripts/lerobot_record.py',
+      'src/lerobot/scripts/lerobot_replay.py',
+      'src/lerobot/scripts/lerobot_calibrate.py', 'pyproject.toml'
+    ]) src(path);
+    files.push({id:'source-map',path:'source-files.json',format:'json'});
+    content.set('source-files.json',Buffer.from(JSON.stringify(sourcePaths,null,2)+'\n'));
+    facts.push(`Selected direct LeRobot mode=${workflow.mode}, follower=${workflow.follower.id}, leader=${workflow.leader?.id ?? 'none'}, offline=${workflow.offline}, provenance=${workflow.provenance}.`,
+      'The follower and optional leader profile type, ID, port, angle convention, relative-target limit, calibration bytes and relevant LeRobot source are compared together. This is not the ROS FollowJointTrajectory recipe.',
+      'The LeRobot ID selects a calibration filename; it is not authenticated physical identity. Port locators are normalized only when explicit serial/topology selectors are supplied. Calibration equality alone cannot prove which arm is attached.',
+      'Policy path/revision is selected only for policy-evaluate. Dataset contents, cameras, task semantics and model quality are outside this minimal direct-arm boundary unless added as separately reviewed files in a future scoped recipe.',
+      'offline=true is an operator requirement, not a network sandbox. This tool itself reads local files only and does not import LeRobot, connect a serial bus, enable torque, write EEPROM, teleoperate, replay, evaluate a policy or upload results.');
+  } else if (recipe === 'dobot-magician-homing') {
+    const selection = z.object({
+      port: z.string().min(1), tool: z.enum(['none', 'pen', 'suction_cup', 'gripper', 'extended_gripper']),
+      slidingRail: z.boolean(), homingService: z.literal('/dobot_homing_service'),
+      requiredNodes: z.array(z.string().regex(/^\/[A-Za-z_][A-Za-z0-9_]*$/)).min(1),
+      provenance: z.enum(['source-default-example', 'operator-selected'])
+    }).strict().parse(savedDocument(input('selection','json'),'json'));
+    if (new Set(selection.requiredNodes).size !== selection.requiredNodes.length) throw new Error('dobot_duplicate_required_node');
+    input('homing_parameters','yaml'); input('axis_limits','yaml'); input('ptp_parameters','yaml');
+    bind('dobot-arm','serial','selection','/port');
+    for (const path of [
+      'dobot_bringup/launch/dobot_magician_control_system.launch.py',
+      'dobot_driver/dobot_driver/dobot_handle.py', 'dobot_driver/dobot_driver/interface.py',
+      'dobot_driver/dobot_driver/message.py', 'dobot_driver/dobot_driver/parsers.py',
+      'dobot_homing/dobot_homing/homing_server.py', 'dobot_homing/launch/dobot_homing.launch.py',
+      'dobot_msgs/srv/ExecuteHomingProcedure.srv',
+      'dobot_kinematics/launch/dobot_validate_trajectory.launch.py',
+      'dobot_motion/launch/dobot_PTP.launch.py'
+    ]) src(path);
+    files.push({id:'source-map',path:'source-files.json',format:'json'});
+    content.set('source-files.json',Buffer.from(JSON.stringify(sourcePaths,null,2)+'\n'));
+    facts.push(`Selected port=${selection.port}, tool=${selection.tool}, slidingRail=${selection.slidingRail}, homing service=${selection.homingService}; provenance=${selection.provenance}.`,
+      `Required startup nodes: ${selection.requiredNodes.join(', ')}. These are operator-selected expectations, not a live RQT graph observation.`,
+      'The homing target, axis limits and point-to-point parameters are retained as separate selected files. The source service calls set_homing_command and therefore moves hardware when invoked; this recipe never invokes it.',
+      'The reviewed public driver can query serial number, device name/version/ID and homing parameters. Those unauthenticated replies can strengthen diagnostics but do not by themselves prove physical identity. A USB path is only a locator unless a supplied inventory binds a stronger serial/topology selector.',
+      'Build success, USB presence, publisher/service availability and node liveness require fresh external observations. Start with the robot unreachable or powered safe; this offline comparison opens no serial port, starts no node, publishes no command and performs no homing, joint or Cartesian motion.');
+  } else if (recipe === 'robstride-command-envelope') {
+    const selection = z.object({
+      controller: z.enum(['robstride_position_controller', 'robstride_velocity_controller', 'robstride_effort_controller']),
+      commandTopic: z.string().regex(/^\/[A-Za-z_][A-Za-z0-9_]*(?:\/[A-Za-z_][A-Za-z0-9_]*)*$/),
+      commandInterface: z.enum(['position', 'velocity', 'effort']),
+      joints: z.array(z.string().min(1)).min(1),
+      rosCoordinates: z.literal(true),
+      provenance: z.enum(['source-default-example', 'operator-selected'])
+    }).strict().parse(savedDocument(input('selection','json'),'json'));
+    const expected = selection.controller.replace('robstride_', '').replace('_controller', '');
+    if (selection.commandInterface !== expected) throw new Error('robstride_controller_interface_mismatch');
+    if (new Set(selection.joints).size !== selection.joints.length) throw new Error('robstride_duplicate_joint');
+    input('expanded_robot_description','text'); input('controllers','yaml');
+    for (const path of [
+      'robstride_ros2_control/src/driver_config.cpp',
+      'robstride_ros2_control/internal/robstride_ros2_control/driver_config.hpp',
+      'robstride_ros2_control/description/robstride_motor_profiles.xacro',
+      'robstride_ros2_control/robstride_hardware.xml',
+      'robstride_driver/include/robstride_driver/joint_data.hpp',
+      'robstride_driver/include/robstride_driver/motor_profile.hpp',
+      'robstride_driver/src/driver.cpp', 'robstride_driver/src/motor_profile.cpp',
+      'robstride_driver/src/protocol.cpp', 'robstride_examples/launch/robstride_example.launch.py'
+    ]) src(path);
+    files.push({id:'source-map',path:'source-files.json',format:'json'});
+    content.set('source-files.json',Buffer.from(JSON.stringify(sourcePaths,null,2)+'\n'));
+    facts.push(`Selected ${selection.controller} (${selection.commandInterface}) on ${selection.commandTopic} for ordered joints ${selection.joints.join(', ')}; provenance=${selection.provenance}.`,
+      'The complete expanded robot_description is compared so command_position_*, command_velocity_* and command_effort_* values stay in ROS joint coordinates together with model/CAN ranges, direction, gear_ratio, position_offset, gains, watchdog and CAN IDs.',
+      'RLSOK does not reinterpret protocol encoding ranges as the approved robot operating envelope. The selected command_* bounds are the narrower operator-reviewed scope; the RobStride driver remains responsible for joint-to-motor conversion and protocol validation.',
+      'The controller YAML, selected controller/interface/topic and relevant driver/hardware source are copied. A source hash does not establish the installed binary, active controller, motor firmware or physical CAN device.',
+      'This is an offline saved-file comparison. It does not open SocketCAN, launch ros2_control, publish Float64MultiArray, claim an interface, set zero, clear faults or transmit a motor frame. A live command-gate integration remains separate.');
   } else if (recipe === 'kuka-sunrise') {
     for (const [id, path] of Object.entries({
       bridge: 'kuka_udp_bridge_node/src/udp_bridge_node.cpp', sunrise: 'UDP_bridge.java',

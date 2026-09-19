@@ -288,5 +288,8 @@ device serials and any configuration values you selected.
 
 - [Modular DiffBot: selected bridge/PWM/firmware copies](diffbot-saved-review.md)
 - [Piper CPP: arm/gripper, controller and model copies](piper-cpp-saved-review.md)
+- [RobStride: ROS-joint command envelope and driver source](robstride-saved-review.md)
+- [Dobot Magician: homing configuration without calling the service](dobot-magician-homing-review.md)
+- [Direct LeRobot SO-101: leader/follower serial and calibration](lerobot-so101-direct-review.md)
 
-Both are local file comparison recipes, not installed hardware integrations.
+These are local file comparison recipes, not installed hardware integrations.

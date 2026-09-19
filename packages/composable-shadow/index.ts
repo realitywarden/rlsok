@@ -7,6 +7,7 @@ import {
   proposalBatchSchema, type Approval, type Observation, type Path, type Profile
 } from './schema';
 export * from './schema';
+export * from './navigation-preflight';
 export { validateGoal } from './goals';
 import { validateGoal } from './goals';
 import { pathInterfaceType } from './contracts';
