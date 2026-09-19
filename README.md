@@ -10,28 +10,43 @@ robot software execution approvals.
 
 **[Website](https://rlsok.com) · [Try the example](https://rlsok.com/download) · [Documentation](https://rlsok.com/docs) · [What changed](https://rlsok.com/updates)**
 
-## Try the included example
+## Start on your own computer
 
-Start at **[rlsok.com/download](https://rlsok.com/download)**. The current local
-checking tool is **RLSOK Local Check 1.5.2**. On Ubuntu 22.04 or 24.04, Intel/AMD
-64-bit, the approximately 45 MB download includes its runtime. The example
-needs no robot, ROS installation or account and sends no robot commands.
-Windows and Mac users can watch the example on the same page.
+Choose your computer at **[rlsok.com/download](https://rlsok.com/download)**.
+You do not need a RLSOK account for these local entry points.
+
+| Your computer | What to download | First step |
+| --- | --- | --- |
+| Windows 10/11, 64-bit | Local Check 1.5.2, a 35 MB ZIP with Node included | Extract the whole ZIP and open `START-HERE.html`. No ROS or database installation is needed for the file checks. |
+| Mac with Apple silicon or Intel | Local workspace 1.3.2, about 198 MB or 200 MB; Node and the database are included | Choose the package for your chip, follow the installer guide, then open RLSOK from Applications. These packages are unsigned and not Apple-notarized; read the first-open instructions. |
+| Ubuntu 22.04 or 24.04, Intel/AMD 64-bit | Local Check 1.5.2, about 45 MB with its runtime included | Follow [the local first-run guide](docs/local-check-start.md). No robot, ROS installation or account is needed for the included example. |
+
+On Windows, `Run example.cmd` compares original inputs with an intentionally
+changed calibration value. Open the reports to see the difference, then follow
+[the Windows and Mac guide](https://rlsok.com/learn/check-robot-files-on-windows-or-mac)
+to move on to your own saved files. The file checks send no robot commands;
+a matching report does not establish what is currently running on a robot.
+
+The separate **Windows local-workspace installer** needs Node 22+ and
+PostgreSQL 16/17. If you only want file checks, start with the smaller ZIP above.
+Older releases and emailed download links remain available.
+
+## Get help or share a result
+
+Use [GitHub Discussions](https://github.com/realitywarden/rlsok/discussions/35)
+or [the RLSOK Discord](https://discord.gg/yVcwqf3jxz). Tell us your operating
+system, which download you chose, the step you tried and a short error with
+private information removed. English and Chinese are welcome.
 
 Prefer to inspect or build what runs locally? See the
 [source-to-binary map](docs/source-transparency.md) for the collector,
 comparison, evidence and platform packaging entry points.
 
 For EtherCAT arms, the [EtherCAT + ros2_control guide](docs/ethercat-ros2-control-shadow.md)
-defines the zero-command selection and live-observer boundary.
-
-For mobile-robot bringup, the [navigation preflight](docs/navigation-preflight.md)
-checks DDS peers, clock skew, lidar, TF, scan/odometry and Nav2 lifecycle facts
-without publishing a command.
-
-The two reports show matching settings and a changed calibration value.
-Follow [the first-run guide](docs/local-check-start.md), then choose a guide
-for your own project files. Older releases and emailed links remain available.
+defines the zero-command selection and live-observer boundary. For mobile-robot
+bringup, the [navigation preflight](docs/navigation-preflight.md) checks DDS
+peers, clock skew, lidar, TF, scan/odometry and Nav2 lifecycle facts without
+publishing a command.
 
 ## Zero-to-Shadow
 
