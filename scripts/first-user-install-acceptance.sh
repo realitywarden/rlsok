@@ -9,7 +9,12 @@ fi
 repository_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 release_dir=${RLSOK_RELEASE_DIR:-"$repository_root/artifacts"}
 candidate_installer=${RLSOK_CANDIDATE_INSTALLER:-"$repository_root/packaging/install.sh"}
-archive="$release_dir/rlsok-runtime-1.4.5-linux-x64.tar.gz"
+runtime_version=$(sed -n 's/^RLSOK_RUNTIME_VERSION="\([^"]*\)"/\1/p' "$candidate_installer")
+[[ $runtime_version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+  echo "candidate installer has no valid runtime version: $candidate_installer" >&2
+  exit 2
+}
+archive="$release_dir/rlsok-runtime-${runtime_version}-linux-x64.tar.gz"
 archive_checksum="$archive.sha256"
 for required in "$candidate_installer" "$archive" "$archive_checksum"; do
   [[ -f $required ]] || { echo "missing candidate input: $required" >&2; exit 2; }
@@ -23,6 +28,7 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export RLSOK_INSTALL_ROOT="$acceptance_root/opt/rlsok"
 export RLSOK_BIN_DIR="$acceptance_root/bin"
 export RLSOK_PYTHON_SITE="$acceptance_root/python-site"
+runtime_root="$RLSOK_INSTALL_ROOT/$runtime_version"
 mkdir -p "$RLSOK_BIN_DIR" "$XDG_CONFIG_HOME/rlsok" "$XDG_DATA_HOME/rlsok/evidence"
 
 printf 'credential-sentinel\n' > "$XDG_CONFIG_HOME/rlsok/cloud-credentials.json"
@@ -53,8 +59,8 @@ set -e
 [[ $doctor_status == 0 || $doctor_status == 2 ]]
 grep -q '"rosAvailable"' <<<"$doctor_output"
 python3 -S -c 'import os, site; site.addsitedir(os.environ["RLSOK_PYTHON_SITE"]); from rlsok import propose; assert callable(propose)'
-test -f "$RLSOK_INSTALL_ROOT/1.4.5/lib/rlsok/experimental/ros2-reference-sidecar/rlsok_ros2_sidecar.py"
-test -f "$RLSOK_INSTALL_ROOT/1.4.5/lib/rlsok/sdk/python/rlsok/__init__.py"
+test -f "$runtime_root/lib/rlsok/experimental/ros2-reference-sidecar/rlsok_ros2_sidecar.py"
+test -f "$runtime_root/lib/rlsok/sdk/python/rlsok/__init__.py"
 
 for sentinel in \
   "$XDG_CONFIG_HOME/rlsok/cloud-credentials.json" \
@@ -63,16 +69,16 @@ for sentinel in \
   test -s "$sentinel"
 done
 
-selected_hash=$(sha256sum "$RLSOK_INSTALL_ROOT/1.4.5/bin/rlsok" | cut -d' ' -f1)
-printf 'previous-runtime-selected\n' > "$RLSOK_INSTALL_ROOT/1.4.5/acceptance-previous-runtime"
+selected_hash=$(sha256sum "$runtime_root/bin/rlsok" | cut -d' ' -f1)
+printf 'previous-runtime-selected\n' > "$runtime_root/acceptance-previous-runtime"
 cli_link_before=$(readlink "$RLSOK_BIN_DIR/rlsok")
 uninstall_link_before=$(readlink "$RLSOK_INSTALL_ROOT/uninstall.sh")
 python_pth_before=$(cat "$RLSOK_PYTHON_SITE/rlsok.pth")
 python_pth_path_before=$(cat "$RLSOK_INSTALL_ROOT/.python-pth-path")
 assert_selected_unchanged() {
-  test "$(sha256sum "$RLSOK_INSTALL_ROOT/1.4.5/bin/rlsok" | cut -d' ' -f1)" = "$selected_hash"
+  test "$(sha256sum "$runtime_root/bin/rlsok" | cut -d' ' -f1)" = "$selected_hash"
   test "$("$RLSOK_BIN_DIR/rlsok" --version)" = "$candidate_version"
-  test "$(cat "$RLSOK_INSTALL_ROOT/1.4.5/acceptance-previous-runtime")" = "previous-runtime-selected"
+  test "$(cat "$runtime_root/acceptance-previous-runtime")" = "previous-runtime-selected"
   test "$(readlink "$RLSOK_BIN_DIR/rlsok")" = "$cli_link_before"
   test "$(readlink "$RLSOK_INSTALL_ROOT/uninstall.sh")" = "$uninstall_link_before"
   test "$(cat "$RLSOK_PYTHON_SITE/rlsok.pth")" = "$python_pth_before"
@@ -134,9 +140,9 @@ assert_injected_rollback() {
   fi
   grep -q "previous runtime and registrations were restored" "$acceptance_root/$failure_name.out"
   assert_selected_unchanged
-  test ! -e "$RLSOK_INSTALL_ROOT/1.4.5.new"
-  test ! -e "$RLSOK_INSTALL_ROOT/1.4.5.rollback"
-  test ! -e "$RLSOK_INSTALL_ROOT/1.4.5.activation-backup"
+  test ! -e "$runtime_root.new"
+  test ! -e "$runtime_root.rollback"
+  test ! -e "$runtime_root.activation-backup"
 }
 
 assert_injected_rollback directory-activation directory-activation
@@ -188,7 +194,7 @@ cat > "$proof" <<EOF
 {
   "sourceCommit": "$source_commit",
   "productVersion": "1.3.0",
-  "runtimeVersion": "1.4.5",
+  "runtimeVersion": "$runtime_version",
   "publicInstallerSha256": "$public_installer_sha256",
   "candidateArchiveSha256": "$archive_sha256",
   "publicInstalledVersion": "$public_version",
