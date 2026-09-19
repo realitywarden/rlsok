@@ -16,9 +16,9 @@ import tempfile
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.5.2'
-SOURCE = '67076fc5d65f327aafc61291cb2868db48d3ed84'
-LINUX_SHA = '01f9fed5d784fce1148d1e5d279e0dc7c723fade0e10c9a11e70377b3642bc2f'
+VERSION = '1.5.3'
+SOURCE = '15b3f0da8b4b1fc2d75c1a634aa75aa8618becd1'
+LINUX_SHA = '731737fa17d4fb24ab3b0cf4c17b8d0d8c4918513e4325d2f3a0a9b6d58c7224'
 NODE = {
     'x64': ('5ea50c9d6dea3dfa3abb66b2656f7a4e1c8cef23432b558d45fb538c7b5dedce', 0x01000007),
     'arm64': ('5ed4db0fcf1eaf84d91ad12462631d73bf4576c1377e192d222e48026a902640', 0x0100000c),
@@ -36,6 +36,7 @@ def main():
     parser.add_argument('--linux-bundle', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--node-cache', required=True, type=Path)
+    parser.add_argument('--arch', choices=tuple(NODE), help='Build one native CPU payload; omit to build both')
     args = parser.parse_args()
     if sha(args.linux_bundle) != LINUX_SHA:
         raise SystemExit('released_linux_payload_checksum_mismatch')
@@ -67,7 +68,8 @@ def main():
         if (original/'VERSION').read_text().strip()!=VERSION or (original/'SOURCE_COMMIT').read_text().strip()!=SOURCE:
             raise RuntimeError('released_source_identity_mismatch')
         assets=[]
-        for arch, (digest, cpu) in NODE.items():
+        selected = NODE.items() if args.arch is None else [(args.arch, NODE[args.arch])]
+        for arch, (digest, cpu) in selected:
             stage=temporary/f'darwin-{arch}'/prefix
             shutil.copytree(original, stage)
             node_name=f'node-v22.22.0-darwin-{arch}.tar.gz'
