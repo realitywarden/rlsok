@@ -122,7 +122,7 @@ exec "$RLSOK_RUNTIME_ROOT/bin/node" "$RLSOK_RUNTIME_ROOT/lib/rlsok/dist/apps/cli
   const versionOutput = execFileSync(join(stage, "bin", "rlsok"), ["--version"], {
     encoding: "utf8",
   }).trim();
-  if (versionOutput !== `rlsok runtime ${version} (product v1.3.0)`) {
+  if (versionOutput !== `RLSOK ${version}`) {
     throw new Error(`bundle_version_mismatch:${versionOutput}`);
   }
   execFileSync(join(stage, "bin", "rlsok"), ["profile", "schema", "--output", join(temporary, "profile-schemas")]);

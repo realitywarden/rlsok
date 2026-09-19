@@ -49,7 +49,7 @@ try {
   );
   const executable = resolve(packageRoot, 'dist', 'apps', 'cli', 'rlsok.js');
   const versionOutput = run(process.execPath, [executable, '--version'], temporary).trim();
-  if (versionOutput !== `rlsok runtime ${packed[0].version} (product v1.3.0)`) {
+  if (versionOutput !== `RLSOK ${packed[0].version}`) {
     throw new Error(`packaged_version_mismatch:${versionOutput}`);
   }
   run(process.execPath, [executable, '--help'], temporary);
