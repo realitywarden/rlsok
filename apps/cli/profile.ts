@@ -49,6 +49,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile export-controller --manager </controller_manager> --controller <name> --node </controller_node> --output <new-state.json> [--python <python3>]
   rlsok profile export-node-settings --node </node> --output <new-settings.json> [--downstream-node </node> --topic </topic> --type <package/msg/Name>] [--python <python3>]
   rlsok profile capture-mira-status --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-trik-status --output <new-observation.json> [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile schema --output <new-directory>
@@ -300,6 +301,11 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     const o = options(rest, ['output', 'python'], ['output']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
     return python(o, ['--output', resolve(o.output)], join(dirname(collectorScript()), 'mira_status.py'));
+  }
+  if (command === 'capture-trik-status') {
+    const o = options(rest, ['output', 'python'], ['output']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['--output', resolve(o.output)], join(dirname(collectorScript()), 'trik_status.py'));
   }
   if (command === 'check-navigation-preflight') {
     const o = options(rest, ['input', 'output'], ['input', 'output']);
