@@ -554,3 +554,56 @@ All eleven IDs in this section establish sending only.  They do not establish
 a reply, current hardware availability, owner execution, a robot connection,
 physical identity, motion safety or acceptance.  The real-hardware objective
 remains open pending returned evidence.
+
+## Communication and introduction corrections (2026-09-20)
+
+The owner clarified that text-channel contact exchange is welcome, but video
+meetings are not.  Future introductions should present Zheng Qi professionally
+and truthfully as the creator/maintainer of the open-source RLSOK project.  If
+asked how a recipient was found, the accurate answer is that their strong
+robotics product or public project was found while looking for real execution
+boundaries, followed by the specific public technical detail that made the
+thread relevant.  Professional positioning must not invent a company role,
+customer endorsement, lab/hardware access, completed physical test or support
+relationship.
+
+All future customer mail must use ordinary human language: short, direct and
+specific to what the recipient actually wrote.  Avoid audit-style prose,
+repeated boundary disclaimers, long numbered intake lists and generic phrases
+that read like an AI template.  Ask one small next question when possible.
+Never fill a missing fact with a plausible guess; say what is unknown and what
+would confirm it.  Already-sent messages are not followed by style-only
+corrections, because that would create noise for recipients.
+
+- Inspection robot / `1a079b9ee5020015`: the earlier message had incorrectly
+  addressed Saikishore as "Satya" and had narrowed his requested conversation
+  to email after missing the proposed September 9 slots.  Correction
+  `1a0be079f6639281` apologized, used the correct name, reopened communication
+  and requested the minimum real-hardware boundary.  Follow-up
+  `1a0be0898e904eb0` explicitly rules out video and offers email or another
+  text-based channel; voice-only would require an explicit separate agreement.
+- Evo-RL / `1a0a12a35cb236b7`: Zhao Bo had supplied Ye Kai's WeChat handle.
+  Message `1a0be081f8acc8a3` corrected the earlier decision to leave the lead at
+  public links and asked Zhao Bo to forward our direct email and a concise
+  real-SO-101/Piper zero-command request, or make a consented business-email
+  introduction.  It does not republish the personal handle or claim contact.
+- Ruiyan hand / `1a0adef57a6df91f`: message `1a0be08241b1f73e`
+  accepted Li's offer to connect us without asking him to disclose the
+  founder's private WeChat details.  It asks him to forward our email or make a
+  consented business-email introduction around the exact read-only RS485
+  identity/version/configuration question.
+- GOLEM/H12 / `1a01d8e3a7eb0fef`: a no-video clarification sent to
+  `max@ahead-robotics.com` bounced because that domain does not exist.  The
+  original thread proves `max.conway@colorado.edu` is Max's requested direct
+  address; the same clarification was successfully resent there as
+  `1a0be09baaa3ee5a`.  This delivery corrects communication format only and
+  does not add a hardware result.
+- TRIK / `1a07658ff1d51524`: Azimbek replied in
+  `1a0be04bf89db9bd` that he will check everything and send it tomorrow.  This
+  is a specific pending commitment, not returned evidence; no reminder or
+  courtesy reply was added.
+
+An incremental Gmail and spam check after these sends found no new robot
+material.  Spam contained only delivery failures and promotions.  The goal
+therefore remains active while the requested owner-run observations are
+pending.
