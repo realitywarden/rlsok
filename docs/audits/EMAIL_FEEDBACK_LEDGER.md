@@ -884,3 +884,26 @@ unauthenticated.  Seven focused offline tests pass.  This is implementation
 preparation, not a published integration, serial connection or physical-hand
 result; it remains private until Ruiyan's answer resolves framing and
 publication scope.
+
+## Same-pass new-reply handling (2026-09-20)
+
+- Ishan clarified in `1a0be4136bc2bb3d` that the discovered mobile-robot
+  repository is ROS/Gazebo simulation and that he has no current physical
+  robot access.  Message `1a0be45e625896c3` answered his concrete product-
+  workflow question in plain language: select the real final command boundary,
+  bind the reviewed software/configuration and robot facts, observe with zero
+  dispatch in Shadow, and only later place an optional Run adapter at that same
+  boundary.  It explicitly says Gazebo can explain the flow but is not a
+  physical-robot result, and asks only for ROS version and simulated command
+  receiver if he wants a tailored small example.  This is a comprehension
+  follow-up, not a real-robot opportunity or integration result.
+- Mark Moseley's iRobot automatic reply (`1a0be0c291fbf820`) states that he no
+  longer works there and explicitly redirects correspondence to Steve Baron.
+  The original Create 3 read-only identity/version/configuration question was
+  forwarded intact to that named contact as `1a0be4650190df82`, with a short
+  note that email is sufficient and no meeting is needed.  There is no reply,
+  Create 3 mapping or hardware result yet.
+- The spam review also surfaced an unsolicited Anvol manufacturing sales pitch
+  (`1a08b51e3bd6a412`) asking which BOM part is difficult to source.  RLSOK has
+  no stated BOM sourcing need in this feedback goal, so it is not a customer
+  request, technical feedback or robot-test opportunity and was not answered.
