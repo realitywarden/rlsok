@@ -362,6 +362,14 @@ exists; source recipes, releases, sent mail and draft PRs are not substitutes:
 | LelyRobot / `1a076624befe452b` | Tomo authorized work with the current system. | Confirmation of the active Python/C++ bridge and a read-only observation from the selected physical path. |
 | GOLEM/H12 / `1a01d8e3a7eb0fef` | CorrellLab offered GOLEM as a test bed and requested a technical conversation. | Adapter-owned readiness/contact verdict mapping plus a zero-command owner run; the generic capability normalizer does not infer this. |
 
+MakerMods delivery correction: PR
+[`makermods-robotics/makermodslab#160`](https://github.com/makermods-robotics/makermodslab/pull/160)
+was changed from Draft to Ready for review on 2026-09-20 after confirming that
+the implementation, exact mapping scope, synthetic checks and hardware limits
+were present in the PR body.  It remains open, mergeable and unreviewed; Ready
+for review is only a maintainer-review state, not merge, owner execution or a
+Metal-arm bench result.  No additional reminder email was sent.
+
 MIRA implementation delta: the CLI now exposes `profile capture-mira-status`.
 It creates one read-only ROS subscription to `/fmu/out/vehicle_status`, requires
 one unambiguous `px4_msgs/msg/VehicleStatus` publisher, and records the ROS
