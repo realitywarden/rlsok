@@ -12,7 +12,6 @@ import argparse
 import hashlib
 import json
 import math
-import re
 import sys
 import time
 from pathlib import Path
@@ -20,6 +19,7 @@ from uuid import uuid4
 
 from collect import CollectionError, utc_now, write_output
 from controller_state import canonical
+from source_checkout import inspect_checkout
 
 CMD_TOPIC = '/cmd_vel'
 CMD_TYPE = 'geometry_msgs/msg/Twist'
@@ -55,7 +55,7 @@ def stamp(message):
     return {'sec': value.sec, 'nanosec': value.nanosec}
 
 
-def build_observation(reader, source_commit):
+def build_observation(reader, source_checkout):
     command_subscriber = endpoint(reader, 'subscribers', CMD_TOPIC, CMD_TYPE)
     odometry_publisher = endpoint(reader, 'publishers', ODOM_TOPIC, ODOM_TYPE)
     odom = reader.once(ODOM_TOPIC, ODOM_TYPE)
@@ -67,7 +67,8 @@ def build_observation(reader, source_commit):
         'schemaVersion': 1,
         'kind': 'RlsokIshanWarehouseGazeboStatus',
         'observedAt': utc_now(),
-        'sourceCommit': source_commit,
+        'sourceCommit': source_checkout['commit'],
+        'sourceCheckout': source_checkout,
         'source': {
             'repository': 'ishan-xy/ros_mobile_robot',
             'environment': reader.environment(),
@@ -204,16 +205,15 @@ class Reader:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--source-commit', required=True)
+    parser.add_argument('--source-root', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args(argv)
     try:
-        if not re.fullmatch(r'[0-9a-f]{40}', args.source_commit):
-            raise CollectionError('source_commit_must_be_full_lowercase_sha1')
         if args.output.exists():
             raise CollectionError('output_already_exists')
+        source_checkout = inspect_checkout(args.source_root)
         with Reader() as reader:
-            result = build_observation(reader, args.source_commit)
+            result = build_observation(reader, source_checkout)
         write_output(args.output, result)
         print('OBSERVED | Ishan warehouse Gazebo boundary read only | hardware dispatch: NO')
         return 0

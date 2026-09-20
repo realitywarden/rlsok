@@ -24,13 +24,14 @@ the serial port or touching `/cmd_vel`:
 
 ```bash
 rlsok profile capture-lely-status \
-  --source-commit 3e286c14f21db5f14d49e9ceb1b54e7e80fafb85 \
+  --source-root "$HOME/Lelyrobot" \
   --bridge-variant python \
   --output lely-status.json
 ```
 
-Select `python` or `cpp` from the process that was actually launched and use the
-full commit of the checkout actually running. The command requires exactly one
+Select `python` or `cpp` from the process that was actually launched and pass
+the root of the checkout actually running. The command records that checkout's
+full commit, dirty state and origin instead of trusting a typed SHA. It requires exactly one
 `sensor_msgs/msg/Range` publisher named `/arduino_bridge` on
 `/ultrasonic_left`, then subscribes for one sample. It creates no publisher,
 service client or serial connection. The result demonstrates a selected ROS
@@ -46,11 +47,12 @@ joints and latched status without opening SocketCAN or sending a command:
 
 ```bash
 rlsok profile capture-rebot-status \
-  --source-commit dadefb0d0681501c41e6311ccc09045f836decd6 \
+  --source-root "$HOME/rebotarm_ros2" \
   --output rebot-status.json
 ```
 
-Use the full commit of the checkout actually running. The collector requires
+Use the root of the checkout actually running; the collector records its full
+commit, dirty state and origin. The collector requires
 both `/rebotarm/joint_states` and `/rebotarm/arm_status` to have exactly one
 publisher named `/reBotArmController`; the public fake driver's different node
 name is rejected. It records the six joint values, status codes, mode, enabled
@@ -69,11 +71,12 @@ for the owner's normal work, capture those existing signals with:
 
 ```bash
 rlsok profile capture-dual-kinova-status \
-  --source-commit 06538a1e2dd04696e7645279b722e4930f0777e9 \
+  --source-root "$HOME/wearable-robot" \
   --output dual-kinova-status.json
 ```
 
-Use the full commit of the checkout actually running. The collector requires
+Use the root of the checkout actually running; the collector records its full
+commit, dirty state and origin. The collector requires
 the exact left and right high-level bridge nodes, connected session messages,
 both telemetry topics and both seven-joint samples. It creates subscriptions
 only: it does not open either arm's single Kortex session, call a service,
@@ -93,11 +96,12 @@ boundary without publishing a command:
 
 ```bash
 rlsok profile capture-ishan-gazebo-status \
-  --source-commit e3cadc4182f3cbc0fc2cde0eee2db0fba4939366 \
+  --source-root "$HOME/ros_mobile_robot" \
   --output ishan-gazebo-status.json
 ```
 
-The collector requires the same `/parameter_bridge` node to be the only typed
+The collector records the actual checkout's full commit, dirty state and origin,
+then requires the same `/parameter_bridge` node to be the only typed
 subscriber at `/cmd_vel` and the only typed publisher at `/odom`, then records
 one existing odometry sample. It creates no publisher, launches nothing and
 calls no service. This demonstrates only a source-selected simulation graph
@@ -128,8 +132,8 @@ Provide these actual inputs; the command does not fill them with synthetic examp
 - Hexapod also requires a fresh `export-node-settings` result for the gait parameters and its selected JointTrajectory link; follow [the observed Hexapod workflow](hexapod-observed-shadow.md).
 - For every recipe with a `controllerState` specification (`so101-arm`, `trik-drive`, `parol6-arm`, `kinova-gen3-7dof`, `xarm1s-moveit-arm`, `hexapod-gait`, `qarol-rover-udp`, `dual-lbr-trajectory`), a fresh `profile export-controller` result from the selected controller manager and controller node. This is required: a YAML copy cannot establish which controller currently owns the command interfaces.
 - `mira-offboard-velocity` also requires a fresh `profile export-node-settings --node /offboard_velocity_control` result so the reviewed workspace binds the active `bench_mode` value. Treat `bench_mode: true` as an explicit ground-test exception, never as a flight-ready setting.
-- When a physical MIRA is already powered for normal maintenance and remains disarmed, `rlsok profile capture-mira-status --output mira-status.json` can record one live `/fmu/out/vehicle_status` sample. The collector creates only a ROS subscription: it publishes no topic, calls no service, does not arm or request Offboard, and does not make the result a flight approval. The result proves only that the selected ROS graph exposed one status publisher at that time; it does not authenticate the Pixhawk, airframe, firmware, estimator, battery, failsafes or vehicle identity.
-- When a physical TRIK is already running for normal maintenance, `rlsok profile capture-trik-status --output trik-status.json` records one `/joint_states` sample for the two selected wheel joints and one `/diff_drive_controller/odom` sample. It creates subscriptions only: it does not connect to the brick's TCP server, publish `/cmd_vel`, call controller services, activate a controller or write zero power. Use `profile export-controller` separately for the selected controller state. This observation proves only that the selected ROS graph exposed the state path at that time; publisher GIDs and topic data do not authenticate the brick, flashed script, wheel wiring/calibration or physical identity.
+- When a physical MIRA is already powered for normal maintenance and remains disarmed, `rlsok profile capture-mira-status --source-root "$HOME/mira" --output mira-status.json` can record one live `/fmu/out/vehicle_status` sample. The collector records the actual checkout's commit, dirty state and origin, then creates only a ROS subscription: it publishes no topic, calls no service, does not arm or request Offboard, and does not make the result a flight approval. The result proves only that the selected ROS graph exposed one status publisher at that time; it does not authenticate the Pixhawk, airframe, firmware, estimator, battery, failsafes or vehicle identity.
+- When a physical TRIK is already running for normal maintenance, `rlsok profile capture-trik-status --source-root "$HOME/trik_ros2_control" --output trik-status.json` records the actual checkout identity, one `/joint_states` sample for the two selected wheel joints and one `/diff_drive_controller/odom` sample. It creates subscriptions only: it does not connect to the brick's TCP server, publish `/cmd_vel`, call controller services, activate a controller or write zero power. Use `profile export-controller` separately for the selected controller state. This observation proves only that the selected ROS graph exposed the state path at that time; publisher GIDs and topic data do not authenticate the brick, flashed script, wheel wiring/calibration or physical identity.
 
 ### PiDog Embodiment local hardware-status observation
 

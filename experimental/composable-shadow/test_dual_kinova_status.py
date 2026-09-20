@@ -6,6 +6,9 @@ import unittest
 
 import dual_kinova_status
 
+CHECKOUT = {'commit': '5' * 40, 'dirty': False, 'checkoutName': 'dual-kinova',
+            'originRemotes': ['https://github.com/example/dual-kinova.git']}
+
 
 def value(**fields):
     return SimpleNamespace(**fields)
@@ -55,10 +58,11 @@ class DualKinovaStatusTests(unittest.TestCase):
 
     def test_records_both_connected_bridge_paths(self):
         result = dual_kinova_status.build_observation(
-            self.reader(), '06538a1e2dd04696e7645279b722e4930f0777e9')
+            self.reader(), CHECKOUT)
         self.assertEqual(result['kind'], 'RlsokWearableDualKinovaStatus')
         self.assertEqual(set(result['sessions']), {'left', 'right'})
         self.assertEqual(len(result['joints']['left']), 7)
+        self.assertEqual(result['operatorSelection']['sourceCheckout'], CHECKOUT)
         self.assertRegex(result['observationSha256'], r'^[a-f0-9]{64}$')
 
     def test_rejects_mock_or_disconnected_paths(self):
@@ -67,10 +71,10 @@ class DualKinovaStatusTests(unittest.TestCase):
             {'node': '/mock_real_stack', 'type': dual_kinova_status.STRING_TYPE, 'gid': 'aa'}]
         with self.assertRaisesRegex(dual_kinova_status.CollectionError, 'expected_publishers'):
             dual_kinova_status.build_observation(
-                self.reader(publishers=mock_rows), '06538a1e2dd04696e7645279b722e4930f0777e9')
+                self.reader(publishers=mock_rows), CHECKOUT)
         with self.assertRaisesRegex(dual_kinova_status.CollectionError, 'both_sessions'):
             dual_kinova_status.build_observation(
-                self.reader(connected=False), '06538a1e2dd04696e7645279b722e4930f0777e9')
+                self.reader(connected=False), CHECKOUT)
 
     def test_reader_has_no_command_service_or_kortex_surface(self):
         source = inspect.getsource(dual_kinova_status.Reader)

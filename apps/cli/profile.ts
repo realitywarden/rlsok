@@ -48,12 +48,12 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile prepare-so101-swap --input <ros2_controllers.yaml> --output <new-controllers.yaml>
   rlsok profile export-controller --manager </controller_manager> --controller <name> --node </controller_node> --output <new-state.json> [--python <python3>]
   rlsok profile export-node-settings --node </node> --output <new-settings.json> [--downstream-node </node> --topic </topic> --type <package/msg/Name>] [--python <python3>]
-  rlsok profile capture-mira-status --output <new-observation.json> [--python <python3>]
-  rlsok profile capture-trik-status --output <new-observation.json> [--python <python3>]
-  rlsok profile capture-lely-status --source-commit <full-sha1> --bridge-variant <python|cpp> --output <new-observation.json> [--python <python3>]
-  rlsok profile capture-rebot-status --source-commit <full-sha1> --output <new-observation.json> [--python <python3>]
-  rlsok profile capture-dual-kinova-status --source-commit <full-sha1> --output <new-observation.json> [--python <python3>]
-  rlsok profile capture-ishan-gazebo-status --source-commit <full-sha1> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-mira-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-trik-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-lely-status --source-root <actual-checkout> --bridge-variant <python|cpp> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-rebot-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-dual-kinova-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-ishan-gazebo-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-pidog-status --repo <pidog-embodiment-checkout> --source-commit <full-sha1> --output <new-observation.json> [--units-directory </etc/systemd/system>] [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
@@ -303,34 +303,34 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     return report.result === 'INCOMPLETE' ? 2 : report.result === 'REVIEW_REQUIRED' ? 1 : 0;
   }
   if (command === 'capture-mira-status') {
-    const o = options(rest, ['output', 'python'], ['output']);
+    const o = options(rest, ['output', 'python', 'source-root'], ['output', 'source-root']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
-    return python(o, ['--output', resolve(o.output)], join(dirname(collectorScript()), 'mira_status.py'));
+    return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root'])], join(dirname(collectorScript()), 'mira_status.py'));
   }
   if (command === 'capture-trik-status') {
-    const o = options(rest, ['output', 'python'], ['output']);
+    const o = options(rest, ['output', 'python', 'source-root'], ['output', 'source-root']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
-    return python(o, ['--output', resolve(o.output)], join(dirname(collectorScript()), 'trik_status.py'));
+    return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root'])], join(dirname(collectorScript()), 'trik_status.py'));
   }
   if (command === 'capture-lely-status') {
-    const o = options(rest, ['output', 'python', 'source-commit', 'bridge-variant'], ['output', 'source-commit', 'bridge-variant']);
+    const o = options(rest, ['output', 'python', 'source-root', 'bridge-variant'], ['output', 'source-root', 'bridge-variant']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
-    return python(o, ['--output', resolve(o.output), '--source-commit', o['source-commit'], '--bridge-variant', o['bridge-variant']], join(dirname(collectorScript()), 'lely_status.py'));
+    return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root']), '--bridge-variant', o['bridge-variant']], join(dirname(collectorScript()), 'lely_status.py'));
   }
   if (command === 'capture-rebot-status') {
-    const o = options(rest, ['output', 'python', 'source-commit'], ['output', 'source-commit']);
+    const o = options(rest, ['output', 'python', 'source-root'], ['output', 'source-root']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
-    return python(o, ['--output', resolve(o.output), '--source-commit', o['source-commit']], join(dirname(collectorScript()), 'rebot_status.py'));
+    return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root'])], join(dirname(collectorScript()), 'rebot_status.py'));
   }
   if (command === 'capture-dual-kinova-status') {
-    const o = options(rest, ['output', 'python', 'source-commit'], ['output', 'source-commit']);
+    const o = options(rest, ['output', 'python', 'source-root'], ['output', 'source-root']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
-    return python(o, ['--output', resolve(o.output), '--source-commit', o['source-commit']], join(dirname(collectorScript()), 'dual_kinova_status.py'));
+    return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root'])], join(dirname(collectorScript()), 'dual_kinova_status.py'));
   }
   if (command === 'capture-ishan-gazebo-status') {
-    const o = options(rest, ['output', 'python', 'source-commit'], ['output', 'source-commit']);
+    const o = options(rest, ['output', 'python', 'source-root'], ['output', 'source-root']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
-    return python(o, ['--output', resolve(o.output), '--source-commit', o['source-commit']], join(dirname(collectorScript()), 'ishan_gazebo_status.py'));
+    return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root'])], join(dirname(collectorScript()), 'ishan_gazebo_status.py'));
   }
   if (command === 'capture-pidog-status') {
     const o = options(rest, ['output', 'python', 'repo', 'source-commit', 'units-directory'], ['output', 'repo', 'source-commit']);

@@ -19,6 +19,7 @@ from uuid import uuid4
 
 from collect import CollectionError, utc_now, write_output
 from controller_state import canonical
+from source_checkout import inspect_checkout
 
 TOPIC = '/ultrasonic_left'
 MESSAGE_TYPE = 'sensor_msgs/msg/Range'
@@ -46,9 +47,7 @@ def stamp(message):
     return {'sec': value.sec, 'nanosec': value.nanosec}
 
 
-def build_observation(reader, source_commit, bridge_variant):
-    if len(source_commit) != 40 or any(character not in '0123456789abcdef' for character in source_commit):
-        raise CollectionError('lely_source_commit_must_be_full_lowercase_sha1')
+def build_observation(reader, source_checkout, bridge_variant):
     if bridge_variant not in VARIANTS:
         raise CollectionError('lely_bridge_variant_invalid')
     endpoint = publisher(reader)
@@ -68,7 +67,11 @@ def build_observation(reader, source_commit, bridge_variant):
         'schemaVersion': 1,
         'kind': 'RlsokLelyRobotUltrasonicStatus',
         'observedAt': utc_now(),
-        'operatorSelection': {'sourceCommit': source_commit, 'bridgeVariant': bridge_variant},
+        'operatorSelection': {
+            'sourceCommit': source_checkout['commit'],
+            'sourceCheckout': source_checkout,
+            'bridgeVariant': bridge_variant,
+        },
         'source': {
             'environment': reader.environment(),
             'topic': TOPIC,
@@ -146,12 +149,13 @@ class Reader:
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
-    parser.add_argument('--source-commit', required=True)
+    parser.add_argument('--source-root', required=True, type=Path)
     parser.add_argument('--bridge-variant', required=True, choices=VARIANTS)
     args = parser.parse_args(argv)
     try:
         if args.output.exists(): raise CollectionError('output_already_exists')
-        with Reader() as reader: result = build_observation(reader, args.source_commit, args.bridge_variant)
+        source_checkout = inspect_checkout(args.source_root)
+        with Reader() as reader: result = build_observation(reader, source_checkout, args.bridge_variant)
         write_output(args.output, result)
         print('OBSERVED | LelyRobot ultrasonic ROS path read only | hardware dispatch: NO')
         return 0

@@ -4,6 +4,9 @@ import inspect
 import unittest
 import trik_status
 
+CHECKOUT = {'commit': '2' * 40, 'dirty': False, 'checkoutName': 'trik',
+            'originRemotes': ['https://github.com/example/trik.git']}
+
 
 def vector(**values):
     return SimpleNamespace(**values)
@@ -27,10 +30,11 @@ class TrikStatusTests(unittest.TestCase):
             environment=lambda: {'rosDistro': 'jazzy', 'rmwImplementation': 'rmw_fastrtps_cpp', 'domainId': 0})
 
     def test_records_selected_state_and_sources(self):
-        result = trik_status.build_observation(self.reader())
+        result = trik_status.build_observation(self.reader(), CHECKOUT)
         self.assertEqual(result['kind'], 'RlsokTrikDriveStatus')
         self.assertEqual(set(result['wheels']), set(trik_status.WHEELS))
         self.assertEqual(result['frames'], {'odometry': 'odom', 'body': 'base_footprint'})
+        self.assertEqual(result['source']['checkout'], CHECKOUT)
         self.assertRegex(result['observationSha256'], r'^[a-f0-9]{64}$')
 
     def test_rejects_ambiguous_publishers_and_missing_wheel(self):
@@ -40,10 +44,10 @@ class TrikStatusTests(unittest.TestCase):
                 {'node': '/b', 'type': trik_status.JOINT_TYPE, 'gid': 'bb'}],
             trik_status.ODOM_TOPIC: [{'node': '/drive', 'type': trik_status.ODOM_TYPE, 'gid': 'cc'}]}
         with self.assertRaisesRegex(trik_status.CollectionError, 'ambiguous'):
-            trik_status.build_observation(self.reader(publishers=rows))
+            trik_status.build_observation(self.reader(publishers=rows), CHECKOUT)
         bad = vector(header=vector(stamp=vector(sec=1, nanosec=2), frame_id=''), name=['base_left_wheel_joint'], position=[0.0], velocity=[0.0])
         with self.assertRaisesRegex(trik_status.CollectionError, 'wheel_joints'):
-            trik_status.build_observation(self.reader(joints=bad))
+            trik_status.build_observation(self.reader(joints=bad), CHECKOUT)
 
     def test_reader_has_no_command_service_or_tcp_surface(self):
         source = inspect.getsource(trik_status.Reader)

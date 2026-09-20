@@ -5,6 +5,9 @@ import unittest
 
 import ishan_gazebo_status as status
 
+CHECKOUT = {'commit': '6' * 40, 'dirty': False, 'checkoutName': 'warehouse',
+            'originRemotes': ['https://github.com/example/warehouse.git']}
+
 
 def value(**fields):
     return SimpleNamespace(**fields)
@@ -39,11 +42,12 @@ class IshanGazeboStatusTests(unittest.TestCase):
         )
 
     def test_records_exact_bridge_and_odometry_without_dispatch(self):
-        result = status.build_observation(self.reader(), 'e3cadc4182f3cbc0fc2cde0eee2db0fba4939366')
+        result = status.build_observation(self.reader(), CHECKOUT)
         self.assertEqual(result['kind'], 'RlsokIshanWarehouseGazeboStatus')
         self.assertEqual(result['source']['commandBoundary']['subscriber']['node'], '/parameter_bridge')
         self.assertEqual(result['frames'], {'odometry': 'odom', 'body': 'base_link_1'})
         self.assertEqual(result['dispatch']['rlsokCommandsSent'], 0)
+        self.assertEqual(result['sourceCheckout'], CHECKOUT)
         self.assertRegex(result['observationSha256'], r'^[a-f0-9]{64}$')
 
     def test_rejects_ambiguous_or_wrong_bridge(self):
@@ -52,10 +56,10 @@ class IshanGazeboStatusTests(unittest.TestCase):
             {'node': '/other', 'type': status.CMD_TYPE, 'gid': 'bb'},
         ]
         with self.assertRaisesRegex(status.CollectionError, 'ambiguous'):
-            status.build_observation(self.reader(subscribers=duplicated), 'e3cadc4182f3cbc0fc2cde0eee2db0fba4939366')
+            status.build_observation(self.reader(subscribers=duplicated), CHECKOUT)
         wrong = [{'node': '/other', 'type': status.ODOM_TYPE, 'gid': 'cc'}]
         with self.assertRaisesRegex(status.CollectionError, 'unexpected_bridge'):
-            status.build_observation(self.reader(publishers=wrong), 'e3cadc4182f3cbc0fc2cde0eee2db0fba4939366')
+            status.build_observation(self.reader(publishers=wrong), CHECKOUT)
 
     def test_reader_has_no_command_or_service_surface(self):
         source = inspect.getsource(status.Reader)

@@ -4,6 +4,9 @@ import inspect
 import unittest
 import lely_status
 
+CHECKOUT = {'commit': '3' * 40, 'dirty': False, 'checkoutName': 'lely',
+            'originRemotes': ['https://github.com/example/lely.git']}
+
 
 def value(**fields):
     return SimpleNamespace(**fields)
@@ -21,19 +24,20 @@ class LelyStatusTests(unittest.TestCase):
             environment=lambda: {'rosDistro': 'humble', 'rmwImplementation': 'rmw_fastrtps_cpp', 'domainId': 0})
 
     def test_records_selected_sample_and_limits(self):
-        result = lely_status.build_observation(self.reader(), '3e286c14f21db5f14d49e9ceb1b54e7e80fafb85', 'python')
+        result = lely_status.build_observation(self.reader(), CHECKOUT, 'python')
         self.assertEqual(result['kind'], 'RlsokLelyRobotUltrasonicStatus')
         self.assertEqual(result['measurement']['range'], '0.42')
         self.assertEqual(result['source']['publisher']['node'], '/arduino_bridge')
+        self.assertEqual(result['operatorSelection']['sourceCheckout'], CHECKOUT)
         self.assertRegex(result['observationSha256'], r'^[a-f0-9]{64}$')
 
     def test_rejects_wrong_publisher_and_invalid_range(self):
         with self.assertRaisesRegex(lely_status.CollectionError, 'publisher_missing_or_ambiguous'):
-            lely_status.build_observation(self.reader(publishers=[{'node': '/other', 'type': lely_status.MESSAGE_TYPE, 'gid': 'aa'}]), '3e286c14f21db5f14d49e9ceb1b54e7e80fafb85', 'cpp')
+            lely_status.build_observation(self.reader(publishers=[{'node': '/other', 'type': lely_status.MESSAGE_TYPE, 'gid': 'aa'}]), CHECKOUT, 'cpp')
         bad = value(header=value(stamp=value(sec=1, nanosec=2), frame_id='sensor'), radiation_type=0,
             field_of_view=0.2, min_range=0.1, max_range=1.0, range=2.0)
         with self.assertRaisesRegex(lely_status.CollectionError, 'outside_declared_bounds'):
-            lely_status.build_observation(self.reader(sample=bad), '3e286c14f21db5f14d49e9ceb1b54e7e80fafb85', 'python')
+            lely_status.build_observation(self.reader(sample=bad), CHECKOUT, 'python')
 
     def test_reader_has_no_command_service_or_serial_surface(self):
         source = inspect.getsource(lely_status.Reader)

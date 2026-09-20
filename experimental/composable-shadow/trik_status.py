@@ -19,6 +19,7 @@ from uuid import uuid4
 
 from collect import CollectionError, utc_now, write_output
 from controller_state import canonical
+from source_checkout import inspect_checkout
 
 JOINT_TOPIC = '/joint_states'
 JOINT_TYPE = 'sensor_msgs/msg/JointState'
@@ -50,7 +51,7 @@ def stamp(message):
     return {'sec': value.sec, 'nanosec': value.nanosec}
 
 
-def build_observation(reader):
+def build_observation(reader, source_checkout):
     joint_publisher = publisher(reader, JOINT_TOPIC, JOINT_TYPE)
     odom_publisher = publisher(reader, ODOM_TOPIC, ODOM_TYPE)
     joints = reader.once(JOINT_TOPIC, JOINT_TYPE)
@@ -75,6 +76,7 @@ def build_observation(reader):
         'kind': 'RlsokTrikDriveStatus',
         'observedAt': utc_now(),
         'source': {
+            'checkout': source_checkout,
             'environment': reader.environment(),
             'jointStates': {'topic': JOINT_TOPIC, 'messageType': JOINT_TYPE, 'publisher': joint_publisher},
             'odometry': {'topic': ODOM_TOPIC, 'messageType': ODOM_TYPE, 'publisher': odom_publisher},
@@ -152,11 +154,14 @@ class Reader:
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--output', required=True, type=Path)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--source-root', required=True, type=Path)
     args = parser.parse_args(argv)
     try:
         if args.output.exists(): raise CollectionError('output_already_exists')
-        with Reader() as reader: result = build_observation(reader)
+        source_checkout = inspect_checkout(args.source_root)
+        with Reader() as reader: result = build_observation(reader, source_checkout)
         write_output(args.output, result)
         print('OBSERVED | TRIK wheel and odometry state read only | hardware dispatch: NO')
         return 0

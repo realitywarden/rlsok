@@ -17,13 +17,14 @@ from uuid import uuid4
 
 from collect import CollectionError, utc_now, write_output
 from controller_state import canonical
+from source_checkout import inspect_checkout
 
 TOPIC = '/fmu/out/vehicle_status'
 TYPE = 'px4_msgs/msg/VehicleStatus'
 FIELDS = ('arming_state', 'nav_state', 'failsafe', 'pre_flight_checks_pass')
 
 
-def build_observation(reader):
+def build_observation(reader, source_checkout):
     publishers = reader.publishers(TOPIC)
     if len(publishers) != 1 or publishers[0]['type'] != TYPE:
         raise CollectionError('vehicle_status_publisher_missing_or_ambiguous:' + json.dumps(publishers))
@@ -41,6 +42,7 @@ def build_observation(reader):
         'kind': 'RlsokMiraVehicleStatus',
         'observedAt': utc_now(),
         'source': {
+            'checkout': source_checkout,
             'topic': TOPIC,
             'messageType': TYPE,
             'environment': reader.environment(),
@@ -108,11 +110,14 @@ class Reader:
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument('--output', required=True, type=Path)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--source-root', required=True, type=Path)
     args = parser.parse_args(argv)
     try:
         if args.output.exists(): raise CollectionError('output_already_exists')
-        with Reader() as reader: result = build_observation(reader)
+        source_checkout = inspect_checkout(args.source_root)
+        with Reader() as reader: result = build_observation(reader, source_checkout)
         write_output(args.output, result)
         print('OBSERVED | MIRA VehicleStatus read only | hardware dispatch: NO')
         return 0

@@ -19,6 +19,7 @@ from uuid import uuid4
 
 from collect import CollectionError, utc_now, write_output
 from controller_state import canonical
+from source_checkout import inspect_checkout
 
 SESSION_TOPIC = '/real/session_state'
 TELEMETRY_TOPICS = {'left': '/real/telemetry_left', 'right': '/real/telemetry_right'}
@@ -55,10 +56,7 @@ def endpoint_set(reader, topic, message_type, expected_nodes):
     return rows
 
 
-def build_observation(reader, source_commit):
-    if len(source_commit) != 40 or any(character not in '0123456789abcdef' for character in source_commit):
-        raise CollectionError('dual_kinova_source_commit_must_be_full_lowercase_sha1')
-
+def build_observation(reader, source_checkout):
     bridge_nodes = tuple(BRIDGE_NODES.values())
     session_endpoints = endpoint_set(reader, SESSION_TOPIC, STRING_TYPE, bridge_nodes)
     joint_endpoints = endpoint_set(reader, JOINT_TOPIC, JOINT_TYPE, bridge_nodes)
@@ -129,7 +127,8 @@ def build_observation(reader, source_commit):
         'kind': 'RlsokWearableDualKinovaStatus',
         'observedAt': utc_now(),
         'operatorSelection': {
-            'sourceCommit': source_commit,
+            'sourceCommit': source_checkout['commit'],
+            'sourceCheckout': source_checkout,
             'publicReferenceCommit': '06538a1e2dd04696e7645279b722e4930f0777e9',
             'arms': list(ARMS),
         },
@@ -220,11 +219,12 @@ class Reader:
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
-    parser.add_argument('--source-commit', required=True)
+    parser.add_argument('--source-root', required=True, type=Path)
     args = parser.parse_args(argv)
     try:
         if args.output.exists(): raise CollectionError('output_already_exists')
-        with Reader() as reader: result = build_observation(reader, args.source_commit)
+        source_checkout = inspect_checkout(args.source_root)
+        with Reader() as reader: result = build_observation(reader, source_checkout)
         write_output(args.output, result)
         print('OBSERVED | wearable dual Kinova state read only | hardware dispatch: NO')
         return 0

@@ -19,6 +19,7 @@ from uuid import uuid4
 
 from collect import CollectionError, utc_now, write_output
 from controller_state import canonical
+from source_checkout import inspect_checkout
 
 JOINT_TOPIC = '/rebotarm/joint_states'
 JOINT_TYPE = 'sensor_msgs/msg/JointState'
@@ -50,9 +51,7 @@ def stamp(message):
     return {'sec': value.sec, 'nanosec': value.nanosec}
 
 
-def build_observation(reader, source_commit):
-    if len(source_commit) != 40 or any(character not in '0123456789abcdef' for character in source_commit):
-        raise CollectionError('rebot_source_commit_must_be_full_lowercase_sha1')
+def build_observation(reader, source_checkout):
     joint_endpoint = endpoint(reader, JOINT_TOPIC, JOINT_TYPE)
     status_endpoint = endpoint(reader, STATUS_TOPIC, STATUS_TYPE)
     joints = reader.once(JOINT_TOPIC, JOINT_TYPE, 'sensor')
@@ -85,7 +84,12 @@ def build_observation(reader, source_commit):
         'schemaVersion': 1,
         'kind': 'RlsokReBotArmB601RsStatus',
         'observedAt': utc_now(),
-        'operatorSelection': {'sourceCommit': source_commit, 'model': 'B601-RS', 'namespace': 'rebotarm'},
+        'operatorSelection': {
+            'sourceCommit': source_checkout['commit'],
+            'sourceCheckout': source_checkout,
+            'model': 'B601-RS',
+            'namespace': 'rebotarm',
+        },
         'source': {
             'environment': reader.environment(),
             'jointStates': {'topic': JOINT_TOPIC, 'messageType': JOINT_TYPE, 'publisher': joint_endpoint},
@@ -171,11 +175,12 @@ class Reader:
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', required=True, type=Path)
-    parser.add_argument('--source-commit', required=True)
+    parser.add_argument('--source-root', required=True, type=Path)
     args = parser.parse_args(argv)
     try:
         if args.output.exists(): raise CollectionError('output_already_exists')
-        with Reader() as reader: result = build_observation(reader, args.source_commit)
+        source_checkout = inspect_checkout(args.source_root)
+        with Reader() as reader: result = build_observation(reader, source_checkout)
         write_output(args.output, result)
         print('OBSERVED | reBot Arm B601-RS state read only | hardware dispatch: NO')
         return 0

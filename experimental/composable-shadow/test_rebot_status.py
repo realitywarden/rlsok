@@ -4,6 +4,9 @@ import inspect
 import unittest
 import rebot_status
 
+CHECKOUT = {'commit': '4' * 40, 'dirty': False, 'checkoutName': 'rebot',
+            'originRemotes': ['https://github.com/example/rebot.git']}
+
 
 def value(**fields):
     return SimpleNamespace(**fields)
@@ -28,10 +31,11 @@ class ReBotStatusTests(unittest.TestCase):
             environment=lambda: {'rosDistro': 'jazzy', 'rmwImplementation': 'rmw_fastrtps_cpp', 'domainId': 0})
 
     def test_records_hardware_controller_state(self):
-        result = rebot_status.build_observation(self.reader(), 'dadefb0d0681501c41e6311ccc09045f836decd6')
+        result = rebot_status.build_observation(self.reader(), CHECKOUT)
         self.assertEqual(result['kind'], 'RlsokReBotArmB601RsStatus')
         self.assertEqual(set(result['joints']), set(rebot_status.JOINTS))
         self.assertEqual(result['armStatus']['stateMachine'], 'IDLE')
+        self.assertEqual(result['operatorSelection']['sourceCheckout'], CHECKOUT)
         self.assertRegex(result['observationSha256'], r'^[a-f0-9]{64}$')
 
     def test_rejects_fake_driver_and_invalid_mapping(self):
@@ -40,12 +44,12 @@ class ReBotStatusTests(unittest.TestCase):
             rebot_status.STATUS_TOPIC: [{'node': '/fake_rebotarm_rs_driver', 'type': rebot_status.STATUS_TYPE, 'gid': 'bb'}],
         }
         with self.assertRaisesRegex(rebot_status.CollectionError, 'hardware_publisher'):
-            rebot_status.build_observation(self.reader(publishers=fake), 'dadefb0d0681501c41e6311ccc09045f836decd6')
+            rebot_status.build_observation(self.reader(publishers=fake), CHECKOUT)
         bad = value(header=value(stamp=value(sec=1, nanosec=2)), joint_names=['joint1'],
             per_joint_status_code=[0], mode='mit', enabled=False, control_loop_active=False,
             state_machine='IDLE', error_codes=[])
         with self.assertRaisesRegex(rebot_status.CollectionError, 'joint_mapping'):
-            rebot_status.build_observation(self.reader(status=bad), 'dadefb0d0681501c41e6311ccc09045f836decd6')
+            rebot_status.build_observation(self.reader(status=bad), CHECKOUT)
 
     def test_reader_has_no_command_service_or_can_surface(self):
         source = inspect.getsource(rebot_status.Reader)
