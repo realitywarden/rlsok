@@ -459,3 +459,21 @@ follows:
   a Dobot Nova5 arm and cannot be substituted for the emailed inspection
   robot.  The already-sent repository/commit/command/material request remains
   the only truthful unblock path; no repeat was sent.
+
+## MIRA observer source-compatibility audit (2026-09-20)
+
+The packaged observer was checked again against the exact public MIRA source
+revision named in the recipe, not only against RLSOK's tests.  MIRA commit
+`52a3503e966a00dca6faba7b8850fed54540f34d` subscribes to
+`/fmu/out/vehicle_status` as `px4_msgs::msg::VehicleStatus` with
+`rclcpp::SensorDataQoS()`, matching the observer's topic, type and sensor-data
+QoS.  The MIRA dependency table and Docker entrypoint intentionally consume
+the latest `px4_msgs` main rather than a pinned revision.  Current upstream
+`px4_msgs` commit `72fcfaa2750306c9fde8e30e14b5a6d67eb3264f` defines all four
+selected fields: `arming_state`, `nav_state`, `failsafe` and
+`pre_flight_checks_pass`.
+
+This source audit found no reason to replace the immutable v1 package.  It is
+still not an installed ROS/PX4 run, an authenticated Pixhawk/airframe identity,
+or physical-MIRA evidence; only Lucas's returned owner-run capture can satisfy
+that stage.
