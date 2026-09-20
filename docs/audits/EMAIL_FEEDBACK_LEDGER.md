@@ -954,3 +954,50 @@ with email work or an activated checkout:
   current Shadow-only subscription category is eligible.  It asks for the
   complete document list and next step in one reply if review is required.
   This is now an external wait, not an approved or integrated payment route.
+
+## Ishan warehouse Gazebo source-first delivery (2026-09-20)
+
+Ishan supplied the exact public repository in `1a0be5724fceb427`:
+`ishan-xy/ros_mobile_robot@e3cadc4182f3cbc0fc2cde0eee2db0fba4939366`.
+Source inspection established the existing simulation boundary without making
+him restore a deleted VM merely to answer questions: ROS `/cmd_vel` uses
+`geometry_msgs/msg/Twist` through `ros_gz_bridge` to Gazebo DiffDrive, and
+`/odom` returns as `nav_msgs/msg/Odometry` through the same bridge.
+
+The checkout also contained three reproducibility defects: an absolute
+`/home/ishan/...` model URI, a Fortress `ign gazebo` launch combined with
+newer `gz-sim` plugin names in the world, and Python launch code stored as
+`rviz.rviz`.  Public upstream PR
+`https://github.com/ishan-xy/ros_mobile_robot/pull/2` proposes portable model
+resolution, consistent ignition plugin names, a valid RViz configuration and
+the exact Humble/Fortress setup/boundary documentation.  Focused Python, XML,
+YAML, path and bridge/plugin consistency checks passed.  The PR is open and
+has not been merged or accepted; no live Gazebo run is claimed.
+
+Core commit `df298752054c0efaf4120db6af25f542a67c4bdb` adds the project-specific
+`capture-ishan-gazebo-status` profile.  It requires exactly one
+`/parameter_bridge` subscription on `/cmd_vel`, exactly one publisher on
+`/odom`, captures one odometry sample and records the ROS context, endpoints,
+frames, pose, velocity, source commit and digest.  It creates no publisher or
+service client and launches nothing.  Three focused no-ROS tests, Python
+compilation and the source TypeScript typecheck passed.
+
+Immutable release
+`https://github.com/realitywarden/rlsok/releases/tag/ishan-gazebo-shadow-observer-v1`
+contains the 18,027-byte ZIP with SHA-256
+`710c64d6b5b51d345e7d9ccfa413068e7a7f01d50e3abafab3922100adb75773`.
+The exact extracted ZIP passed the three focused tests and Python compilation.
+Website commit `3206942` was deployed to production as
+`dpl_2saXL9zaHMqLNXZyXscD16pcVTMm`.  The production guide and Learn index
+returned HTTP 200 with the expected command, digest, no-publish and simulation
+limits; the direct release asset returned HTTP 200 as an 18,027-byte download.
+The web typecheck and production build passed locally and the Vercel production
+build completed successfully.
+
+Message `1a0be67353269b81` delivered the source findings, open fix PR, immutable
+download, checksum and complete guide in the existing thread.  It asks for
+only `ishan-gazebo-status.json` after he restores the environment, explicitly
+says no video is needed, and states that the observer cannot publish or move
+anything.  Publication, deployment and sending do not establish that Ishan
+ran the observer.  This remains a simulation-only waiting item and cannot
+satisfy the separate physical-robot evidence objective.
