@@ -1,5 +1,12 @@
 # H1-2 LowState observer v1
 
+> Superseded by
+> [`h12-lowstate-observer-v2`](https://github.com/realitywarden/rlsok/releases/tag/h12-lowstate-observer-v2).
+> Version 1 preserves the subscribe-only, zero-command boundary, but its
+> standalone command does not require the H12 checkout root and therefore
+> cannot reliably bind the result to the checkout actually in use. Use v2 for
+> any new capture.
+
 This project-specific package is the immutable companion to CorrellLab
 `h12_loco_manipulation` PR #1 at source commit
 `6fef8760741af122c59ca13e5f1960a1f79b230a`.
