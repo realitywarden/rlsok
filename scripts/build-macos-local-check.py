@@ -16,9 +16,9 @@ import tempfile
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.5.4'
-SOURCE = '5ce2cdd49992372580de8c9254cb49674c13880b'
-LINUX_SHA = '3353b71205d26f101cf21abc834fcf568f1718ec7f2c5d2388a0edf0a5aba30b'
+VERSION = '1.5.5'
+SOURCE = '7a1176f194dff6bdb6f50e69945692ba3847d3c5'
+LINUX_SHA = '23a745811bef8ede1b8ef1bf6d145d5c71a2367783635234128816acc25e4773'
 NODE = {
     'x64': ('5ea50c9d6dea3dfa3abb66b2656f7a4e1c8cef23432b558d45fb538c7b5dedce', 0x01000007),
     'arm64': ('5ed4db0fcf1eaf84d91ad12462631d73bf4576c1377e192d222e48026a902640', 0x0100000c),
@@ -91,6 +91,7 @@ def main():
                 raise RuntimeError('darwin_node_architecture_mismatch')
             shutil.copyfile(ROOT/'packaging/macos/rlsok',stage/'bin/rlsok')
             shutil.copyfile(ROOT/'packaging/macos/build-pkg.sh',stage/'build-pkg.sh')
+            shutil.copyfile(ROOT/'packaging/macos/RLSOKLocalCheck.swift',stage/'RLSOKLocalCheck.swift')
             shutil.copyfile(ROOT/'packaging/macos/README.md',stage/'START-HERE.md')
             (stage/'PLATFORM').write_text(f'darwin-{arch}\n')
             manifest=json.loads((stage/'BUILD-MANIFEST.json').read_text())

@@ -7,36 +7,22 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 [[ ! -e $1 && ! -L $1 ]] || { echo 'Output already exists.' >&2; exit 1; }
 VERSION=$(cat "$ROOT/VERSION")
 PLATFORM=$(cat "$ROOT/PLATFORM")
-[[ $VERSION == 1.5.4 && $PLATFORM =~ ^darwin-(x64|arm64)$ ]] || { echo 'Unexpected payload identity.' >&2; exit 1; }
+[[ $VERSION == 1.5.5 && $PLATFORM =~ ^darwin-(x64|arm64)$ ]] || { echo 'Unexpected payload identity.' >&2; exit 1; }
 ARCH=${PLATFORM#darwin-}
 OUT=$1
 mkdir "$OUT"
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/rlsok-macos-pkg.XXXXXX")
 trap 'rm -rf -- "$WORK"' EXIT
 APP="$WORK/payload/Applications/RLSOK Local Check $VERSION.app"
-mkdir -p "$(dirname "$APP")"
-cat > "$WORK/main.applescript" <<'APPLESCRIPT'
-on run
-  set appPath to POSIX path of (path to me)
-  set bundlePath to appPath & "Contents/Resources/local-check/"
-  set choice to button returned of (display dialog "Compare robot settings with a reviewed copy. Try an included example first: it shows a matching setup and a changed calibration. No robot or account is needed." with title "RLSOK Local Check" buttons {"Cancel", "Open guide", "Run example"} default button "Run example")
-  if choice is "Open guide" then
-    do shell script "/usr/bin/open -t " & quoted form of (bundlePath & "START-HERE.md")
-  else
-    try
-      set destination to do shell script quoted form of (bundlePath & "bin/run-example")
-      display dialog "Example complete. The baseline matches; the changed calibration is flagged. Your two reports are saved locally. No robot command was sent." with title "RLSOK Local Check" buttons {"Open reports"} default button "Open reports"
-      do shell script "/usr/bin/open " & quoted form of destination
-    on error messageText
-      display dialog messageText with title "RLSOK could not run the example" buttons {"OK"} default button "OK" with icon caution
-    end try
-  end if
-end run
-APPLESCRIPT
-/usr/bin/osacompile -o "$APP" "$WORK/main.applescript"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+/usr/bin/xcrun swiftc -swift-version 5 -parse-as-library -O \
+  -framework SwiftUI -framework AppKit \
+  "$ROOT/RLSOKLocalCheck.swift" \
+  -o "$APP/Contents/MacOS/RLSOKLocalCheck"
 mkdir -p "$APP/Contents/Resources/local-check"
 cp -R "$ROOT/." "$APP/Contents/Resources/local-check/"
-rm "$APP/Contents/Resources/local-check/build-pkg.sh"
+rm "$APP/Contents/Resources/local-check/build-pkg.sh" \
+  "$APP/Contents/Resources/local-check/RLSOKLocalCheck.swift"
 cat > "$APP/Contents/Resources/local-check/bin/run-example" <<'EXAMPLE'
 #!/bin/bash
 set -euo pipefail
@@ -47,14 +33,24 @@ WORK=$(mktemp -d "$HOME/Documents/RLSOK/Example-XXXXXX")
 printf '%s\n' "$WORK/reports"
 EXAMPLE
 chmod 755 "$APP/Contents/Resources/local-check/bin/"*
-set_plist() {
-  /usr/libexec/PlistBuddy -c "Set :$1 $2" "$APP/Contents/Info.plist" 2>/dev/null ||
-    /usr/libexec/PlistBuddy -c "Add :$1 string $2" "$APP/Contents/Info.plist"
-}
-set_plist CFBundleIdentifier com.rlsok.local-check
-set_plist CFBundleShortVersionString "$VERSION"
-set_plist CFBundleVersion "$VERSION"
-set_plist LSMinimumSystemVersion 14.0
+cat > "$APP/Contents/Info.plist" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>CFBundleDisplayName</key><string>RLSOK Local Check $VERSION</string>
+  <key>CFBundleExecutable</key><string>RLSOKLocalCheck</string>
+  <key>CFBundleIdentifier</key><string>com.rlsok.local-check</string>
+  <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+  <key>CFBundleName</key><string>RLSOK Local Check</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>$VERSION</string>
+  <key>CFBundleVersion</key><string>$VERSION</string>
+  <key>LSMinimumSystemVersion</key><string>14.0</string>
+  <key>NSHighResolutionCapable</key><true/>
+  <key>NSPrincipalClass</key><string>NSApplication</string>
+</dict></plist>
+PLIST
+/usr/bin/plutil -lint "$APP/Contents/Info.plist"
 /usr/bin/pkgbuild --root "$WORK/payload" --identifier "com.rlsok.local-check.$ARCH" --version "$VERSION" --install-location / "$OUT/RLSOK-Local-Check-$VERSION-macos-$ARCH.pkg"
 (cd "$OUT" && /usr/bin/shasum -a 256 ./*.pkg > SHA256SUMS)
 printf 'Built native installer: %s\n' "$OUT"
