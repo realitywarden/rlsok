@@ -1066,6 +1066,9 @@ The exact extracted archive passed all four focused tests and Python
 compilation.  Message `1a0be87d9fbc97ea` apologized for the quick correction
 and supplied the v2 asset, checksum and corrected command before Max reported a
 run.
+The v1 release remains available for historical checksum integrity, but its
+public release notes now prominently mark it superseded and direct every new
+capture to v2; v2 is marked as the latest release.
 
 Website commit `a8760ff09096e13028957157304a71e7067c72da` was deployed to
 production as `dpl_DPqrMhxpmcfVcPMfn9k6qKjroRwc`.  The production guide and
