@@ -909,6 +909,14 @@ publication scope.
   (`1a08b51e3bd6a412`) asking which BOM part is difficult to source.  RLSOK has
   no stated BOM sourcing need in this feedback goal, so it is not a customer
   request, technical feedback or robot-test opportunity and was not answered.
+- Waveshare support's latest ticket update (`1a0be7c42aea46b0`) only confirms
+  receipt of our explicit closure and repeats that future messages to this
+  address should be Waveshare-product technical questions.  Their earlier
+  human response said they have no near-term plan for the evaluation, and our
+  `1a0b8d7af6c6d7dd` already promised not to use that support channel for
+  third-party RLSOK validation.  No reply, sales redirect or renewed robot-test
+  request is warranted; this opportunity is externally closed unless
+  Waveshare independently reopens it.
 
 Ishan replied again in `1a0be4e1c864b05d`: he now understands the boundary and
 wants to try the Shadow workflow, but removed his Ubuntu VM and believed he
