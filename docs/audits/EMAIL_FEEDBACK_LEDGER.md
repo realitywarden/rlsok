@@ -1155,6 +1155,52 @@ These commits, release, deployment and SENT IDs prove implementation,
 publication and email delivery only.  A real H1-2 connection, owner run,
 returned JSON, contact verdict and acceptance remain open.
 
+## Ishan live-simulation regression and observer v4 (2026-09-20)
+
+Ishan's message `1a0beb1d4382f17e` reported that the released v3 archive
+failed again and correctly asked us to build and run the single-launch
+simulation ourselves.  His screenshot showed the exact live error:
+`ishan_gazebo_unexpected_bridge:subscribers:/_NODE_NAMESPACE_UNKNOWN_/_NODE_NAME_UNKNOWN_`.
+This was not an old v2 package: the downloaded 25,136-byte v3 asset matched its
+published SHA-256 and contained `/ros_gz_bridge`.  The remaining defect was
+v3's assumption that every valid DDS endpoint exposes a concrete ROS node
+identity.  His Fast DDS graph exposed the exact ROS middleware unknown-node
+sentinel instead.
+
+Core commit `5d6e85db29b73f6ca62863a93fa13ab61af24cd2` fixes that case without
+inventing provenance.  Observer v4 accepts either the verified
+`/ros_gz_bridge` identity or the exact unknown-node sentinel, preserves the
+observed value, and adds `nodeIdentity: verified|middleware_unknown`.  Any
+other node name, wrong type or multiple endpoints remains a hard failure.  It
+also records `observerVersion: "4"` and provides `--version` so an old extracted
+package can be rejected before a run.  Five focused observer regressions and
+two checkout tests passed locally and from the extracted archive.
+
+The public v4 ZIP is 25,740 bytes with SHA-256
+`f3e50175c3ca9afe8f3aadca5bbb6e8a52a3e4795c9277f985d0b1317ba38ace`.
+V3 is marked superseded and v4 is the latest release.  Unlike v2/v3, v4 was
+accepted against a live ROS graph before customer delivery: public GitHub run
+`35509751902` built Ishan's exact portable-path PR commit
+`ec909071f6d9275661372bba196ba47857f7bea8` under ROS 2 Humble / Gazebo
+Fortress, launched the project, downloaded the published ZIP, verified version
+4, observed `/cmd_vel` and one `/odom` sample with frames `odom` and
+`base_link_1`, and asserted zero RLSOK publishers and zero commands.  The live
+run completed successfully.  It is simulation evidence, not physical-robot
+evidence.
+
+Acknowledgement `1a0beb413f6a8d99` told Ishan to stop acting as our
+integration runner while the live check ran.  Delivery message
+`1a0bebebaf9ca4f3` explained the exact cause, supplied the release, checksum,
+public acceptance run and version check, and requested the v4 JSON.  These SENT
+IDs prove communication only; Ishan's own v4 run and acceptance remain open.
+
+Website commit `4a0a20a` updates the guide, checksum, version check and live-run
+evidence.  It is pushed to `realitywarden/rlsok-cloud` main, but production was
+still serving v3 at the time of this entry: the local Vercel CLI had no login
+credential and the connected Vercel deployment action was unavailable/denied.
+Do not report the website as deployed until production exposes the v4 hash and
+run link.
+
 ## PiDog issue-12 source-first preparation (2026-09-20)
 
 The promised upstream gate was rechecked rather than bypassed.  PiDog
