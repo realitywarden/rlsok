@@ -83,6 +83,27 @@ selected real-bridge ROS paths were live; it still does not authenticate the
 physical arms or network peers, prove motion safety, or grant permission to
 move.
 
+### Warehouse mobile-robot Gazebo Shadow capture
+
+The public `ishan-xy/ros_mobile_robot` source at
+`e3cadc4182f3cbc0fc2cde0eee2db0fba4939366` maps ROS `/cmd_vel` Twist through
+one `ros_gz_bridge` parameter bridge to Gazebo DiffDrive, with odometry
+returning on `/odom`. After that simulation is already running, capture the
+boundary without publishing a command:
+
+```bash
+rlsok profile capture-ishan-gazebo-status \
+  --source-commit e3cadc4182f3cbc0fc2cde0eee2db0fba4939366 \
+  --output ishan-gazebo-status.json
+```
+
+The collector requires the same `/parameter_bridge` node to be the only typed
+subscriber at `/cmd_vel` and the only typed publisher at `/odom`, then records
+one existing odometry sample. It creates no publisher, launches nothing and
+calls no service. This demonstrates only a source-selected simulation graph
+and zero-dispatch observation. It is not a physical-robot result, authenticated
+Gazebo instance, safety layer or command gate.
+
 | Recipe | Public reference | Selected boundary |
 | --- | --- | --- |
 | `parol6-arm` | grahas/parol6_ros2_control, c111b97d | Six-joint `/parol6_arm_controller/follow_joint_trajectory` |
