@@ -1035,7 +1035,12 @@ service or writes I2C.
 Three focused offline tests, Python compilation, CLI help wiring and the full
 TypeScript typecheck passed.  Its source/unit reader also inspected the exact
 upstream checkout successfully: seven selected files, three unit files, clean
-commit and the corrected PATH.  This is a pushed preparation only.  There is
+commit and the corrected PATH.  A source-only candidate ZIP was assembled
+locally for the Pi (`19,967` bytes; SHA-256
+`ef91167ff7ebcb8ab9104f1ad9e563e3c32d930167066a09d1c16dcf8e76d3dd`),
+and the exact extracted archive passed all three focused tests and Python
+compilation.  It has not been uploaded or sent.  This is a pushed preparation
+only.  There is
 no PiDog release asset, website claim, customer delivery or owner run yet;
 those remain intentionally gated on the upstream issue's confirmed final
 revision and Rocky's promised ping.
