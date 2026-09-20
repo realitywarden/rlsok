@@ -968,6 +968,31 @@ physical-robot result.
   with the current instruction to filter people who later said they are not
   doing the work, the opportunity is closed without another follow-up.
 
+## No-date reply and contact-request recheck (2026-09-20)
+
+A connector-only, no-date audit inspected the latest message in the first 500
+inbound non-promotional/non-update Gmail matches rather than relying on unread
+labels. The only newly actionable project messages were Ishan's concrete v2
+failure and Gaus's loss of lab access; both are handled above. Other external
+last messages were automated receipts, delivery failures, explicit closures,
+unrelated sales/newsletter mail or older messages already followed by a sent
+reply in the same thread.
+
+A separate no-date keyword audit for LinkedIn, WhatsApp, Telegram, WeChat,
+phone, call, meeting, contact, Discord, email address and video inspected 100
+matching messages across 94 coalesced threads. It found no unresolved
+project-related human request whose latest message lacked a later answer. The
+iRobot employment redirect had already been forwarded to Steve Baron;
+Waveshare and Unitree were courtesy/closure messages rather than unanswered
+requests. No user draft was opened, edited, sent or deleted.
+
+The current real-hardware priority threads were then read by thread ID. MIRA,
+MakerMods, TRIK, LelyRobot, H12, Nova inspection robot, rover-arm UART, PiDog,
+both ESP32 bridges, Dobot and Ruiyan all still end with a sent project-specific
+request or delivery, not a new owner result. Duplicate reminders were not
+sent. `rockywuest/pidog-embodiment#12` remains OPEN and was last updated on
+2026-09-15, so the explicit wait-for-Rocky condition is unchanged.
+
 Ishan replied again in `1a0be4e1c864b05d`: he now understands the boundary and
 wants to try the Shadow workflow, but removed his Ubuntu VM and believed he
 would first need to restore it before identifying the ROS version and command
