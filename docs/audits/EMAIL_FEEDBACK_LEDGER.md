@@ -946,6 +946,11 @@ with email work or an activated checkout:
   asks for Bank Account Verification in the authenticated dashboard.  Banking
   information was not requested or transmitted by email.  No bank verification
   or live payment activation is claimed.
-- PayPro Global has only acknowledged receipt (`1a0612400c0a492f`) and has not
-  issued an eligibility decision.  It remains an external wait; repeated
-  acknowledgement replies would add no information.
+- PayPro Global only acknowledged receipt on 2026-09-02
+  (`1a0612400c0a492f`) and never issued the promised eligibility decision.
+  Because eighteen days had elapsed, message `1a0be56450255367` sent one
+  concise in-thread follow-up asking for the two missing decisions: whether a
+  mainland-China individual/sole proprietor can onboard and whether the
+  current Shadow-only subscription category is eligible.  It asks for the
+  complete document list and next step in one reply if review is required.
+  This is now an external wait, not an approved or integrated payment route.
