@@ -477,3 +477,31 @@ This source audit found no reason to replace the immutable v1 package.  It is
 still not an installed ROS/PX4 run, an authenticated Pixhawk/airframe identity,
 or physical-MIRA evidence; only Lucas's returned owner-run capture can satisfy
 that stage.
+
+## Real-hardware follow-up wording correction (2026-09-20)
+
+The owner clarified that earlier replies which stopped at source preparation,
+configuration material or a statement that no physical run was needed should
+not be treated as having fully pursued a real-robot result.  Five still-viable
+threads therefore received one corrected, project-specific follow-up.  These
+are not generic reminders: each asks for the smallest read-only evidence that
+can distinguish an owner-run environment from another public-source review.
+
+| Platform / thread | Gmail SENT ID | Corrected request and boundary |
+| --- | --- | --- |
+| LelyRobot / `1a076624befe452b` | `1a0bdfaadf404fdb` | During an already-running normal bringup, return checkout identity, active Python/C++ bridge, node/topic endpoint details and one existing `/ultrasonic_left` sample.  No launch solely for RLSOK and no `/cmd_vel` publication.  A sensor sample is serial-path evidence, not controller authentication or motion safety. |
+| TRIK / `1a07658ff1d51524` | `1a0bdfab4fd66be9` | During normal TRIK bringup and before teleoperation, return checkout identity, controller/hardware-interface listings, `/joint_states` and `/diff_drive_controller/odom`.  No power/launch solely for RLSOK and no velocity publication.  This is a request for the real TCP/hardware path, not another static recipe. |
+| MakerMods Metal / `1a08f6661ff3b468` | `1a0bdfac005a26ec` | PR #160 is now Ready for mapping review.  If accepted, run capture-only against copies of the selected real-bench record/calibrations while the arm remains unpowered and no bus/session is opened.  This can establish an owner-run selected setup, not physical identity, torque, motion or safety. |
+| Amal ESP32 bridge / `1a0adeb95ffdf921` | `1a0bdfad064edfba` | Requested the exact public host/firmware sources and existing non-motion query so RLSOK can implement the project-specific identity/capability exchange and later run it on the physical bridge with drive output disabled.  Authentication will not be claimed without actual nonce/session proof. |
+| Hiep ESP32 bridge / `1a0aeac310cdddbf` | `1a0bdfae383c2dbe` | Offered to implement the missing read-only identity request from the exact host/firmware sources, then capture it during normal maintenance with drive output disabled.  A returned version string is comparison evidence only, not authenticated identity. |
+
+MIRA and dual Kinova had already received explicit physical, zero-command
+requests and were not contacted again.  GOLEM/H12 had received an exact
+materials plus real/simulation zero-command question on 2026-09-19; repeating
+it one day later would not improve the unblock path.  PAROL6 is broken, xArm
+1S lacks restoration availability, PiDog is waiting on its upstream issue and
+the rover-arm owner has already received multiple mapping requests, so those
+constraints were respected rather than overridden by a mass reminder.
+
+These SENT IDs prove outreach only.  None is a returned owner capture, robot
+connection, bench trial, accepted PR or hardware validation.
