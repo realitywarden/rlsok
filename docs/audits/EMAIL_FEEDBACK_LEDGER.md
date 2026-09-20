@@ -1114,3 +1114,53 @@ only.  There is
 no PiDog release asset, website claim, customer delivery or owner run yet;
 those remain intentionally gated on the upstream issue's confirmed final
 revision and Rocky's promised ping.
+
+## Source-bound observer v2 correction (2026-09-20)
+
+A cross-observer review found that the first MIRA, TRIK, LelyRobot, reBot,
+dual Kinova and Ishan packages either accepted an operator-typed source commit
+or did not bind the result to a checkout. The ROS observations were still
+subscription-only, but a typed SHA could be paired with a different or dirty
+checkout. Those v1 assets remain immutable historical files and their release
+notes now prominently point to v2; they must not be used for a new result.
+
+Core commit `5d9dfe7c55443d914e8cff320a9363c1dddfcff2` adds a shared checkout
+inspector. Each v2 observer requires `--source-root` at the actual Git root and
+records the full commit, dirty state, checkout name and all `origin` URLs while
+omitting the local absolute path. Twenty focused source tests passed, the
+TypeScript typecheck passed, and all six exact ZIPs were extracted and passed
+five focused tests apiece. No ROS graph or physical robot was used in those
+offline checks.
+
+| Observer | Immutable v2 ZIP bytes | SHA-256 |
+| --- | ---: | --- |
+| `mira-status-observer-v2` | 24,210 | `85470a7ddcbccd6922bdaef83685ba1fb1c4a90e99ebe4809e4773d9595b9d3e` |
+| `trik-status-observer-v2` | 25,232 | `d4fd8dc1dbeb6e32cb2ac8f67564d3068a812eb558784c9d5368c0e67ae64523` |
+| `lely-status-observer-v2` | 24,908 | `634680c088596215de3ecc434b6859bd5ffb014020a18b55d0de1e92d22873ca` |
+| `rebot-status-observer-v2` | 25,560 | `28d306fb2b93db3319905ffe627064eb246dd8e7b0d96d055e266b0b88e46228` |
+| `dual-kinova-status-observer-v2` | 26,442 | `59e4c7a011fb25bc23cf647a62c6d4f52c8c3e14b74fcb4b03ccec586124c433` |
+| `ishan-gazebo-shadow-observer-v2` | 25,311 | `acbf1133540fe0c3f2bc23f012d6045d3b995e03575bb0a8431377af6fb14ee9` |
+
+Website commit `c976a95` was deployed to production as
+`dpl_FGAyc9CVdfexRXckkTMJDF6iUdKg`. All six production guides returned HTTP
+200 and contained their v2 tag, checksum and `--source-root` command; all six
+ZIP URLs returned HTTP 200 with the exact published byte count. Web workspace
+typechecks and the production Vercel build passed. Publication still does not
+establish an owner run.
+
+Short in-thread corrections were sent only to owners who had received the v1
+package and could still run it: MIRA `1a0be9b5f970d595`, TRIK
+`1a0be9b62a739f04`, LelyRobot `1a0be9b69834bfd9`, dual Kinova
+`1a0be9b6c2c11d10`, Seeed technical support for reBot
+`1a0be9b73faeed9e`, and Ishan `1a0be9b790b89345`. Frank Nie was not
+re-contacted because he had already closed his hardware role. These SENT IDs
+prove delivery of the correction only.
+
+Ishan's new message `1a0be8f93844c5cd` reported that the PR's relative
+`model.sdf` include still required him to insert an absolute path. PR #2 was
+updated at commit `8549ef5`: the launch now registers the installed package
+`sdf` directory in `IGN_GAZEBO_RESOURCE_PATH`, and the world resolves
+`model://finalassembly_v3` through `model.config`. Two focused source checks
+passed. The reply says not to stop an already-running simulation merely to
+remove his temporary absolute-path edit; v2 records that checkout as dirty.
+This is active simulation troubleshooting, not a physical-robot result.
