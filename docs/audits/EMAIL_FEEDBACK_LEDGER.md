@@ -909,12 +909,14 @@ publication scope.
   request, technical feedback or robot-test opportunity and was not answered.
 
 Ishan replied again in `1a0be4e1c864b05d`: he now understands the boundary and
-wants to try the Shadow workflow, but removed his Ubuntu VM and first needs to
-restore the ROS/Gazebo project before he can identify the ROS version and
-command topic.  He explicitly said he will inspect the files and return those
-details.  No additional reply was sent because the complete required fact set
-was already requested in the preceding message and he has accepted that next
-step.  This remains a simulation-only waiting item, not a physical-robot run.
+wants to try the Shadow workflow, but removed his Ubuntu VM and believed he
+would first need to restore it before identifying the ROS version and command
+topic.  Message `1a0be558a6b3cb2a` removed that unnecessary burden: it asks
+only for the exact public repository URL and branch/commit so the package,
+launch and controller files can be inspected first.  It says a single specific
+read-only runtime command will be requested later only if source cannot settle
+a remaining fact.  This is a simulation-only waiting item, not a physical-
+robot run.
 
 ## No-date inbox, RLSOK and spam reconciliation (2026-09-20)
 
