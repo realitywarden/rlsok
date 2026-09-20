@@ -38,6 +38,28 @@ sensor path was live; it does not authenticate the Arduino/firmware, prove a
 motor stop, validate command delivery or establish physical acceptance. Do not
 power or launch the robot solely for this capture.
 
+### reBot Arm B601-RS live hardware-controller capture
+
+The public B601-RS stack has separate real and fake drivers. During an
+already-running normal hardware session, capture the real controller's six arm
+joints and latched status without opening SocketCAN or sending a command:
+
+```bash
+rlsok profile capture-rebot-status \
+  --source-commit dadefb0d0681501c41e6311ccc09045f836decd6 \
+  --output rebot-status.json
+```
+
+Use the full commit of the checkout actually running. The collector requires
+both `/rebotarm/joint_states` and `/rebotarm/arm_status` to have exactly one
+publisher named `/reBotArmController`; the public fake driver's different node
+name is rejected. It records the six joint values, status codes, mode, enabled
+flag, control-loop flag, state machine and errors. It creates subscriptions
+only—no publisher, service client or SocketCAN connection. Do not launch,
+enable or power the arm solely for this capture. A matching node and sample are
+stronger than a generic topic echo but still do not authenticate the physical
+arm or CAN peers and do not grant permission to move.
+
 | Recipe | Public reference | Selected boundary |
 | --- | --- | --- |
 | `parol6-arm` | grahas/parol6_ros2_control, c111b97d | Six-joint `/parol6_arm_controller/follow_joint_trajectory` |

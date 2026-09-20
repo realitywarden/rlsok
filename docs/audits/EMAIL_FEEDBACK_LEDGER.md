@@ -770,3 +770,21 @@ acceptance.  Focused source tests and the TypeScript typecheck passed.
 Publishing, deploying and sending remain distinct from an owner run.  The
 LelyRobot item stays open until Tomo returns a credible physical-session
 capture or closes the opportunity.
+
+## reBot Arm B601-RS redirect and public-source implementation (2026-09-20)
+
+Frank Nie (`1a0be213af0a1651`) explained that he maintains the Seeed Studio
+Wiki rather than reBot Arm hardware/ROS 2 content.  He gave three correct
+routes: the relevant Wiki comments, the Wiki GitHub repository, or directly
+`techsupport@seeed.io`.  Do not ask Frank for hardware validation again.
+
+The official Wiki-linked public stack at
+`Yang-Ci/ReBot_Arm_DigitalTwin_RS@dadefb0d0681501c41e6311ccc09045f836decd6`
+already distinguishes the physical controller from its fake driver.  A new
+subscription-only observer requires the unique publisher of both
+`/rebotarm/joint_states` and `/rebotarm/arm_status` to be
+`/reBotArmController`, captures the six arm joints and public controller
+status, and rejects the public fake driver's node name.  It never opens
+SocketCAN or creates a command/service surface.  Implementation, release,
+website delivery, support routing and a physical-owner run remain separate
+until recorded with their evidence.
