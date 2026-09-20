@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import test from 'node:test';
 import { prepareSavedSetup } from '../../packages/composable-shadow/saved-setup-recipes';
+import { inspectSavedInputs } from '../../packages/composable-shadow/saved-input-review';
 
 const robstrideSources = [
   'robstride_ros2_control/src/driver_config.cpp',
@@ -100,4 +101,40 @@ test('direct LeRobot recipe keeps leader/follower identities, calibrations and s
   writeFileSync(join(f.inputs, 'workflow.json'), JSON.stringify(workflow));
   assert.throws(() => prepareSavedSetup('lerobot-so101-direct', f.source, input, join(f.root, 'bad')),
     /lerobot_leader_follower_port_must_differ/);
+});
+
+test('bounded operation inspection separates saved authorization inputs from local control and safety', (t) => {
+  const f = fixture([]); t.after(() => rmSync(f.root, { recursive: true, force: true }));
+  f.write('operation.json', JSON.stringify({ schemaVersion: 1, operationId: 'three-finger-hold',
+    authorizedTask: 'Grasp and hold one lightweight cylindrical object.',
+    validity: { maxDurationMs: 60_000, renewal: 'new-check-before-next-operation' },
+    localControl: { allowedAdjustments: ['Redistribute grip response', 'Small positional contact correction'],
+      continuousMeasurements: ['slip estimate'], terminatingConditionIds: ['slip-envelope-exit'], ownsImmediatePhysicalResponse: true },
+    independentSafety: { responsibilities: ['Force limits', 'Stopping behavior', 'Immediate safe physical response'] } }));
+  f.write('envelope.json', JSON.stringify({ schemaVersion: 1, conditions: [{ id: 'slip-envelope-exit', signal: 'slip_mm',
+    comparator: 'gt', threshold: 2, unit: 'mm', debounceMs: 50, interpretation: 'Local control ends the bounded operation.' }] }));
+  f.write('controller.yaml', 'controller: selected\n');
+  f.write('calibration.json', JSON.stringify({ selected: true }));
+  f.write('perception.yaml', 'temporal_memory: selected\n');
+  f.write('temporal.json', JSON.stringify({ schemaVersion: 1,
+    states: [{ id: 'holding', description: 'Object held inside the declared envelope.' }, { id: 'slipping', description: 'Slip is outside the envelope.' }],
+    referenceObservations: [{ id: 'hold-reference', sha256: 'd'.repeat(64), role: 'baseline', description: 'Operator-selected reference digest.' }],
+    expectedTransitions: [{ from: 'holding', to: 'slipping', allowedDuringOperation: false, terminatesOperation: true, description: 'Local classifier ends the operation.' }] }));
+  const input = join(f.inputs, 'input.json');
+  writeFileSync(input, JSON.stringify({ id: 'bounded-review', sourceCommit: 'e'.repeat(40), files: {
+    operation: 'operation.json', operating_envelope: 'envelope.json', controller_configuration: 'controller.yaml',
+    calibration: 'calibration.json', perception_configuration: 'perception.yaml', temporal_state: 'temporal.json' } }));
+  const result = inspectSavedInputs('bounded-operation', f.source, input);
+  assert.equal(result.decision, 'NO_STATIC_ISSUES');
+  assert.equal(result.hardwareDispatch, false);
+  assert.match(String(result.facts.ownershipBoundary), /Local control owns continuous measurement/);
+  assert.match(String(result.facts.temporalStateBoundary), /does not interpret live vision/);
+
+  const envelope = JSON.parse(readFileSync(join(f.inputs, 'envelope.json'), 'utf8'));
+  envelope.conditions[0].id = 'unreferenced';
+  writeFileSync(join(f.inputs, 'envelope.json'), JSON.stringify(envelope));
+  const changed = inspectSavedInputs('bounded-operation', f.source, input);
+  assert.equal(changed.decision, 'REVIEW_REQUIRED');
+  assert.ok(changed.issues.some(issue => issue.code === 'UNKNOWN_TERMINATING_CONDITION'));
+  assert.ok(changed.issues.some(issue => issue.code === 'UNBOUND_TERMINATING_CONDITION'));
 });

@@ -17,9 +17,50 @@ const pose = z.object({ header, pose: z.object({ position: vector,
   orientation: vector.extend({ w: z.number().finite() }).strict() }).strict() }).strict();
 const wrench = z.object({ header, wrench: z.object({ force: vector, torque: vector }).strict() }).strict();
 const jointMove = z.object({ cmd: z.object({ layout: z.object({ dim: z.array(z.object({ label: z.string(), size: z.number().int().nonnegative(), stride: z.number().int().nonnegative() }).strict()), data_offset: z.number().int().nonnegative() }).strict(), data: z.array(z.number().finite()).min(1) }).strict(), duration: z.number().finite().positive() }).strict();
+const boundedOperation = z.object({
+  schemaVersion: z.literal(1), operationId: z.string().trim().min(1).max(300),
+  authorizedTask: z.string().trim().min(1).max(2000),
+  validity: z.object({
+    maxDurationMs: z.number().int().positive().max(86_400_000),
+    renewal: z.literal('new-check-before-next-operation'),
+  }).strict(),
+  localControl: z.object({
+    allowedAdjustments: z.array(z.string().trim().min(1).max(1000)).min(1).max(100),
+    continuousMeasurements: z.array(z.string().trim().min(1).max(1000)).min(1).max(100),
+    terminatingConditionIds: z.array(z.string().trim().min(1).max(300)).min(1).max(100),
+    ownsImmediatePhysicalResponse: z.literal(true),
+  }).strict(),
+  independentSafety: z.object({
+    responsibilities: z.array(z.string().trim().min(1).max(1000)).min(1).max(100),
+  }).strict(),
+}).strict();
+const boundedCondition = z.object({
+  id: z.string().trim().min(1).max(300), signal: z.string().trim().min(1).max(1000),
+  comparator: z.enum(['lt', 'lte', 'gt', 'gte', 'outside']),
+  threshold: z.union([z.number().finite(), z.tuple([z.number().finite(), z.number().finite()])]),
+  unit: z.string().trim().min(1).max(100), debounceMs: z.number().int().nonnegative().max(3_600_000),
+  interpretation: z.string().trim().min(1).max(2000),
+}).strict();
+const boundedEnvelope = z.object({
+  schemaVersion: z.literal(1),
+  conditions: z.array(boundedCondition).min(1).max(100),
+}).strict();
+const temporalState = z.object({
+  schemaVersion: z.literal(1),
+  states: z.array(z.object({ id: z.string().trim().min(1).max(300), description: z.string().trim().min(1).max(2000) }).strict()).min(1).max(200),
+  referenceObservations: z.array(z.object({
+    id: z.string().trim().min(1).max(300), sha256: z.string().regex(/^[a-f0-9]{64}$/),
+    role: z.enum(['baseline', 'boundary', 'transition-example']), description: z.string().trim().min(1).max(2000),
+  }).strict()).max(500),
+  expectedTransitions: z.array(z.object({
+    from: z.string().trim().min(1).max(300), to: z.string().trim().min(1).max(300),
+    allowedDuringOperation: z.boolean(), terminatesOperation: z.boolean(),
+    description: z.string().trim().min(1).max(2000),
+  }).strict()).min(1).max(500),
+}).strict();
 
 export function inspectSavedInputs(recipe: string, source: string, inputPath: string) {
-  if (!['aditya-so101', 'beast', 'cartesian'].includes(recipe)) throw new Error('unsupported_saved_input_inspection');
+  if (!['aditya-so101', 'beast', 'cartesian', 'bounded-operation'].includes(recipe)) throw new Error('unsupported_saved_input_inspection');
   const request = requestSchema.parse(savedDocument(inputPath, 'json'));
   const issues: Array<{ code: string; file: string; detail: string }> = [];
   const facts: Obj = {}, evidence: Array<{ id: string; path: string; sha256: string }> = [];
@@ -35,7 +76,48 @@ export function inspectSavedInputs(recipe: string, source: string, inputPath: st
       return parseSaved(bytes, format);
     } catch (error) { add('UNREADABLE_OR_INVALID', id, (error instanceof Error ? error.message : String(error)).slice(0,1600)); return undefined; }
   }
-  if (recipe === 'aditya-so101') {
+  if (recipe === 'bounded-operation') {
+    const operationResult = boundedOperation.safeParse(read('operation', 'json'));
+    const envelopeResult = boundedEnvelope.safeParse(read('operating_envelope', 'json'));
+    read('controller_configuration', 'text');
+    read('calibration', 'text');
+    if (!operationResult.success) add('INVALID_OPERATION_CONTRACT', 'operation', operationResult.error.message);
+    if (!envelopeResult.success) add('INVALID_OPERATING_ENVELOPE', 'operating_envelope', envelopeResult.error.message);
+    if (operationResult.success && envelopeResult.success) {
+      const operation = operationResult.data, envelope = envelopeResult.data;
+      const ids = envelope.conditions.map(condition => condition.id);
+      if (new Set(ids).size !== ids.length) add('DUPLICATE_TERMINATING_CONDITION', 'operating_envelope', 'Condition IDs must be unique.');
+      const refs = operation.localControl.terminatingConditionIds;
+      if (new Set(refs).size !== refs.length) add('DUPLICATE_TERMINATING_CONDITION_REFERENCE', 'operation', 'Each terminating condition is referenced once.');
+      for (const id of refs) if (!ids.includes(id)) add('UNKNOWN_TERMINATING_CONDITION', 'operation', id);
+      for (const id of ids) if (!refs.includes(id)) add('UNBOUND_TERMINATING_CONDITION', 'operating_envelope', id);
+      for (const condition of envelope.conditions) {
+        if (condition.comparator === 'outside') {
+          if (!Array.isArray(condition.threshold) || condition.threshold[0] >= condition.threshold[1])
+            add('INVALID_OUTSIDE_RANGE', 'operating_envelope', `${condition.id}: outside requires [minimum, maximum] with minimum < maximum.`);
+        } else if (Array.isArray(condition.threshold)) add('INVALID_SCALAR_THRESHOLD', 'operating_envelope', `${condition.id}: ${condition.comparator} requires one scalar threshold.`);
+      }
+      facts.operation = operation;
+      facts.operatingEnvelope = envelope;
+      facts.ownershipBoundary = 'RLSOK compares the selected saved contract and inputs. Local control owns continuous measurement, envelope exit classification and immediate physical response. Independent safety remains separate.';
+    }
+    if (request.files.perception_configuration) read('perception_configuration', 'text');
+    if (request.files.temporal_state) {
+      const temporalResult = temporalState.safeParse(read('temporal_state', 'json'));
+      if (!temporalResult.success) add('INVALID_TEMPORAL_STATE_CONTRACT', 'temporal_state', temporalResult.error.message);
+      else {
+        const temporal = temporalResult.data, stateIds = temporal.states.map(state => state.id), observationIds = temporal.referenceObservations.map(item => item.id);
+        if (new Set(stateIds).size !== stateIds.length) add('DUPLICATE_TEMPORAL_STATE', 'temporal_state', 'State IDs must be unique.');
+        if (new Set(observationIds).size !== observationIds.length) add('DUPLICATE_REFERENCE_OBSERVATION', 'temporal_state', 'Reference observation IDs must be unique.');
+        for (const transition of temporal.expectedTransitions) {
+          if (!stateIds.includes(transition.from) || !stateIds.includes(transition.to))
+            add('UNKNOWN_TRANSITION_STATE', 'temporal_state', `${transition.from} -> ${transition.to}`);
+        }
+        facts.temporalState = temporal;
+        facts.temporalStateBoundary = 'Reference hashes and expected transitions identify reviewed inputs only. RLSOK does not interpret live vision, infer the active state or certify transition correctness.';
+      }
+    }
+  } else if (recipe === 'aditya-so101') {
     const bridge = object(read('bridge','json')), calibration = object(read('calibration','json'));
     const controllers = object(read('controllers','yaml'));
     const model = read('model','text'), control = request.files.ros2_control ? read('ros2_control','text') : model;

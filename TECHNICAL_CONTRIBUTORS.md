@@ -23,9 +23,6 @@ organization relationship. No logos are used.
   ownership from execution authorization and consuming available capabilities
   at that boundary. Independent feedback; no endorsement, integration, or
   support relationship implied.
-- Dr. Denis Stogl — Critiqued the earlier public explanation and later
-  confirmed that the clarified execution boundary is understandable, cleanly
-  separated from ros2_control, and resembles approaches seen previously.
 - [Atsushi Kuwagata](https://rt-net.jp) — RT Corporation. Clarified the
   distinct roles of URDF hardware limits, MoveIt planning constraints,
   ros2_control drive limits, and live encoder/controller posture, helping avoid

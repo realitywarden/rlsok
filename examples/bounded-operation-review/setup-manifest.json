@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "replace-with-review-id",
+  "source": {
+    "repository": "replace-with-source-repository",
+    "commit": "0000000000000000000000000000000000000000"
+  },
+  "scope": "saved-configuration-only",
+  "files": [
+    { "id": "operation", "path": "operation.json", "format": "json" },
+    { "id": "operating-envelope", "path": "operating-envelope.json", "format": "json" },
+    { "id": "controller-configuration", "path": "controller-configuration.yaml", "format": "yaml" },
+    { "id": "calibration", "path": "calibration.json", "format": "json" },
+    { "id": "perception-configuration", "path": "perception-configuration.yaml", "format": "yaml" },
+    { "id": "temporal-state", "path": "temporal-state.json", "format": "json" }
+  ],
+  "bindings": []
+}

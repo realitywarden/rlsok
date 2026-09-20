@@ -335,7 +335,6 @@ test('technical contributor attribution is opt-in, factual and does not imply en
     'Ruddrho Mollik',
     'Aditya Jindal',
     'Bartosz Burda',
-    'Dr. Denis Stogl',
     'Atsushi Kuwagata',
     'Rune Søe-Knudsen',
     'Tetsu Yamaguchi'
@@ -354,7 +353,6 @@ test('technical contributor attribution is opt-in, factual and does not imply en
   assert.equal(byName('Aditya Jindal').project, 'Independent contributor');
   assert.equal(byName('Bartosz Burda').preferredUrl, 'https://github.com/selfpatch/ros2_medkit');
   assert.equal(byName('Bartosz Burda').project, 'selfpatch.ai / ros2_medkit');
-  assert.equal('preferredUrl' in byName('Dr. Denis Stogl'), false);
   assert.equal(byName('Atsushi Kuwagata').organization, 'RT Corporation');
   assert.equal(byName('Atsushi Kuwagata').preferredUrl, 'https://rt-net.jp');
   assert.equal(byName('Rune Søe-Knudsen').organization, 'Universal Robots');
@@ -386,7 +384,9 @@ test('technical contributor attribution is opt-in, factual and does not imply en
     assert.equal('supportedIntegration' in contributor, false);
   }
   assert.equal(
-    contributors.slice(0, 7).every((contributor) => !('organization' in contributor)),
+    contributors
+      .filter(({ displayName }) => !['Atsushi Kuwagata', 'Rune Søe-Knudsen'].includes(String(displayName)))
+      .every((contributor) => !('organization' in contributor)),
     true
   );
   assert.equal(

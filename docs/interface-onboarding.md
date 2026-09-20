@@ -1,6 +1,6 @@
 # Configure and reuse your ROS 2 interface setup
 
-Current local tool: **v1.5.3**. This workflow discovers local graph
+Current local tool: **v1.5.4**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
@@ -151,5 +151,5 @@ See [the first-evaluation guide](local-shadow-first-evaluation.md) for required 
 
 Absolute native W/P/R goals now have an explicit mm/degrees adapter; see
 [the mapping guide](absolute-wpr-review.md), the [1.5.2 verification scope](releases/v1.5.2.md),
-and the [1.5.3 feedback-driven additions](releases/v1.5.3.md).
+and the [1.5.4 feedback-driven additions](releases/v1.5.4.md).
 Earlier validation records above retain their actual historical scope.

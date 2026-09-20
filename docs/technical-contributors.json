@@ -47,12 +47,6 @@
       "optInConfirmed": true
     },
     {
-      "id": "denis-stogl",
-      "displayName": "Dr. Denis Stogl",
-      "contribution": "Critiqued the earlier public explanation and later confirmed that the clarified execution boundary is understandable, cleanly separated from ros2_control, and resembles approaches seen previously.",
-      "optInConfirmed": true
-    },
-    {
       "id": "atsushi-kuwagata",
       "displayName": "Atsushi Kuwagata",
       "organization": "RT Corporation",

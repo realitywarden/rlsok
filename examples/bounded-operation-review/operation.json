@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "operationId": "three-finger-hold",
+  "authorizedTask": "Grasp and hold one lightweight cylindrical object.",
+  "validity": {
+    "maxDurationMs": 60000,
+    "renewal": "new-check-before-next-operation"
+  },
+  "localControl": {
+    "allowedAdjustments": [
+      "Redistribute grip response as contact changes.",
+      "Make small positional contact corrections."
+    ],
+    "continuousMeasurements": ["Operator-defined slip estimate"],
+    "terminatingConditionIds": ["slip-envelope-exit"],
+    "ownsImmediatePhysicalResponse": true
+  },
+  "independentSafety": {
+    "responsibilities": [
+      "Force limits",
+      "Stopping behaviour",
+      "Immediate safe physical response"
+    ]
+  }
+}

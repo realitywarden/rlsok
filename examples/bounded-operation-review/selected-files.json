@@ -1,0 +1,12 @@
+{
+  "id": "replace-with-review-id",
+  "sourceCommit": "0000000000000000000000000000000000000000",
+  "files": {
+    "operation": "operation.json",
+    "operating_envelope": "operating-envelope.json",
+    "controller_configuration": "controller-configuration.yaml",
+    "calibration": "calibration.json",
+    "perception_configuration": "perception-configuration.yaml",
+    "temporal_state": "temporal-state.json"
+  }
+}

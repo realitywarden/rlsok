@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "states": [
+    { "id": "holding", "description": "Object held inside the declared envelope." },
+    { "id": "slipping", "description": "Operator-defined slip is outside the envelope." }
+  ],
+  "referenceObservations": [
+    {
+      "id": "holding-reference",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "role": "baseline",
+      "description": "Replace with the digest of one privately retained, operator-selected reference observation."
+    }
+  ],
+  "expectedTransitions": [
+    {
+      "from": "holding",
+      "to": "slipping",
+      "allowedDuringOperation": false,
+      "terminatesOperation": true,
+      "description": "The local classifier ends the operation; RLSOK does not classify the live observation."
+    }
+  ]
+}

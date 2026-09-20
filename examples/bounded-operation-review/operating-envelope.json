@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "conditions": [
+    {
+      "id": "slip-envelope-exit",
+      "signal": "Operator-defined slip estimate",
+      "comparator": "gt",
+      "threshold": 2,
+      "unit": "replace-with-reviewed-unit",
+      "debounceMs": 50,
+      "interpretation": "Local control ends the bounded operation and performs the immediate physical response. Replace this illustrative threshold with a reviewed system-specific value."
+    }
+  ]
+}
