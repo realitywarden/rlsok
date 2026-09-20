@@ -1,8 +1,9 @@
-# RLSOK H1-2 LowState observer v1
+# RLSOK H1-2 LowState observer v2
 
 This archive contains the subscribe-only observer proposed in
-`correlllab/h12_loco_manipulation` PR #1. It is pinned to upstream commit
-`6fef8760741af122c59ca13e5f1960a1f79b230a`.
+`correlllab/h12_loco_manipulation` PR #1. It targets upstream commit
+`6fef8760741af122c59ca13e5f1960a1f79b230a` and requires the checkout root
+actually in use so the result records its full commit, dirty state and origin.
 
 Use it only while the H1-2 and its normal Unitree SDK2 environment are already
 available. From the archive directory, replace `enp3s0` with the Ethernet
@@ -10,6 +11,7 @@ interface connected to the robot:
 
 ```bash
 python3 rlsok_lowstate_snapshot.py enp3s0 \
+  --source-root /path/to/h12_loco_manipulation \
   --output h12-lowstate-status.json
 ```
 
