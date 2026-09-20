@@ -335,6 +335,38 @@ receipt, reading, real-hardware use or acceptance.
 | Branimir Ćaran / Astro `1a079e2e7307dc41` | `1a0bda9d1a7136bb` | Waiting until after the paper deadline; exact firmware/configuration and zero-command observation remain required. |
 | Hiwonder support / ROSpider `1a0bc96b8af75ddb` | `1a0bda9dc5ea3f17` | Email request closed; any future support post must contain a concrete tutorial step, version and observed result. |
 | Nguyễn Hậu / mobile robot `1a0b37abb024a379` | `1a0bdab1c563b0d8` | Request closed because the maintainer left robotics and the project is indefinitely postponed; no integration or test claim. |
+
+## 2026-09-20 real-hardware recovery correction
+
+The earlier mailbox-complete statement did **not** establish that the
+real-hardware feedback objective was complete.  A connector-only Gmail query
+for `in:anywhere is:unread -from:me "rlsok.com"` returned 91 messages across
+87 threads at the time of the recovery audit.  Unread state is not the same as
+reply state: after reading the complete threads, 23 had an external last
+message, but most of those were delivery failures, automated notifications or
+unrelated mail.  More importantly, several threads whose latest message was
+ours still contained an explicit real-hardware offer which had been answered
+with source preparation or another material request rather than a completed
+device observation.
+
+The following threads therefore remain open until the stated external result
+exists; source recipes, releases, sent mail and draft PRs are not substitutes:
+
+| Platform / thread | Existing external commitment | Required completion evidence |
+| --- | --- | --- |
+| Physical MIRA / `1a08f594da4e5c52` | Lucas states that the team is currently working with the physical MIRA and is open to integration/testing. | A live, read-only PX4/ROS observation tied to the selected MIRA checkout, followed by the project-specific capture.  Minimal no-command request sent as Gmail message `1a0bddb7e1fd8ee9`; it explicitly forbids launching solely for the request, arming, Offboard, services, `/cmd_vel` and propeller enablement. |
+| MakerMods Metal / `1a08f6661ff3b468` | Isaac invited PR integration, mapping review and subsequent bench testing. | Owner review of draft PR #160, then an owner-run bench result; the open draft PR alone is implementation evidence only. |
+| Dual Kinova Gen3 / `1a0a852fac9b1187` | Gaus will try it when both real Gen3 arms are free. | Current left/right mapping and one zero-command observation from the real dual-arm environment. |
+| PAROL6 / `1a079accbfaa60b2` | Graham still has the setup and offered testing. | Owner-run result using the actual PAROL6 checkout/controller/bridge; the pinned public recipe is not this result. |
+| TRIK / `1a07658ff1d51524` | Azimbek offered a real TRIK environment. | Current wheel/brick binding and a read-only result from that environment. |
+| LelyRobot / `1a076624befe452b` | Tomo authorized work with the current system. | Confirmation of the active Python/C++ bridge and a read-only observation from the selected physical path. |
+| GOLEM/H12 / `1a01d8e3a7eb0fef` | CorrellLab offered GOLEM as a test bed and requested a technical conversation. | Adapter-owned readiness/contact verdict mapping plus a zero-command owner run; the generic capability normalizer does not infer this. |
+
+Completion reporting must keep four stages separate: project-specific source
+implementation, publication/delivery, owner execution, and physical-robot
+evidence.  The real-hardware goal remains open while every row above lacks the
+last stage.
+
 ## Cross-platform Local Check 1.5.5 delivery (2026-09-20)
 
 - Source payload: immutable `v1.5.5`, source commit `7a1176f194dff6bdb6f50e69945692ba3847d3c5`.
