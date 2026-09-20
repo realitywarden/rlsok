@@ -1295,3 +1295,99 @@ The same incremental inbox check found a new delivery failure
 It is evidence of non-delivery, not a recipient reply or product feedback. No
 alternate person or address was guessed, and no reply is required. The spam
 check still contains only the two PACMod undeliverables and promotions.
+
+## Ruiyan hand protocol return and physical-read observer v1 (2026-09-20)
+
+Li's reply `1a0bebde90c66261` supplied the requested Ruiyan protocol facts after
+checking them with the information available from the vendor.  The attached
+private workbook was reviewed but was not published; its SHA-256 is
+`4de67a89baad4cb7411fd715cac4a0c96d91b0457f20633acaffbbb4197e0c19`.
+Li confirmed that the protocol applies across the hand family, the selected
+six-DoF RS485 hand uses motor IDs 1-6 and broadcast ID 0, the default bus rate
+is 5 Mbps, multi-byte values are little-endian, and the serial transport uses a
+low-eight-bit additive checksum.  E6, F0, A0, A2, A7, AB, AE and B0 are common
+read-only requests; B2 is tactile-dependent.  He explicitly permitted an
+open-source observer and protocol mapping, but not publication of the workbook.
+
+Core commit `6dfa36dc8068d3ee08f8dca6c02ec67d1cf3922e` implements the
+project-specific unicast RS485 observer and CLI entry.  It rejects broadcast,
+write, motion, reset, calibration-write, configuration-write and firmware
+opcodes, validates response ID/opcode/checksum and F0 multi-frame behavior, and
+stores response sizes and digests instead of raw serial numbers or payloads.
+Four focused tests, Python compilation and the root TypeScript typecheck passed.
+
+The immutable 24,072-byte `ruiyan-hand-status-observer-v1` ZIP has SHA-256
+`947b67bf4325f120b61b906c8b339d46e7ad363c8171f9df4c15ab7772a56dc9`.
+Public run `35510588941` downloaded that exact asset and exercised all eight
+default reads over a real Linux pseudo-terminal at 5 Mbps, including response
+identity, checksum and F0 multi-frame handling.  This validates the serial
+transport implementation, not a physical hand.
+
+Website source commit `b8091bd` documents the observer, checksum, command and
+limits and is pushed to `realitywarden/rlsok-cloud` main.  Production remains
+pending because this environment has neither a Vercel credential nor a working
+connected deployment action; source publication must not be reported as a live
+website deployment.  Delivery message `1a0bec941d87e87a` supplied the release,
+checksum and public run and asked Li for the JSON from an already-running real
+six-DoF hand.  A physical hand result, owner confirmation and acceptance remain
+open.
+
+## Closed Racecar hardware opportunity (2026-09-20)
+
+Axel's reply `1a0beb8411e9f857` states that he no longer works on the project
+and no longer has access to the hardware.  This is an explicit external closure,
+not silence.  Reply `1a0becb17ac0b6b9` thanked him, closed the item and promised
+not to ask him to recreate access.  No adapter or physical-result claim was
+made.
+
+## Workbench tested-Draft then digest-change profile v1 (2026-09-20)
+
+Quchaosheng's reply `1a0bebdfe4a0e9ed` supplied public repository
+`Quchaosheng/workbench-mobile-home-robot` at exact commit
+`716864c08ea383b29b29d46c0a1452cf579a3b2a`, identified
+`ActionAdapter.dispatch(SemanticAction)` as the command boundary, confirmed that
+the current system is offline/simulation only, and preserved the repository's
+`REPOSITORY_BASELINE_READY_PHYSICAL_BRINGUP_BLOCKED` state.  He specifically
+required the useful order: create a tested Draft, approve the exact ExecSpec,
+then change one digest.  A block against a never-approved release was explicitly
+not acceptable evidence.
+
+Core commits `ff555b4280c055625e7971ce8dcef7cb47a29c54` and
+`a2303e41190a10c1e5325ccb741a9230cc488910` implement and wire the
+project-specific offline profile.  It binds the clean exact source revision,
+the typed dispatch boundary and policy validator, `bsp/readiness.yaml`, the
+design-partner handoff and the actual output of the repository's ordinary
+offline planner.  Preparation has no approver input and writes an exact tested
+Draft.  A separate approval record binds its canonical hash and configuration
+digest.  The approved unchanged baseline reports `WOULD_ALLOW` with
+`SHADOW_NO_DISPATCH`; changing only `configuration.plannerArtifactDigest`
+reports `WOULD_BLOCK`, `configuration_digest_mismatch` and
+`BLOCKED_BEFORE_DISPATCH`.  A never-approved Draft, a dirty/wrong checkout and
+an edited-after-approval Draft fail closed.  Three focused regressions, Python
+compilation, root TypeScript typecheck and the extracted release tests passed.
+
+The immutable 8,363-byte `quchaosheng-workbench-offline-shadow-v1` ZIP has
+SHA-256
+`fe28150d1657bbfaca7712b3115532ce02e284b174ba50bbd9c4dd39d21b9bd8`.
+Public run `35511237126` cloned the customer's exact commit, selected its
+required Python 3.12, installed its hash-locked environment, ran the real
+`local_runner.py` path, downloaded the public ZIP and repeated the complete
+approved-then-one-digest-changed sequence.  Every `ActionAdapter.dispatch`,
+goal, zero, stop, hold, cancel, retry and action-attempt count was zero.  The
+preceding run `35511189485` failed before the demo because the workflow had
+used Ubuntu's Python 3.10 against a repository that requires Python 3.12; the
+workflow was corrected rather than treating that run as evidence.
+
+Website source commit `7addf73` adds the complete project-specific guide and is
+pushed to main.  Production deployment is not yet established for the same
+Vercel credential/tool blocker recorded above.  Message `1a0bedac9f40a91e`
+delivered the immutable package, checksum and successful public run, stated
+that the included approval is a local review record rather than Hosted browser
+authentication or customer approval, and asked Quchaosheng to return the real
+device/controller/runtime mapping and independently approved exact Draft.  This
+is reproducible offline software evidence only; deployment, physical hardware,
+the owner's mapping and customer acceptance remain open.
+
+The same incremental Gmail audit found no newer physical-run result.  Spam
+still contains only two old PACMod recipient failures and marketing messages;
+no project reply was hidden there.
