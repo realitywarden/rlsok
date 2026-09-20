@@ -312,3 +312,26 @@ below.
 | E14 Nav2 | `1a0381a2d8bdf85a` | selected Jazzy smoother semantics, CLOSED_LOOP source, command topology and FollowPath-selector reference plus test | Awaiting an actual adapter and simulated graph result; current Runtime has no Nav2 dispatch path |
 | E28 CRANE-X7 | `1a0381a381cec7d3` | selected limits versus live-state provenance fixture plus test | Conceptually validated by follow-up: source split appears correct; implementation details and an actual fixture/Shadow run were not reviewed |
 | E23 device serial/calibration | `1a0381a226b47c8b`, retry `1a0381bad0da0a3f` | serial-to-role/calibration identity fixture plus test | Conceptually validated by reply `1a038459178f828d`: source-of-truth and negative test confirmed; actual code not reviewed |
+
+## Current unreplied-thread closure receipts (2026-09-20)
+
+The mailbox was rescanned without a date boundary. These replies close or
+truthfully park RLSOK threads whose latest message was external and had no
+later reply from us. A Gmail `SENT` ID proves sending only; it does not prove
+receipt, reading, real-hardware use or acceptance.
+
+| Contact / thread | Gmail SENT message ID | Truthful state after reply |
+| --- | --- | --- |
+| Yasiru Fernando / Dobot Magician `1a0adf5685c386c6` | `1a0bda95969d789a` | Exact public repository/commit, homing service, launch/config, startup checks and redacted request still awaited; no motion requested. |
+| BADAOUI IKRAM / ESIBOT `1a0a860d07bb9a86` | `1a0bda9623a759f3` | Current request closed; no ESIBOT integration or test claim. |
+| Kenichi Maeda / dual LBR `1a0af9e82a86e7a8` | `1a0bda96c28ad8f1` | One zero-command result and exact controller/interface mapping invited if the hardware is used later. |
+| Raj Indulkar / MyCobot 280 `1a0b39e578127eab` | `1a0bda9778005460` | Waiting until the owner returns to the hardware; versions/configuration and a zero-command observation remain required. |
+| Giovanni Remigi / serial robot `1a0b381bacb60639` | `1a0bda98397e8e5f` | Waiting for the confirmed handshake implementation and returned device name; memory alone was not used to implement an adapter. |
+| Lidarbot `1a023083dfe04645` | `1a0bda991409f335` | Waiting on the maintainer's deadline; exact Jazzy path and a zero-command observation remain required. |
+| Arjun Chandroth / 17-DOF humanoid `1a0a3fab4a69b50e` | `1a0bda9a100bfc9b` | Physical-hardware request closed; no compatibility inferred from the historical project. |
+| Gaus Mohiuddin Sayyad / dual Kinova `1a0a852fac9b1187` | `1a0bda9aa24fd27d` | Waiting for hardware availability, exact bridge/mapping and one zero-command result. |
+| Rocky Wüst / PiDog `1a0a0a9c3e8a5f61` | `1a0bda9b6e178407` | Waiting for upstream issue #12; no reminder and no integration claim. |
+| Tanvir Rahman / taught arm `1a08f71d089be0fc` | `1a0bda9c41686e85` | Physical-arm request closed because the hardware is unavailable. |
+| Branimir Ćaran / Astro `1a079e2e7307dc41` | `1a0bda9d1a7136bb` | Waiting until after the paper deadline; exact firmware/configuration and zero-command observation remain required. |
+| Hiwonder support / ROSpider `1a0bc96b8af75ddb` | `1a0bda9dc5ea3f17` | Email request closed; any future support post must contain a concrete tutorial step, version and observed result. |
+| Nguyễn Hậu / mobile robot `1a0b37abb024a379` | `1a0bdab1c563b0d8` | Request closed because the maintainer left robotics and the project is indefinitely postponed; no integration or test claim. |
