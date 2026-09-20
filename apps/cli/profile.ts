@@ -56,6 +56,9 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile capture-ishan-gazebo-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-ruiyan-hand-status --port </dev/ttyUSB0> --device-id <1-254> --motor-count <1-8> --baud <9600-5000000> --confirm-read-only yes --output <new-observation.json> [--tactile-coefficient-index <0-255>] [--python <python3>]
   rlsok profile capture-pidog-status --repo <pidog-embodiment-checkout> --source-commit <full-sha1> --output <new-observation.json> [--units-directory </etc/systemd/system>] [--python <python3>]
+  rlsok profile prepare-workbench-offline-shadow --source-root <workbench-checkout> --expected-commit <full-sha1> --demo-json <make-demo-offline-output.json> --output <tested-draft.json> [--python <python3>]
+  rlsok profile approve-workbench-offline-shadow --draft <tested-draft.json> --approver <independent-reviewer> --approved-at <RFC3339> --output <approval.json> [--python <python3>]
+  rlsok profile evaluate-workbench-offline-shadow --draft <tested-draft.json> --approval <approval.json> --output <result.json> [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile schema --output <new-directory>
@@ -350,6 +353,28 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     const args = ['--output', resolve(o.output), '--repo', resolve(o.repo), '--source-commit', o['source-commit']];
     if (o['units-directory']) args.push('--units-directory', resolve(o['units-directory']));
     return python(o, args, join(dirname(collectorScript()), 'pidog_status.py'));
+  }
+  if (command === 'prepare-workbench-offline-shadow') {
+    const o = options(rest, ['source-root', 'expected-commit', 'demo-json', 'output', 'python'],
+      ['source-root', 'expected-commit', 'demo-json', 'output']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['prepare', '--source-root', resolve(o['source-root']), '--expected-commit', o['expected-commit'],
+      '--demo-json', resolve(o['demo-json']), '--output', resolve(o.output)],
+      join(dirname(collectorScript()), 'workbench_offline_shadow.py'));
+  }
+  if (command === 'approve-workbench-offline-shadow') {
+    const o = options(rest, ['draft', 'approver', 'approved-at', 'output', 'python'],
+      ['draft', 'approver', 'approved-at', 'output']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['approve', '--draft', resolve(o.draft), '--approver', o.approver,
+      '--approved-at', o['approved-at'], '--output', resolve(o.output)],
+      join(dirname(collectorScript()), 'workbench_offline_shadow.py'));
+  }
+  if (command === 'evaluate-workbench-offline-shadow') {
+    const o = options(rest, ['draft', 'approval', 'output', 'python'], ['draft', 'approval', 'output']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['evaluate', '--draft', resolve(o.draft), '--approval', resolve(o.approval),
+      '--output', resolve(o.output)], join(dirname(collectorScript()), 'workbench_offline_shadow.py'));
   }
   if (command === 'check-navigation-preflight') {
     const o = options(rest, ['input', 'output'], ['input', 'output']);

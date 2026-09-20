@@ -1,0 +1,65 @@
+name: Quchaosheng workbench offline Shadow acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-approved-then-drift:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact customer source
+        uses: actions/checkout@v4
+        with:
+          repository: Quchaosheng/workbench-mobile-home-robot
+          ref: 716864c08ea383b29b29d46c0a1452cf579a3b2a
+          path: workbench
+          fetch-depth: 1
+
+      - name: Install locked offline-demo environment
+        run: |
+          python3 -m pip install --require-hashes -r workbench/docker/requirements-dev.lock
+          python3 -m pip install --no-deps -e workbench
+
+      - name: Run the owner's ordinary offline path
+        working-directory: workbench
+        run: |
+          python3 tools/scripts/local_runner.py \
+            --goal "Place the red block in the tray" \
+            --output "$RUNNER_TEMP/workbench-demo.json"
+
+      - name: Download immutable RLSOK profile
+        env:
+          ASSET_URL: https://github.com/realitywarden/rlsok/releases/download/quchaosheng-workbench-offline-shadow-v1/quchaosheng-workbench-offline-shadow-v1.zip
+        run: |
+          curl --fail --location --silent --show-error "$ASSET_URL" -o "$RUNNER_TEMP/profile.zip"
+          echo "fe28150d1657bbfaca7712b3115532ce02e284b174ba50bbd9c4dd39d21b9bd8  $RUNNER_TEMP/profile.zip" | sha256sum --check
+          unzip -q "$RUNNER_TEMP/profile.zip" -d "$RUNNER_TEMP/profile"
+
+      - name: Approve exact Draft, then change one digest
+        run: |
+          python3 "$RUNNER_TEMP/profile/workbench_offline_shadow.py" prepare \
+            --source-root "$GITHUB_WORKSPACE/workbench" \
+            --expected-commit 716864c08ea383b29b29d46c0a1452cf579a3b2a \
+            --demo-json "$RUNNER_TEMP/workbench-demo.json" \
+            --output "$RUNNER_TEMP/tested-draft.json"
+          python3 "$RUNNER_TEMP/profile/workbench_offline_shadow.py" approve \
+            --draft "$RUNNER_TEMP/tested-draft.json" \
+            --approver github-standard-runner-independent-step \
+            --approved-at 2026-09-20T12:34:31Z \
+            --output "$RUNNER_TEMP/approval.json"
+          python3 "$RUNNER_TEMP/profile/workbench_offline_shadow.py" evaluate \
+            --draft "$RUNNER_TEMP/tested-draft.json" \
+            --approval "$RUNNER_TEMP/approval.json" \
+            --output "$RUNNER_TEMP/result.json"
+          jq -e '
+            .baseline.decision == "WOULD_ALLOW" and
+            .changedAfterApproval.decision == "WOULD_BLOCK" and
+            .changedAfterApproval.reason == "configuration_digest_mismatch" and
+            ([.dispatch[]] | all(. == 0)) and
+            .claims.deployment == false and
+            .claims.physicalRobot == false
+          ' "$RUNNER_TEMP/result.json"
