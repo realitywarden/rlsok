@@ -362,6 +362,16 @@ exists; source recipes, releases, sent mail and draft PRs are not substitutes:
 | LelyRobot / `1a076624befe452b` | Tomo authorized work with the current system. | Confirmation of the active Python/C++ bridge and a read-only observation from the selected physical path. |
 | GOLEM/H12 / `1a01d8e3a7eb0fef` | CorrellLab offered GOLEM as a test bed and requested a technical conversation. | Adapter-owned readiness/contact verdict mapping plus a zero-command owner run; the generic capability normalizer does not infer this. |
 
+MIRA implementation delta: the CLI now exposes `profile capture-mira-status`.
+It creates one read-only ROS subscription to `/fmu/out/vehicle_status`, requires
+one unambiguous `px4_msgs/msg/VehicleStatus` publisher, and records the ROS
+environment, publisher endpoint and selected arming/navigation/failsafe/preflight
+fields in a digested observation.  Focused tests prove rejection of ambiguous
+publishers and incomplete status and statically reject publisher/service APIs in
+the reader.  This makes an owner-run live result directly collectable, but does
+not itself establish that Lucas ran it or that the publisher is a particular
+Pixhawk/airframe.
+
 Completion reporting must keep four stages separate: project-specific source
 implementation, publication/delivery, owner execution, and physical-robot
 evidence.  The real-hardware goal remains open while every row above lacks the
@@ -382,4 +392,7 @@ last stage.
 - Thirty-seven candidates had prior outbound context and appeared human or support-originated. The current RLSOK technical subset is represented by the ledger and closure table above. Each independently actionable generic requirement is implemented; each unavailable-hardware or missing-material case was closed or asked for the exact public commit, configuration, version, mapping and/or zero-command result needed next.
 - Spam was included. Its apparent technical threads were full-thread false positives with later `SENT` replies; the remaining spam items were sales, promotion or delivery failures.
 - A final incremental normal-and-spam search after the releases and website deployment found no newer external message. Courtesy acknowledgements do not reopen a closed request, and automated release notifications do not require replies.
-- This completes the bounded mailbox-processing objective. It does not claim that waiting senders supplied materials, ran RLSOK, connected hardware, or accepted a result. Any future reply is a new mailbox event and must be evaluated from its full thread.
+- This completes the bounded mailbox *classification and reply audit*, not the
+  current real-hardware feedback objective. Waiting senders have not thereby
+  supplied materials, run RLSOK, connected hardware, or accepted a result. Any
+  future reply is a new mailbox event and must be evaluated from its full thread.
