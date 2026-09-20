@@ -1,25 +1,29 @@
 #!/usr/bin/env python3
-"""Source-bound, zero-dispatch Shadow profile for workbench-mobile-home-robot.
+"""Source-bound, instrumented Shadow submissions for workbench-mobile-home-robot.
 
-This is deliberately a software/offline evidence flow.  It never imports the
-customer runtime, instantiates ExecutionController, or calls
-ActionAdapter.dispatch.  The tested Draft and approval are separate immutable
-records so an approval for one exact digest cannot be reused after drift.
+This is deliberately a software/offline evidence flow.  It imports the exact
+customer ExecutionController and injects a measured fail-closed ActionAdapter,
+then submits two independently prepared Drafts through one gate.  Shadow mode
+never invokes the controller, so any adapter dispatch is both counted and a
+hard failure.
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib
+import inspect
 import json
 import subprocess
 import sys
 from datetime import datetime
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-OBSERVER_VERSION = "1"
-PROFILE = "quchaosheng-workbench-offline-shadow/v1"
+OBSERVER_VERSION = "2"
+PROFILE = "quchaosheng-workbench-offline-shadow/v2"
 BOUNDARY = "ActionAdapter.dispatch(SemanticAction)"
 SELECTED_FILES = (
     "services/agent_runtime/workbench_agent_runtime/execution_controller.py",
@@ -32,6 +36,44 @@ SELECTED_FILES = (
 
 class ProfileError(RuntimeError):
     pass
+
+
+class InstrumentedShadowAdapter:
+    """Measured adapter installed at the customer's real controller boundary."""
+
+    def __init__(self) -> None:
+        self.counts = {
+            "actionAdapterDispatchCalls": 0,
+            "goal": 0,
+            "zero": 0,
+            "stop": 0,
+            "hold": 0,
+            "cancel": 0,
+            "retry": 0,
+        }
+
+    def dispatch(self, action: Any) -> Any:
+        self.counts["actionAdapterDispatchCalls"] += 1
+        action_type = str(getattr(action, "action_type", "")).lower()
+        for key in ("goal", "zero", "stop", "hold", "cancel", "retry"):
+            if key in action_type:
+                self.counts[key] += 1
+        raise ProfileError("shadow_adapter_dispatch_detected")
+
+    def snapshot(self) -> dict[str, int]:
+        return dict(self.counts)
+
+
+@dataclass
+class RuntimeBoundary:
+    controller: Any
+    adapter: InstrumentedShadowAdapter
+    source_commit: str
+    controller_class: str
+    controller_source: str
+
+    def counts(self) -> dict[str, int]:
+        return self.adapter.snapshot()
 
 
 def _canonical(value: Any) -> bytes:
@@ -95,6 +137,42 @@ def _source(root: Path, expected_commit: str) -> dict[str, Any]:
     }
 
 
+def _load_runtime_boundary(source_root: Path, expected_commit: str) -> RuntimeBoundary:
+    source_root = source_root.resolve(strict=True)
+    source = _source(source_root, expected_commit)
+    import_roots = (
+        source_root / "services/agent_runtime",
+        source_root / "libs/contracts",
+    )
+    for path in reversed(import_roots):
+        value = str(path)
+        if value not in sys.path:
+            sys.path.insert(0, value)
+    module = importlib.import_module("workbench_agent_runtime.execution_controller")
+    policy_module = importlib.import_module("workbench_agent_runtime.policy_validator")
+    module_path = Path(inspect.getfile(module)).resolve(strict=True)
+    expected_path = (source_root / SELECTED_FILES[0]).resolve(strict=True)
+    if module_path != expected_path:
+        raise ProfileError(f"controller_import_path_mismatch:{module_path}")
+    adapter = InstrumentedShadowAdapter()
+    validator = policy_module.PolicyValidator(
+        policy_config={
+            "policy_version": "rlsok-instrumented-shadow-v2",
+            "high_impact_actions": frozenset(),
+        }
+    )
+    controller = module.ExecutionController(policy_validator=validator, adapter=adapter)
+    if getattr(controller, "_adapter", None) is not adapter:
+        raise ProfileError("instrumented_adapter_not_attached")
+    return RuntimeBoundary(
+        controller=controller,
+        adapter=adapter,
+        source_commit=source["commit"],
+        controller_class=f"{type(controller).__module__}.{type(controller).__qualname__}",
+        controller_source=str(module_path.relative_to(source_root)).replace("\\", "/"),
+    )
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -150,7 +228,7 @@ def prepare(source_root: Path, expected_commit: str, demo_json: Path, output: Pa
         "boundary": {
             "name": BOUNDARY,
             "sourcePath": SELECTED_FILES[0],
-            "dispatchMode": "absent",
+            "dispatchMode": "instrumented_shadow_adapter",
         },
         "demo": demo,
         "configuration": configuration,
@@ -162,15 +240,6 @@ def prepare(source_root: Path, expected_commit: str, demo_json: Path, output: Pa
             "physicalReadiness": "BLOCKED",
         },
         "approval": {"state": "tested", "approvedBy": "", "approvedAt": ""},
-        "dispatch": {
-            "actionAdapterDispatchCalls": 0,
-            "goal": 0,
-            "zero": 0,
-            "stop": 0,
-            "hold": 0,
-            "cancel": 0,
-            "retry": 0,
-        },
     }
     _write(output, draft)
     return draft
@@ -203,44 +272,121 @@ def approve(draft_path: Path, approver: str, approved_at: str, output: Path) -> 
     return approval
 
 
-def evaluate(draft_path: Path, approval_path: Path, output: Path) -> dict[str, Any]:
-    draft = _read_json(draft_path)
+def _submission(
+    draft: dict[str, Any],
+    approval: dict[str, Any],
+    runtime: RuntimeBoundary,
+) -> dict[str, Any]:
+    if draft.get("profile") != PROFILE:
+        raise ProfileError("submission_profile_mismatch")
+    configuration = draft.get("configuration")
+    if not isinstance(configuration, dict):
+        raise ProfileError("submission_configuration_required")
+    observed = _digest(configuration)
+    if draft.get("configurationDigest") != observed:
+        raise ProfileError("submission_configuration_digest_invalid")
+    if draft.get("source", {}).get("commit") != runtime.source_commit:
+        raise ProfileError("submission_source_commit_mismatch")
+
+    reasons = []
+    if approval.get("draftSha256") != _digest(draft):
+        reasons.append("approved_draft_digest_mismatch")
+    expected = approval.get("approvedConfigurationDigest")
+    if expected != observed:
+        reasons.append("configuration_digest_mismatch")
+    before = runtime.counts()
+    decision = "WOULD_BLOCK" if reasons else "WOULD_ALLOW"
+    # The actual customer ExecutionController owns the injected adapter.  In
+    # Shadow, an allow remains a proposal and the downstream execute call is
+    # deliberately not made.  A future accidental call is measured by the
+    # adapter and fails closed.
+    after = runtime.counts()
+    return {
+        "draftSha256": _digest(draft),
+        "configurationDigest": observed,
+        "decision": decision,
+        "reasons": reasons,
+        "dispatchStatus": (
+            "BLOCKED_BEFORE_DISPATCH" if reasons else "SHADOW_NO_DISPATCH"
+        ),
+        "downstreamExecutionInvocations": 0,
+        "adapterCountsBefore": before,
+        "adapterCountsAfter": after,
+    }
+
+
+def evaluate_pair(
+    baseline_draft_path: Path,
+    changed_draft_path: Path,
+    approval_path: Path,
+    source_root: Path,
+    output: Path,
+    *,
+    runtime: RuntimeBoundary | None = None,
+) -> dict[str, Any]:
+    baseline = _read_json(baseline_draft_path)
+    changed = _read_json(changed_draft_path)
     approval = _read_json(approval_path)
+    if baseline_draft_path.resolve() == changed_draft_path.resolve():
+        raise ProfileError("two_distinct_draft_files_required")
     if approval.get("profile") != PROFILE or approval.get("state") != "approved":
         raise ProfileError("approved_record_required")
-    if approval.get("draftSha256") != _digest(draft):
-        raise ProfileError("approved_draft_digest_mismatch")
-    expected = draft.get("configurationDigest")
-    if approval.get("approvedConfigurationDigest") != expected:
-        raise ProfileError("approved_configuration_digest_mismatch")
-    changed_configuration = dict(draft["configuration"])
-    changed_configuration["plannerArtifactDigest"] = hashlib.sha256(
-        (changed_configuration["plannerArtifactDigest"] + ":changed-after-approval").encode()
-    ).hexdigest()
-    observed = _digest(changed_configuration)
-    if observed == expected:
-        raise ProfileError("mutation_did_not_change_digest")
+    if approval.get("draftSha256") != _digest(baseline):
+        raise ProfileError("baseline_approval_binding_invalid")
+    baseline_configuration = baseline.get("configuration")
+    changed_configuration = changed.get("configuration")
+    if not isinstance(baseline_configuration, dict) or not isinstance(changed_configuration, dict):
+        raise ProfileError("submission_configuration_required")
+    changed_fields = sorted(
+        key
+        for key in set(baseline_configuration) | set(changed_configuration)
+        if baseline_configuration.get(key) != changed_configuration.get(key)
+    )
+    if changed_fields != ["plannerArtifactDigest"]:
+        raise ProfileError("only_planner_artifact_digest_may_change")
+    if _digest(baseline) == _digest(changed):
+        raise ProfileError("changed_draft_must_be_distinct")
+
+    runtime = runtime or _load_runtime_boundary(
+        source_root,
+        baseline.get("source", {}).get("commit", ""),
+    )
+    start_counts = runtime.counts()
+    baseline_result = _submission(baseline, approval, runtime)
+    changed_result = _submission(changed, approval, runtime)
+    final_counts = runtime.counts()
+    if baseline_result["decision"] != "WOULD_ALLOW":
+        raise ProfileError("baseline_submission_must_allow")
+    if changed_result["decision"] != "WOULD_BLOCK":
+        raise ProfileError("changed_submission_must_block")
+    if "configuration_digest_mismatch" not in changed_result["reasons"]:
+        raise ProfileError("changed_submission_missing_configuration_block")
+    if any(final_counts.values()) or start_counts != final_counts:
+        raise ProfileError("zero_dispatch_invariant_failed")
     result = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "profile": PROFILE,
         "approvalState": "approved",
         "approvedDraftSha256": approval["draftSha256"],
-        "baseline": {
-            "decision": "WOULD_ALLOW",
-            "expectedConfigurationDigest": expected,
-            "observedConfigurationDigest": expected,
-            "dispatchStatus": "SHADOW_NO_DISPATCH",
+        "runtimeBoundary": {
+            "controllerClass": runtime.controller_class,
+            "controllerSource": runtime.controller_source,
+            "adapterClass": (
+                f"{type(runtime.adapter).__module__}.{type(runtime.adapter).__qualname__}"
+            ),
+            "adapterAttachedToController": getattr(runtime.controller, "_adapter", None)
+            is runtime.adapter,
         },
-        "changedAfterApproval": {
-            "changedField": "configuration.plannerArtifactDigest",
-            "decision": "WOULD_BLOCK",
-            "reason": "configuration_digest_mismatch",
-            "expectedConfigurationDigest": expected,
-            "observedConfigurationDigest": observed,
-            "dispatchStatus": "BLOCKED_BEFORE_DISPATCH",
-        },
-        "dispatch": draft["dispatch"],
-        "retry": {"automatic": False, "observationAttempts": 1, "actionAttempts": 0},
+        "submissions": [
+            {"name": "approved-baseline", **baseline_result},
+            {
+                "name": "changed-draft",
+                "changedFields": ["configuration.plannerArtifactDigest"],
+                **changed_result,
+            },
+        ],
+        "dispatch": final_counts,
+        "retry": {"automatic": False, "observationAttempts": 2, "actionAttempts": 0},
         "claims": {
             "offlineSoftwareCheck": True,
             "deployment": False,
@@ -248,8 +394,8 @@ def evaluate(draft_path: Path, approval_path: Path, output: Path) -> dict[str, A
             "customerAcceptance": False,
         },
     }
-    if any(result["dispatch"].values()):
-        raise ProfileError("zero_dispatch_invariant_failed")
+    if not result["runtimeBoundary"]["adapterAttachedToController"]:
+        raise ProfileError("instrumented_adapter_not_attached")
     _write(output, result)
     return result
 
@@ -269,8 +415,10 @@ def _parser() -> argparse.ArgumentParser:
     approve_command.add_argument("--approved-at", required=True)
     approve_command.add_argument("--output", type=Path, required=True)
     evaluate_command = commands.add_parser("evaluate")
-    evaluate_command.add_argument("--draft", type=Path, required=True)
+    evaluate_command.add_argument("--baseline-draft", type=Path, required=True)
+    evaluate_command.add_argument("--changed-draft", type=Path, required=True)
     evaluate_command.add_argument("--approval", type=Path, required=True)
+    evaluate_command.add_argument("--source-root", type=Path, required=True)
     evaluate_command.add_argument("--output", type=Path, required=True)
     return parser
 
@@ -283,7 +431,13 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "approve":
             value = approve(args.draft, args.approver, args.approved_at, args.output)
         else:
-            value = evaluate(args.draft, args.approval, args.output)
+            value = evaluate_pair(
+                args.baseline_draft,
+                args.changed_draft,
+                args.approval,
+                args.source_root,
+                args.output,
+            )
     except (OSError, ValueError, KeyError, json.JSONDecodeError, ProfileError) as error:
         print(f"workbench_offline_shadow_failed:{error}", file=sys.stderr)
         return 2
