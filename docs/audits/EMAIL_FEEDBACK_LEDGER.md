@@ -807,3 +807,29 @@ until recorded with their evidence.
 
 The support email and published observer are not a physical run.  This item
 stays open for a reply and credible owner-run evidence.
+
+## Wearable dual Kinova read-only observer (2026-09-20)
+
+The exact public rig source at
+`megazron/Multimodal-control-of-a-wearable-dual-arm-robotic-system-for-assisted-object-manipulation@06538a1e2dd04696e7645279b722e4930f0777e9`
+exposes a stronger real-versus-mock boundary than a generic `/joint_states`
+sample.  Its real high-level path launches one named bridge per arm; each
+opens the arm's single Kortex session and publishes arm-labelled connected
+session health, telemetry and seven-joint state.  The public mock path may
+publish `/real/joint_states`, but it does not publish the two bridge session
+and telemetry paths.
+
+`profile capture-dual-kinova-status` therefore requires the exact left and
+right bridge publishers, connected session messages for both arms, both
+telemetry topics and both seven-joint samples.  The collector creates
+subscriptions only.  It never imports Kortex, opens a TCP session, starts
+bringup, publishes a target, calls a service, homes an arm or sends a stop.
+Three focused no-ROS tests cover successful dual capture, rejection of a mock
+publisher or disconnected sessions, and static absence of command/service/
+Kortex surfaces.  The source TypeScript typecheck passed.
+
+This implementation makes the next owner step one command rather than a
+manual intake, but it is not yet an owner run.  Publication, website delivery
+and the in-thread handoff must be recorded separately, and the item remains
+open until Gaus returns the JSON with confirmation that both physical Gen3
+arms and their normal bridge processes were present.

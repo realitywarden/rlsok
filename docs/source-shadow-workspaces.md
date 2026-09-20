@@ -60,6 +60,29 @@ enable or power the arm solely for this capture. A matching node and sample are
 stronger than a generic topic echo but still do not authenticate the physical
 arm or CAN peers and do not grant permission to move.
 
+### Wearable dual Kinova live bridge capture
+
+The public wearable-rig stack exposes two signals that its mock launch does
+not: each real `kortex_highlevel_bridge` publishes session health and arm
+telemetry alongside its seven-joint state. While both arms are already running
+for the owner's normal work, capture those existing signals with:
+
+```bash
+rlsok profile capture-dual-kinova-status \
+  --source-commit 06538a1e2dd04696e7645279b722e4930f0777e9 \
+  --output dual-kinova-status.json
+```
+
+Use the full commit of the checkout actually running. The collector requires
+the exact left and right high-level bridge nodes, connected session messages,
+both telemetry topics and both seven-joint samples. It creates subscriptions
+only: it does not open either arm's single Kortex session, call a service,
+publish a target, home an arm or start `start_real.sh`. Do not launch or move
+the arms solely for this capture. A matching result establishes that both
+selected real-bridge ROS paths were live; it still does not authenticate the
+physical arms or network peers, prove motion safety, or grant permission to
+move.
+
 | Recipe | Public reference | Selected boundary |
 | --- | --- | --- |
 | `parol6-arm` | grahas/parol6_ros2_control, c111b97d | Six-joint `/parol6_arm_controller/follow_joint_trajectory` |
