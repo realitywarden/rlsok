@@ -44,7 +44,7 @@ class IshanGazeboStatusTests(unittest.TestCase):
     def test_records_exact_bridge_and_odometry_without_dispatch(self):
         result = status.build_observation(self.reader(), CHECKOUT)
         self.assertEqual(result['kind'], 'RlsokIshanWarehouseGazeboStatus')
-        self.assertEqual(result['source']['commandBoundary']['subscriber']['node'], '/parameter_bridge')
+        self.assertEqual(result['source']['commandBoundary']['subscriber']['node'], '/ros_gz_bridge')
         self.assertEqual(result['frames'], {'odometry': 'odom', 'body': 'base_link_1'})
         self.assertEqual(result['dispatch']['rlsokCommandsSent'], 0)
         self.assertEqual(result['sourceCheckout'], CHECKOUT)
@@ -52,7 +52,7 @@ class IshanGazeboStatusTests(unittest.TestCase):
 
     def test_rejects_ambiguous_or_wrong_bridge(self):
         duplicated = [
-            {'node': '/parameter_bridge', 'type': status.CMD_TYPE, 'gid': 'aa'},
+            {'node': '/ros_gz_bridge', 'type': status.CMD_TYPE, 'gid': 'aa'},
             {'node': '/other', 'type': status.CMD_TYPE, 'gid': 'bb'},
         ]
         with self.assertRaisesRegex(status.CollectionError, 'ambiguous'):
@@ -60,6 +60,26 @@ class IshanGazeboStatusTests(unittest.TestCase):
         wrong = [{'node': '/other', 'type': status.ODOM_TYPE, 'gid': 'cc'}]
         with self.assertRaisesRegex(status.CollectionError, 'unexpected_bridge'):
             status.build_observation(self.reader(publishers=wrong), CHECKOUT)
+
+    def test_regression_uses_ros_graph_node_not_executable_name(self):
+        executable_name = [
+            {'node': '/parameter_bridge', 'type': status.CMD_TYPE, 'gid': 'aa'}
+        ]
+        with self.assertRaisesRegex(status.CollectionError, 'unexpected_bridge'):
+            status.build_observation(
+                self.reader(subscribers=executable_name), CHECKOUT
+            )
+
+        live_graph_name = [
+            {'node': '/ros_gz_bridge', 'type': status.CMD_TYPE, 'gid': 'aa'}
+        ]
+        result = status.build_observation(
+            self.reader(subscribers=live_graph_name), CHECKOUT
+        )
+        self.assertEqual(
+            result['source']['commandBoundary']['subscriber']['node'],
+            '/ros_gz_bridge',
+        )
 
     def test_reader_has_no_command_or_service_surface(self):
         source = inspect.getsource(status.Reader)

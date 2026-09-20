@@ -25,7 +25,9 @@ CMD_TOPIC = '/cmd_vel'
 CMD_TYPE = 'geometry_msgs/msg/Twist'
 ODOM_TOPIC = '/odom'
 ODOM_TYPE = 'nav_msgs/msg/Odometry'
-BRIDGE_NODE = '/parameter_bridge'
+# ros_gz_bridge's Humble / Fortress parameter_bridge executable reports its
+# graph node as /ros_gz_bridge.  The executable name is not the node name.
+BRIDGE_NODE = '/ros_gz_bridge'
 
 
 def finite(value, label):

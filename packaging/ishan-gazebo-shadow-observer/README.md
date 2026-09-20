@@ -1,4 +1,4 @@
-# RLSOK warehouse Gazebo Shadow observer v1
+# RLSOK warehouse Gazebo Shadow observer v3
 
 This archive contains a subscription-only observer for the public
 `ishan-xy/ros_mobile_robot` warehouse simulation at commit
@@ -10,11 +10,14 @@ After the simulation is already running:
 source /opt/ros/humble/setup.bash
 source /path/to/ros_mobile_robot/install/setup.bash
 python3 ishan_gazebo_status.py \
-  --source-commit e3cadc4182f3cbc0fc2cde0eee2db0fba4939366 \
+  --source-root /path/to/ros_mobile_robot \
   --output ishan-gazebo-status.json
 ```
 
-Return `ishan-gazebo-status.json` and the exact checkout commit. The reader
+Return `ishan-gazebo-status.json`. The reader records the exact checkout
+commit, dirty state and origin itself. It recognizes the Humble / Fortress
+bridge by its actual graph node name, `/ros_gz_bridge`; `parameter_bridge` is
+the executable name, not the graph node name. The reader
 only discovers the `/cmd_vel` subscriber and subscribes once to `/odom`. It
 does not publish a command, launch the simulation, call a service or touch
 physical hardware.
