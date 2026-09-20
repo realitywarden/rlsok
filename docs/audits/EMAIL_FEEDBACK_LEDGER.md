@@ -696,3 +696,42 @@ next reply and do the public-source work ourselves.  A stated date, repair,
 travel, upstream issue or promised delivery is an explicit wait and should not
 receive a reminder before it expires.  Courtesy mail, duplicate requests and
 "checking in" without a new unblock path are not progress.
+
+## TRIK read-only state observer delivery (2026-09-20)
+
+The public TRIK source shows that opening a new TCP client is not a passive
+probe: after accepting the connection, the brick loop repeatedly calls
+`setPower` for both motors (initially zero) while streaming sensors.  A second
+socket reader therefore cannot truthfully be described as read-only.  The
+project-specific implementation uses the already-running ROS state path
+instead.
+
+- Source commit `bead83dfff47426fd009eb94290e0c93e564ce1b` adds
+  `profile capture-trik-status` and a subscription-only collector for exactly
+  one `/joint_states` publisher and one `/diff_drive_controller/odom`
+  publisher.  It requires the two public wheel joint names, finite selected
+  values and non-empty frames.  It has no publisher, service client or TCP
+  socket surface.
+- The three focused no-ROS cases passed from source and again from the exact
+  packaged ZIP: selected state/source capture, ambiguous-publisher and
+  missing-wheel rejection, and a static no-command/service/TCP surface check.
+  The source TypeScript typecheck also passed.  These are implementation
+  checks, not a TRIK run.
+- Immutable release
+  `https://github.com/realitywarden/rlsok/releases/tag/trik-status-observer-v1`
+  contains the 18,302-byte source bundle and checksum.  The ZIP SHA-256 is
+  `bafbe2cccea6874ee9e218bc2cd943dcbd83f3319ae13bf9e41b522c21495286`.
+- Website commit `666d587` was deployed to production as
+  `dpl_9XgceuP2wJGZsGGdU9HkZwQfXnJU`.  The production guide
+  `/learn/read-trik-wheel-state-without-commanding-the-robot`, the Learn index,
+  ZIP and checksum each returned HTTP 200; the guide contains the explicit
+  no-TCP/no-command boundary.  The web workspace typecheck and production
+  build passed.
+- Delivery message `1a0be1b149a8b124` was sent in the existing TRIK thread.
+  It gives the observer immediately and asks in one pass for the observation,
+  exact checkout commit, controller/interface listings and confirmation of
+  physical TRIK versus mock graph.
+
+Publishing, deploying and sending the observer do not establish that Azimbek
+ran it.  The TRIK item remains open until the owner returns a credible capture
+from the physical robot's normal TCP/ROS path.
