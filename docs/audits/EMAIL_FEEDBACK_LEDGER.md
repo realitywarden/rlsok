@@ -335,3 +335,10 @@ receipt, reading, real-hardware use or acceptance.
 | Branimir Ćaran / Astro `1a079e2e7307dc41` | `1a0bda9d1a7136bb` | Waiting until after the paper deadline; exact firmware/configuration and zero-command observation remain required. |
 | Hiwonder support / ROSpider `1a0bc96b8af75ddb` | `1a0bda9dc5ea3f17` | Email request closed; any future support post must contain a concrete tutorial step, version and observed result. |
 | Nguyễn Hậu / mobile robot `1a0b37abb024a379` | `1a0bdab1c563b0d8` | Request closed because the maintainer left robotics and the project is indefinitely postponed; no integration or test claim. |
+## Cross-platform Local Check 1.5.5 delivery (2026-09-20)
+
+- Source payload: immutable `v1.5.5`, source commit `7a1176f194dff6bdb6f50e69945692ba3847d3c5`.
+- Windows: immutable `windows-local-check-v1.5.5`, packaging commit `c8031662c2897f026fc883ac7c49781a945bb6d9`; the exact ZIP was extracted on Windows, reported `RLSOK 1.5.5`, and produced `WOULD_ALLOW` plus `WOULD_BLOCK` example reports.
+- macOS: immutable `macos-local-check-v1.5.5`, packaging commit `c8031662c2897f026fc883ac7c49781a945bb6d9`; Apple-silicon and Intel installers were compiled and installed on their matching standard GitHub-hosted architectures. The installed native SwiftUI executable passed its resource/version self-check and the bundled example produced `WOULD_ALLOW` plus `WOULD_BLOCK` on both architectures.
+- Website: `rlsok-cloud` commit `0379e4ed05ee2e922209d56bf937685b5250a837`, production deployment `dpl_8mfmNgkLpFGAbTJQgwJHnXHv2fbe`. Production manifests and the download page identify 1.5.5, and all four Windows, macOS arm64, macOS x64 and Ubuntu asset URLs returned HTTP 200 after redirects.
+- Boundary: the new Mac surface is a real native Local Check console aligned with the current dark, dense workspace hierarchy. It does not claim the absent Cloud-management or robot-command capabilities; packages remain unsigned and not notarized. No physical robot use or customer acceptance is established.
