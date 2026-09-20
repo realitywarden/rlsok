@@ -28,7 +28,10 @@ const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'rlsok-shadow-package-')
 const stage = path.join(temporary, `${bundlePrefix}-${version}`);
 const copy = (source, target) => {
   fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.cpSync(source, target, { recursive: true, filter: name => !name.includes('__pycache__') && !name.endsWith('.pyc') });
+  // pnpm materializes package entries as directory links. Dereference them so
+  // the release contains real dependency files and packaging does not require
+  // symlink privileges on Windows or leave links outside the bundle.
+  fs.cpSync(source, target, { recursive: true, dereference: true, filter: name => !name.includes('__pycache__') && !name.endsWith('.pyc') });
 };
 
 (async () => {
