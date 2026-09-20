@@ -58,7 +58,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile capture-pidog-status --repo <pidog-embodiment-checkout> --source-commit <full-sha1> --output <new-observation.json> [--units-directory </etc/systemd/system>] [--python <python3>]
   rlsok profile prepare-workbench-offline-shadow --source-root <workbench-checkout> --expected-commit <full-sha1> --demo-json <make-demo-offline-output.json> --output <tested-draft.json> [--python <python3>]
   rlsok profile approve-workbench-offline-shadow --draft <tested-draft.json> --approver <independent-reviewer> --approved-at <RFC3339> --output <approval.json> [--python <python3>]
-  rlsok profile evaluate-workbench-offline-shadow --draft <tested-draft.json> --approval <approval.json> --output <result.json> [--python <python3>]
+  rlsok profile evaluate-workbench-offline-shadow --baseline-draft <approved-draft.json> --changed-draft <changed-draft.json> --approval <approval.json> --source-root <workbench-checkout> --output <result.json> [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile schema --output <new-directory>
@@ -371,10 +371,14 @@ export async function runProfileCommand(args: string[]): Promise<number> {
       join(dirname(collectorScript()), 'workbench_offline_shadow.py'));
   }
   if (command === 'evaluate-workbench-offline-shadow') {
-    const o = options(rest, ['draft', 'approval', 'output', 'python'], ['draft', 'approval', 'output']);
+    const o = options(rest,
+      ['baseline-draft', 'changed-draft', 'approval', 'source-root', 'output', 'python'],
+      ['baseline-draft', 'changed-draft', 'approval', 'source-root', 'output']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
-    return python(o, ['evaluate', '--draft', resolve(o.draft), '--approval', resolve(o.approval),
-      '--output', resolve(o.output)], join(dirname(collectorScript()), 'workbench_offline_shadow.py'));
+    return python(o, ['evaluate', '--baseline-draft', resolve(o['baseline-draft']),
+      '--changed-draft', resolve(o['changed-draft']), '--approval', resolve(o.approval),
+      '--source-root', resolve(o['source-root']), '--output', resolve(o.output)],
+    join(dirname(collectorScript()), 'workbench_offline_shadow.py'));
   }
   if (command === 'check-navigation-preflight') {
     const o = options(rest, ['input', 'output'], ['input', 'output']);

@@ -2,8 +2,8 @@
 set -eu
 
 RLSOK_PRODUCT_VERSION="1.3.0"
-RLSOK_RUNTIME_VERSION="1.5.5"
-RLSOK_RELEASE_TAG="v1.5.5"
+RLSOK_RUNTIME_VERSION="1.5.6"
+RLSOK_RELEASE_TAG="v1.5.6"
 ARCHIVE="rlsok-runtime-${RLSOK_RUNTIME_VERSION}-linux-x64.tar.gz"
 RELEASE_BASE="${RLSOK_RELEASE_BASE:-https://github.com/realitywarden/rlsok/releases/download/${RLSOK_RELEASE_TAG}}"
 INSTALL_ROOT="${RLSOK_INSTALL_ROOT:-/opt/rlsok}"
