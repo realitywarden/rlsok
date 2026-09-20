@@ -389,6 +389,21 @@ boundary.  The page explicitly says this source command is not present in the
 1.5.5 Windows/Mac downloads, so website publication does not silently upgrade
 those packages or claim an owner run.
 
+Packaged delivery: immutable release
+[`mira-status-observer-v1`](https://github.com/realitywarden/rlsok/releases/tag/mira-status-observer-v1)
+points to source commit `0cd66e6bafa46944dab4fedcc86bf2c08c098d95` and
+contains a 23,476-byte ZIP plus checksum.  The published ZIP was downloaded
+again and matched SHA-256
+`16008c63db11b6136957cec2cc28d5b5f6510200c2c8819cc3c07ed9b9b797a2`;
+its extracted focused tests passed all three cases.  GitHub reports the release
+immutable.  Website commit `34a51d1` and production deployment
+`dpl_6kB19755PZpF3b5kHTeSLaEVkh4K` expose that separate download without
+changing desktop feeds; the production guide, ZIP and checksum each returned
+HTTP 200.  Delivery update `1a0bdee1e27972fc` was sent in the existing MIRA
+thread with no deadline and an explicit instruction not to power or launch the
+robot solely for the request.  Publication and sending remain distinct from an
+owner-run observation.
+
 Completion reporting must keep four stages separate: project-specific source
 implementation, publication/delivery, owner execution, and physical-robot
 evidence.  The real-hardware goal remains open while every row above lacks the
