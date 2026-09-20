@@ -331,7 +331,7 @@ receipt, reading, real-hardware use or acceptance.
 | Giovanni Remigi / serial robot `1a0b381bacb60639` | `1a0bda98397e8e5f` | Waiting for the confirmed handshake implementation and returned device name; memory alone was not used to implement an adapter. |
 | Lidarbot `1a023083dfe04645` | `1a0bda991409f335` | Waiting on the maintainer's deadline; exact Jazzy path and a zero-command observation remain required. |
 | Arjun Chandroth / 17-DOF humanoid `1a0a3fab4a69b50e` | `1a0bda9a100bfc9b` | Physical-hardware request closed; no compatibility inferred from the historical project. |
-| Gaus Mohiuddin Sayyad / dual Kinova `1a0a852fac9b1187` | `1a0bda9aa24fd27d` | Waiting for hardware availability, exact bridge/mapping and one zero-command result. |
+| Gaus Mohiuddin Sayyad / dual Kinova `1a0a852fac9b1187` | `1a0bda9aa24fd27d` | Closed: his course and lab access ended; no physical run was obtained. |
 | Rocky Wüst / PiDog `1a0a0a9c3e8a5f61` | `1a0bda9b6e178407` | Waiting for upstream issue #12; no reminder and no integration claim. |
 | Tanvir Rahman / taught arm `1a08f71d089be0fc` | `1a0bda9c41686e85` | Physical-arm request closed because the hardware is unavailable. |
 | Branimir Ćaran / Astro `1a079e2e7307dc41` | `1a0bda9d1a7136bb` | Waiting until after the paper deadline; exact firmware/configuration and zero-command observation remain required. |
@@ -358,7 +358,7 @@ exists; source recipes, releases, sent mail and draft PRs are not substitutes:
 | --- | --- | --- |
 | Physical MIRA / `1a08f594da4e5c52` | Lucas states that the team is currently working with the physical MIRA and is open to integration/testing. | A live, read-only PX4/ROS observation tied to the selected MIRA checkout, followed by the project-specific capture.  Minimal no-command request sent as Gmail message `1a0bddb7e1fd8ee9`; it explicitly forbids launching solely for the request, arming, Offboard, services, `/cmd_vel` and propeller enablement. |
 | MakerMods Metal / `1a08f6661ff3b468` | Isaac invited PR integration, mapping review and subsequent bench testing. | Owner review of draft PR #160, then an owner-run bench result; the open draft PR alone is implementation evidence only. |
-| Dual Kinova Gen3 / `1a0a852fac9b1187` | Gaus will try it when both real Gen3 arms are free. | Current left/right mapping and one zero-command observation from the real dual-arm environment. |
+| Dual Kinova Gen3 / `1a0a852fac9b1187` | Closed: Gaus no longer has lab access after completing the course. | No current owner or physical result; do not chase Gaus for a run he can no longer perform. |
 | PAROL6 / `1a079accbfaa60b2` | Graham offered testing, then reported that the arm is broken and needs replacement parts plus reassembly. | Owner-run result using the actual PAROL6 checkout/controller/bridge after repair; the pinned public recipe is not this result. Do not remind before the owner says the arm is ready. |
 | TRIK / `1a07658ff1d51524` | Azimbek offered a real TRIK environment. | Current wheel/brick binding and a read-only result from that environment. |
 | LelyRobot / `1a076624befe452b` | Tomo authorized work with the current system. | Confirmation of the active Python/C++ bridge and a read-only observation from the selected physical path. |
@@ -848,10 +848,13 @@ both physical Gen3 arms and their normal bridge processes were present, and
 asks for the exact error if capture fails.  It explicitly says not to start or
 move the arms solely for RLSOK.
 
-This implementation makes the next owner step one command rather than a
-manual intake, but publication, deployment and sending are not an owner run.
-The item remains open until Gaus returns the JSON with credible physical-
-session confirmation or closes the opportunity.
+This implementation made the owner step one command rather than a manual
+intake, but publication, deployment and sending were never an owner run. Gaus
+later replied in `1a0bea441bf1db50` that his course had ended and his lab
+access had ended with it. Reply `1a0beac4100869f1` thanked him, explicitly
+closed the hardware test and asked for nothing further. The opportunity is
+closed without a JSON, physical connection, trial result or acceptance; the
+published observer remains available for a future qualified owner.
 
 ## Ruiyan supplied protocol and model-specific questions (2026-09-20)
 
