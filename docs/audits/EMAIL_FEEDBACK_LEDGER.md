@@ -850,3 +850,37 @@ This implementation makes the next owner step one command rather than a
 manual intake, but publication, deployment and sending are not an owner run.
 The item remains open until Gaus returns the JSON with credible physical-
 session confirmation or closes the opportunity.
+
+## Ruiyan supplied protocol and model-specific questions (2026-09-20)
+
+Li returned in the existing Ruiyan thread with an original protocol workbook
+obtained from the company's founder (`1a0be300ad19a0a8`).  It documents
+read-only production-tracking SN, firmware version, motor status, selected
+configuration/limit values and tactile-calibration coefficients.  The SN is a
+readable device value, not cryptographically authenticated identity.  The
+workbook is customer-supplied material and was inspected privately; it has not
+been copied into the public repository or website.
+
+The generic serial-wrapper sheet contains a material ambiguity: its visible
+note specifies the low eight bits of an additive checksum, while an adjacent
+hidden column gives a CRC8-ITU implementation.  It also says individual
+devices may implement only a subset of the base protocol and does not identify
+Li's exact hand model, current RS485 baud rate, first ID or motor count.  Those
+facts must not be guessed before sending bytes to a physical hand.
+
+Message `1a0be41d0d29c41c` thanked Li and asked him to obtain all known missing
+facts in one pass: exact model/interface, baud/first ID/motor count, applicable
+checksum, model-supported read opcodes, and permission to publish only the
+observer code/field mapping without publishing the workbook.  It explains
+that the next step will be one read-query-only command on an already connected
+hand, with no motion, enable, reset, calibration write or configuration write.
+
+While that answer is pending, a private review candidate was completed outside
+the public repository.  It has an explicit allowlist for only E6/F0/A0/A2/A7/
+AB/AE/B0/B2, rejects every documented write/motion opcode, supports both
+unresolved checksum variants only through an explicit selection, parses
+fragmented frames and multi-frame version replies, and records readable SN as
+unauthenticated.  Seven focused offline tests pass.  This is implementation
+preparation, not a published integration, serial connection or physical-hand
+result; it remains private until Ruiyan's answer resolves framing and
+publication scope.
