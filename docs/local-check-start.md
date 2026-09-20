@@ -1,6 +1,6 @@
 # Try RLSOK on your computer
 
-RLSOK Local Check **1.5.4** compares robot settings with a copy you reviewed.
+RLSOK Local Check **1.5.5** compares robot settings with a copy you reviewed.
 Try the included example first: one report shows matching settings, and the
 other identifies a changed calibration value. No robot, ROS installation or
 account is needed for this example. Nothing is sent to a robot.
@@ -9,9 +9,9 @@ account is needed for this example. Nothing is sent to a robot.
 
 - **Ubuntu 22.04 or 24.04, Intel/AMD 64-bit:** use the download below. The
   package includes its runtime; `curl`, `sha256sum` and `tar` are required.
-- **Windows or Mac:** [watch the same example](https://rlsok.com/download#recorded-walkthrough).
-  This download runs on Linux. The older Windows management app serves a
-  different purpose and is not a Windows edition of this example.
+- **Windows 10/11, 64-bit:** use the self-contained ZIP from the download page.
+- **macOS 14 or later, Apple silicon or Intel:** use the native installer for
+  your processor. Its local console runs this same zero-command example.
 
 ## 1. Download and run the example
 
@@ -20,11 +20,11 @@ Use a new folder name if `rlsok-first-check` already exists.
 
 ```sh
 mkdir rlsok-first-check && cd rlsok-first-check &&
-curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.4/rlsok-local-check-1.5.4-linux-x64.tar.gz &&
-curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.4/rlsok-local-check-1.5.4-linux-x64.tar.gz.sha256 &&
-sha256sum -c rlsok-local-check-1.5.4-linux-x64.tar.gz.sha256 &&
-tar -xzf rlsok-local-check-1.5.4-linux-x64.tar.gz &&
-./rlsok-local-check-1.5.4/bin/rlsok profile demo --output first-result
+curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.5/rlsok-local-check-1.5.5-linux-x64.tar.gz &&
+curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.5/rlsok-local-check-1.5.5-linux-x64.tar.gz.sha256 &&
+sha256sum -c rlsok-local-check-1.5.5-linux-x64.tar.gz.sha256 &&
+tar -xzf rlsok-local-check-1.5.5-linux-x64.tar.gz &&
+./rlsok-local-check-1.5.5/bin/rlsok profile demo --output first-result
 ```
 
 Already extracted the package? Run `./bin/rlsok profile demo --output first-result`
@@ -62,8 +62,8 @@ emailed URLs remain available at their original version. To try this version,
 use a new directory and retain existing workspaces and reviewed baselines.
 
 The separate installer is available as `install-local.sh` with its matching
-`.sha256` file in [this release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.4).
+`.sha256` file in [this release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.5).
 The `install-shadow.sh` name is also supplied for existing instructions; both
 scripts select this exact package version. Do not use a source-template script.
 
-See [release notes and verification scope](releases/v1.5.4.md).
+See [release notes and verification scope](releases/v1.5.5.md).

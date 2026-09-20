@@ -1,7 +1,7 @@
 # RLSOK
 
 [![CI](https://github.com/realitywarden/rlsok/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/realitywarden/rlsok/actions/workflows/ci.yml)
-[![Local Check 1.5.4](https://img.shields.io/badge/Local_Check-1.5.4-blue)](https://github.com/realitywarden/rlsok/releases/tag/v1.5.4)
+[![Local Check 1.5.5](https://img.shields.io/badge/Local_Check-1.5.5-blue)](https://github.com/realitywarden/rlsok/releases/tag/v1.5.5)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 RLSOK helps you see when robot settings no longer match the version you reviewed.
@@ -17,9 +17,9 @@ You do not need a RLSOK account for these local entry points.
 
 | Your computer | What to download | First step |
 | --- | --- | --- |
-| Windows 10/11, 64-bit | Local Check 1.5.2, a 35 MB ZIP with Node included | Extract the whole ZIP and open `START-HERE.html`. No ROS or database installation is needed for the file checks. |
-| Mac with Apple silicon or Intel | Local workspace 1.3.2, about 198 MB or 200 MB; Node and the database are included | Choose the package for your chip, follow the installer guide, then open RLSOK from Applications. These packages are unsigned and not Apple-notarized; read the first-open instructions. |
-| Ubuntu 22.04 or 24.04, Intel/AMD 64-bit | Local Check 1.5.4, about 45 MB with its runtime included | Follow [the local first-run guide](docs/local-check-start.md). No robot, ROS installation or account is needed for the included example. |
+| Windows 10/11, 64-bit | Local Check 1.5.5 ZIP with Node included | Extract the whole ZIP and open `START-HERE.html`. No ROS or database installation is needed for the file checks. |
+| Mac with Apple silicon or Intel | Local Check 1.5.5 native app and installer for your processor | Install the matching package, open the app, and run the included example in the local console. The packages are unsigned and not Apple-notarized; read the first-open instructions. |
+| Ubuntu 22.04 or 24.04, Intel/AMD 64-bit | Local Check 1.5.5 with its runtime included | Follow [the local first-run guide](docs/local-check-start.md). No robot, ROS installation or account is needed for the included example. |
 
 On Windows, `Run example.cmd` compares original inputs with an intentionally
 changed calibration value. Open the reports to see the difference, then follow
@@ -56,7 +56,7 @@ For reusable interface selection and field mapping, open the
 processed in the browser; exported workspaces are consumed by the local CLI.
 
 For the FANUC/Humble composable workflow, download the separate
-[Local Check 1.5.4 package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.4)
+[Local Check 1.5.5 package](https://github.com/realitywarden/rlsok/releases/tag/v1.5.5)
 and follow the [installation-to-Evidence guide](docs/fanuc-shadow-self-service.md).
 This local workflow has not been validated on Humble or a
 physical FANUC. It does not change the stable Cloud or v1.4.5 installer below.
