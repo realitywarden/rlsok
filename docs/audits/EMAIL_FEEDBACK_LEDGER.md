@@ -677,3 +677,22 @@ public repository; sending a long intake before confirming current hardware
 access; addressing the wrong person or using an obsolete referral; and
 describing source, simulated or synthetic work as a live robot result.  These
 checks are applied to each still-active thread before another message is sent.
+
+### Response-speed and one-pass intake rule
+
+Customer time is treated as scarce.  When a reply can be resolved from facts
+already available, resolve it in the same review pass instead of acknowledging
+it and promising a later answer.  When external detail is genuinely required,
+ask for the complete *known necessary* set once, explain briefly why it is
+needed and offer the cheapest acceptable form (public commit/link, pasted
+schema, existing screenshot/export or redacted excerpt).  Separate items
+needed now from facts that can wait until after the first mapping; do not make
+the recipient discover the requirements through several rounds of mail.
+
+This does not mean sending an exhaustive questionnaire before basic viability
+is known.  First establish current hardware/source access where that fact is
+uncertain.  Once confirmed, send the complete platform-specific intake in the
+next reply and do the public-source work ourselves.  A stated date, repair,
+travel, upstream issue or promised delivery is an explicit wait and should not
+receive a reminder before it expires.  Courtesy mail, duplicate requests and
+"checking in" without a new unblock path are not progress.
