@@ -1,0 +1,105 @@
+name: Ruiyan hand RS485 PTY acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  released-observer:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Install serial dependency
+        run: python3 -m pip install --disable-pip-version-check pyserial==3.5
+
+      - name: Download and exercise the released ZIP through a Linux PTY
+        shell: bash
+        run: |
+          curl --fail --location --retry 3 \
+            https://github.com/realitywarden/rlsok/releases/download/ruiyan-hand-status-observer-v1/rlsok-ruiyan-hand-status-observer-v1.zip \
+            -o /tmp/ruiyan.zip
+          unzip -q /tmp/ruiyan.zip -d /tmp/ruiyan
+          observer_root="$(find /tmp/ruiyan -mindepth 1 -maxdepth 1 -type d | head -n1)"
+          test "$(python3 "$observer_root/experimental/composable-shadow/ruiyan_hand_status.py" --version)" = "1"
+          export OBSERVER_ROOT="$observer_root"
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import pty
+          import select
+          import subprocess
+          import threading
+
+          root = pathlib.Path(os.environ['OBSERVER_ROOT'])
+          master, slave = pty.openpty()
+          port = os.ttyname(slave)
+          error = []
+
+          def checksum(value):
+              return sum(value) & 0xff
+
+          def frame(device_id, payload):
+              body = bytes([0xA5]) + device_id.to_bytes(2, 'little') + bytes([len(payload)]) + payload
+              return body + bytes([checksum(body)])
+
+          def read_exact(count):
+              result = bytearray()
+              while len(result) < count:
+                  ready, _, _ = select.select([master], [], [], 5)
+                  if not ready:
+                      raise TimeoutError('pty request timeout')
+                  result.extend(os.read(master, count - len(result)))
+              return bytes(result)
+
+          def server():
+              try:
+                  for _ in range(8):
+                      while read_exact(1) != b'\xa5':
+                          pass
+                      prefix = read_exact(3)
+                      payload_and_sum = read_exact(prefix[2] + 1)
+                      request = b'\xa5' + prefix + payload_and_sum
+                      if checksum(request[:-1]) != request[-1]:
+                          raise AssertionError('bad request checksum')
+                      device_id = int.from_bytes(prefix[:2], 'little')
+                      opcode = payload_and_sum[0]
+                      if opcode == 0xE6:
+                          os.write(master, frame(device_id + 256, bytes([opcode, 0]) + b'ABC123'))
+                      elif opcode == 0xF0:
+                          os.write(master, frame(device_id + 256, bytes([opcode, 0]) + b'v1.2.3'))
+                          os.write(master, frame(device_id + 256, bytes([opcode, 1]) + b'build7'))
+                      else:
+                          os.write(master, frame(device_id + 256, bytes([opcode]) + b'\0' * 7))
+              except Exception as exc:
+                  error.append(exc)
+
+          thread = threading.Thread(target=server)
+          thread.start()
+          output = pathlib.Path('/tmp/ruiyan-status.json')
+          result = subprocess.run([
+              'python3', str(root / 'experimental/composable-shadow/ruiyan_hand_status.py'),
+              '--port', port, '--device-id', '1', '--motor-count', '6',
+              '--baud', '5000000', '--execute-read-only', '--output', str(output),
+          ], text=True, capture_output=True, timeout=30)
+          thread.join(timeout=5)
+          if error:
+              raise error[0]
+          assert result.returncode == 0, (result.stdout, result.stderr)
+          evidence = json.loads(output.read_text())
+          assert evidence['observerVersion'] == '1'
+          assert evidence['dispatch'] == {
+              'readOnlyRequestsSent': 8,
+              'motionCommandsSent': 0,
+              'configurationWritesSent': 0,
+              'broadcastRequestsSent': 0,
+          }
+          assert len(evidence['observations']) == 8
+          assert evidence['observations'][1]['responseFrameCount'] == 2
+          print(result.stdout.strip())
+          print(json.dumps(evidence, indent=2, sort_keys=True))
+          PY

@@ -54,6 +54,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile capture-rebot-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-dual-kinova-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-ishan-gazebo-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-ruiyan-hand-status --port </dev/ttyUSB0> --device-id <1-254> --motor-count <1-8> --baud <9600-5000000> --confirm-read-only yes --output <new-observation.json> [--tactile-coefficient-index <0-255>] [--python <python3>]
   rlsok profile capture-pidog-status --repo <pidog-embodiment-checkout> --source-commit <full-sha1> --output <new-observation.json> [--units-directory </etc/systemd/system>] [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
@@ -331,6 +332,17 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     const o = options(rest, ['output', 'python', 'source-root'], ['output', 'source-root']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
     return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root'])], join(dirname(collectorScript()), 'ishan_gazebo_status.py'));
+  }
+  if (command === 'capture-ruiyan-hand-status') {
+    const o = options(rest,
+      ['output', 'python', 'port', 'device-id', 'motor-count', 'baud', 'confirm-read-only', 'tactile-coefficient-index'],
+      ['output', 'port', 'device-id', 'motor-count', 'baud', 'confirm-read-only']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    if (o['confirm-read-only'] !== 'yes') throw new Error('confirm_read_only_must_be_yes');
+    const args = ['--output', resolve(o.output), '--port', o.port, '--device-id', o['device-id'],
+      '--motor-count', o['motor-count'], '--baud', o.baud, '--execute-read-only'];
+    if (o['tactile-coefficient-index']) args.push('--tactile-coefficient-index', o['tactile-coefficient-index']);
+    return python(o, args, join(dirname(collectorScript()), 'ruiyan_hand_status.py'));
   }
   if (command === 'capture-pidog-status') {
     const o = options(rest, ['output', 'python', 'repo', 'source-commit', 'units-directory'], ['output', 'repo', 'source-commit']);
