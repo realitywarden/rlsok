@@ -19,6 +19,11 @@ jobs:
           path: workbench
           fetch-depth: 1
 
+      - name: Use the repository's required Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Install locked offline-demo environment
         run: |
           python3 -m pip install --require-hashes -r workbench/docker/requirements-dev.lock
