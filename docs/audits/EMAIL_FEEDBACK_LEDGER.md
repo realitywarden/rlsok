@@ -607,3 +607,33 @@ An incremental Gmail and spam check after these sends found no new robot
 material.  Spam contained only delivery failures and promotions.  The goal
 therefore remains active while the requested owner-run observations are
 pending.
+
+## Human-language follow-up pass (2026-09-20)
+
+The older positive-interest search was continued to its final page and each
+candidate was checked against the later state of its thread.  The Arctos
+gripper discovery question had already been answered with the exact public
+commit; Astro had already received an explicit wait response after the paper
+deadline; PNC hand was closed because the repository is only being used for
+version control; FANUC is waiting for the recently requested active
+UFRAME/UTOOL observation; S90 has no servo available; and the remaining
+threads were already answered, unavailable, declined or not a real-hardware
+opportunity.  They were not sent duplicate reminders.
+
+- iRobot Create 3 / new contact: Alberto's automatic reply said he had left
+  iRobot and directed enquiries to Mark Moseley.  Message
+  `1a0be0b7f2d407b6` introduced Zheng as the RLSOK maintainer, explained the
+  specific Create 3 relevance and asked one small question about a read-only
+  robot identity/firmware/configuration source before teleoperation or
+  coverage.  This is a contact handoff and question only, not an iRobot
+  integration or endorsement.
+- Rover-arm UART / `1a066fa358e97d9f`: Rohit had originally agreed to try the
+  evaluation, but the later requests had turned into a long intake and had no
+  reply.  Message `1a0be0d8ff8fc813` reset the conversation in ordinary
+  language: it asks only whether the arm is still accessible and, if so, for
+  the current repository/commit or driver file plus whether a read-only check
+  is possible.  RLSOK owns the mapping work; no hardware result is claimed.
+
+The pass confirms sending and thread disposition only.  It does not establish
+that either contact replied, that either robot is accessible, or that a live
+read-only observation has been completed.
