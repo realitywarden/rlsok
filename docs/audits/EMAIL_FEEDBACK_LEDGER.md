@@ -428,3 +428,29 @@ last stage.
   current real-hardware feedback objective. Waiting senders have not thereby
   supplied materials, run RLSOK, connected hardware, or accepted a result. Any
   future reply is a new mailbox event and must be evaluated from its full thread.
+
+## Incremental mailbox events after the audit (2026-09-20)
+
+The Gmail connector was checked again after the MIRA implementation and
+delivery.  Spam had no new message.  New normal-mail events were handled as
+follows:
+
+- Unitree support `1a0bde5a39b2ce7c` thanked us for acknowledging the
+  third-party/no-compatibility boundary and invited future questions.  This is
+  a courtesy close, supplies no implementation material or hardware result and
+  needs no additional reply.
+- Nguyễn Hậu `1a0bdb6262db7317` was a courtesy reply after the mobile-robot
+  request was explicitly closed because the owner left robotics.  It does not
+  reopen that thread.
+- GitHub release notifications are automated receipts for already recorded
+  releases.  Delivery failures for Niryo, FZI and earlier outreach establish
+  non-delivery only; they are not customer feedback or a reason to invent an
+  alternate recipient.
+- The unsolicited “underexposed repository” message
+  `1a0bdce448f35b47` is a generic marketing solicitation with no RLSOK product
+  feedback or robot material.  No reply is required.
+- The Nova Robotics public-source search did not uniquely identify the
+  inspection platform described by Satya.  A result named `Nova_ROS2` concerns
+  a Dobot Nova5 arm and cannot be substituted for the emailed inspection
+  robot.  The already-sent repository/commit/command/material request remains
+  the only truthful unblock path; no repeat was sent.
