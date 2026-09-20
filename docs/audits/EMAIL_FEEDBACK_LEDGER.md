@@ -828,8 +828,25 @@ Three focused no-ROS tests cover successful dual capture, rejection of a mock
 publisher or disconnected sessions, and static absence of command/service/
 Kortex surfaces.  The source TypeScript typecheck passed.
 
+Core commit `e2e77a36302e4d2646f9067ea65406baeaa71c68` is pushed.  Immutable
+release
+`https://github.com/realitywarden/rlsok/releases/tag/dual-kinova-status-observer-v1`
+contains the 28,167-byte ZIP and checksum; the ZIP SHA-256 is
+`e79b3c77147283d02f70d60d4a530c3e03f820a8d6844887fc7254d9ba295dfe`.
+The exact extracted ZIP passed all three focused tests.  Website commit
+`b636332` was deployed to production as
+`dpl_GsFHCU6RB2o89ttZ5c9Hp4e4YNob`.  The guide, Learn index, ZIP and checksum
+each returned HTTP 200, and the production page contained the exact digest,
+download action and no-Kortex-session boundary.  The web typecheck and
+production build passed.
+
+Message `1a0be3df36acb0f0` delivered the finished reader in Gaus's original
+thread.  It asks only for `dual-kinova-status.json` plus one sentence that
+both physical Gen3 arms and their normal bridge processes were present, and
+asks for the exact error if capture fails.  It explicitly says not to start or
+move the arms solely for RLSOK.
+
 This implementation makes the next owner step one command rather than a
-manual intake, but it is not yet an owner run.  Publication, website delivery
-and the in-thread handoff must be recorded separately, and the item remains
-open until Gaus returns the JSON with confirmation that both physical Gen3
-arms and their normal bridge processes were present.
+manual intake, but publication, deployment and sending are not an owner run.
+The item remains open until Gaus returns the JSON with credible physical-
+session confirmation or closes the opportunity.
