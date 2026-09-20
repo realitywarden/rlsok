@@ -907,3 +907,43 @@ publication scope.
   (`1a08b51e3bd6a412`) asking which BOM part is difficult to source.  RLSOK has
   no stated BOM sourcing need in this feedback goal, so it is not a customer
   request, technical feedback or robot-test opportunity and was not answered.
+
+Ishan replied again in `1a0be4e1c864b05d`: he now understands the boundary and
+wants to try the Shadow workflow, but removed his Ubuntu VM and first needs to
+restore the ROS/Gazebo project before he can identify the ROS version and
+command topic.  He explicitly said he will inspect the files and return those
+details.  No additional reply was sent because the complete required fact set
+was already requested in the preceding message and he has accepted that next
+step.  This remains a simulation-only waiting item, not a physical-robot run.
+
+## No-date inbox, RLSOK and spam reconciliation (2026-09-20)
+
+The inbox history from 2026-07-01 through the current message was paged to the
+end, the complete current spam set was read, and a separate `in:anywhere RLSOK`
+search was paged to the end.  Existing drafts were not opened or modified.
+The reconciliation found no additional unanswered human RLSOK technical reply
+beyond Ishan's new commitment above.  The remaining last-in-thread messages
+were delivery failures, automatic acknowledgements, security/billing notices,
+newsletters, our own routing tests, already-closed courtesies, unrelated
+NoPager/SpyHunt correspondence or unsolicited sales messages.  None warrants
+a reply merely to make the mailbox look handled.
+
+The same audit records these payment-provider outcomes without confusing them
+with email work or an activated checkout:
+
+- Paddle's final human answer `1a083e004831488d` leaves its rejection of
+  `rlsok.com` unchanged.  Lemon Squeezy's `1a0912be3e8d56f8` says mainland-
+  China stores and individual merchants are unsupported.  Both routes are
+  externally closed; another email would not advance them.
+- Creem's human answer `1a08ffb8eabeb15b` confirms Alipay for a mainland-
+  China individual merchant, a CNY 50,000 per-transaction limit, KYC-name-
+  matched payouts, twice-monthly payouts and a USD 50 minimum.  Its next step
+  is the authenticated Balance -> Payout Account flow and product/KYC review,
+  not another email.  No dashboard setup or checkout activation is claimed.
+- Dodo's compliance answer `1a0a9a0ccd5e6951` confirms that KYC succeeded and
+  asks for Bank Account Verification in the authenticated dashboard.  Banking
+  information was not requested or transmitted by email.  No bank verification
+  or live payment activation is claimed.
+- PayPro Global has only acknowledged receipt (`1a0612400c0a492f`) and has not
+  issued an eligibility decision.  It remains an external wait; repeated
+  acknowledgement replies would add no information.
