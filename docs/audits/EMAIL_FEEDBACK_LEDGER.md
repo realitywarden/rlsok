@@ -750,6 +750,23 @@ The collector creates no publisher or service client, does not import or open
 serial, and never sends a stop or motion command.  Its result can show that
 the selected ROS sensor path was live; it cannot authenticate the Arduino or
 firmware, prove motor safety/command delivery, or establish physical
-acceptance.  Focused source tests and the TypeScript typecheck passed.  Release,
-website delivery, customer delivery and owner execution remain separate until
-their evidence is recorded below.
+acceptance.  Focused source tests and the TypeScript typecheck passed.
+
+- Core commit `ff31bbaa5bb1c3fbc5cca8cbf02fe8f0f009d17d` is pushed.
+  Release `lely-status-observer-v1` contains a 26,716-byte ZIP with SHA-256
+  `120d192981e4acf7916fe50190bba260ab7704d307ae8c9f302088959125b10f`;
+  the three focused tests passed again from the exact extracted ZIP.
+- Website commit `b5f3a0a` was deployed to production as
+  `dpl_2KK16a96KFuqZkR1bo42Sg9nqJ7a`.  The guide, Learn index, ZIP and checksum
+  each returned HTTP 200, the index links the guide and the page states the
+  no-serial/no-command boundary.  The web workspace typecheck and production
+  build passed.
+- Message `1a0be22f81fd2d44` delivered the finished reader in the existing
+  LelyRobot thread.  It replaces the earlier five manual ROS commands with one
+  capture and asks only for `lely-status.json` plus confirmation that the
+  physical robot and normal serial bridge were present.  Exact errors are an
+  immediate fix path.
+
+Publishing, deploying and sending remain distinct from an owner run.  The
+LelyRobot item stays open until Tomo returns a credible physical-session
+capture or closes the opportunity.
