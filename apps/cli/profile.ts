@@ -54,6 +54,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile capture-rebot-status --source-commit <full-sha1> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-dual-kinova-status --source-commit <full-sha1> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-ishan-gazebo-status --source-commit <full-sha1> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-pidog-status --repo <pidog-embodiment-checkout> --source-commit <full-sha1> --output <new-observation.json> [--units-directory </etc/systemd/system>] [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile schema --output <new-directory>
@@ -330,6 +331,13 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     const o = options(rest, ['output', 'python', 'source-commit'], ['output', 'source-commit']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
     return python(o, ['--output', resolve(o.output), '--source-commit', o['source-commit']], join(dirname(collectorScript()), 'ishan_gazebo_status.py'));
+  }
+  if (command === 'capture-pidog-status') {
+    const o = options(rest, ['output', 'python', 'repo', 'source-commit', 'units-directory'], ['output', 'repo', 'source-commit']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    const args = ['--output', resolve(o.output), '--repo', resolve(o.repo), '--source-commit', o['source-commit']];
+    if (o['units-directory']) args.push('--units-directory', resolve(o['units-directory']));
+    return python(o, args, join(dirname(collectorScript()), 'pidog_status.py'));
   }
   if (command === 'check-navigation-preflight') {
     const o = options(rest, ['input', 'output'], ['input', 'output']);

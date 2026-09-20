@@ -130,6 +130,33 @@ Provide these actual inputs; the command does not fill them with synthetic examp
 - `mira-offboard-velocity` also requires a fresh `profile export-node-settings --node /offboard_velocity_control` result so the reviewed workspace binds the active `bench_mode` value. Treat `bench_mode: true` as an explicit ground-test exception, never as a flight-ready setting.
 - When a physical MIRA is already powered for normal maintenance and remains disarmed, `rlsok profile capture-mira-status --output mira-status.json` can record one live `/fmu/out/vehicle_status` sample. The collector creates only a ROS subscription: it publishes no topic, calls no service, does not arm or request Offboard, and does not make the result a flight approval. The result proves only that the selected ROS graph exposed one status publisher at that time; it does not authenticate the Pixhawk, airframe, firmware, estimator, battery, failsafes or vehicle identity.
 - When a physical TRIK is already running for normal maintenance, `rlsok profile capture-trik-status --output trik-status.json` records one `/joint_states` sample for the two selected wheel joints and one `/diff_drive_controller/odom` sample. It creates subscriptions only: it does not connect to the brick's TCP server, publish `/cmd_vel`, call controller services, activate a controller or write zero power. Use `profile export-controller` separately for the selected controller state. This observation proves only that the selected ROS graph exposed the state path at that time; publisher GIDs and topic data do not authenticate the brick, flashed script, wheel wiring/calibration or physical identity.
+
+### PiDog Embodiment local hardware-status observation
+
+On an already-running PiDog Embodiment body, the project-specific observer
+reads only the selected checkout, installed Nox unit files, installed
+`pidog`/`robot-hat` versions and one loopback `GET /status` response:
+
+```bash
+rlsok profile capture-pidog-status \
+  --repo "$HOME/pidog-embodiment" \
+  --source-commit e88a3979b7ad200c9ce016b849cd6a3b2bcc3a54 \
+  --output pidog-status.json
+```
+
+The capture requires a powered battery reading and the exact MCU status added
+by upstream issue #12: `responding: true`, verdict `ok`, and a resolved
+robot_hat address of `0x14`, `0x15` or `0x16`. It stores selected status fields
+only. Faces, photos, perception, audio, conversation history, tokens and
+environment-file contents are omitted. If local bridge authentication is
+enabled, supply the token only through `RLSOK_PIDOG_STATUS_TOKEN`; it is used
+in memory and is never written to the observation.
+
+The observer never calls `/action` or `/selftest`, never opens the daemon
+command socket, never changes a service and never writes I2C. A passing file
+shows a live local status path to a powered robot_hat MCU for the selected
+checkout and service setup. It does not prove servo motion, command delivery,
+PiDog serial identity, physical safety or customer acceptance.
 - `autodelivery-serial-command` requires a fresh `profile export-node-settings --node /cmdvel_serial_bridge` result. Its public defaults include `/dev/ttyUSB0`, 115200 baud, 30 Hz writes and a 0.5 s command timeout; use the actual active values and keep the controller unreachable for the first review.
 
 The SO-101 recipe uses the joint order declared in its public controller configuration: `shoulder_pan`, `shoulder_lift`, `elbow_flex`, `wrist_flex`, `wrist_roll`. Its example needs `trajectory.joint_names` and `trajectory.points` with positions and increasing `time_from_start`. A similarly named state message is not a command example.
