@@ -29,7 +29,9 @@ ODOM_TYPE = 'nav_msgs/msg/Odometry'
 # graph node as /ros_gz_bridge.  The executable name is not the node name.
 BRIDGE_NODE = '/ros_gz_bridge'
 UNKNOWN_RMW_NODE = '/_NODE_NAMESPACE_UNKNOWN_/_NODE_NAME_UNKNOWN_'
-OBSERVER_VERSION = '4'
+UNKNOWN_RMW_NAMESPACE = '_NODE_NAMESPACE_UNKNOWN_'
+UNKNOWN_RMW_NAME = '_NODE_NAME_UNKNOWN_'
+OBSERVER_VERSION = '5'
 
 
 def finite(value, label):
@@ -45,19 +47,50 @@ def endpoint(reader, direction, topic, message_type):
             'ishan_gazebo_endpoint_missing_or_ambiguous:'
             + direction + ':' + topic + ':' + json.dumps(rows)
         )
-    node = rows[0]['node']
-    if node not in (BRIDGE_NODE, UNKNOWN_RMW_NODE):
-        raise CollectionError(
-            'ishan_gazebo_unexpected_bridge:' + direction + ':' + node
-        )
     result = dict(rows[0])
+    node = result['node']
+    unknown_identity = (
+        result.get('nodeName') == UNKNOWN_RMW_NAME
+        and result.get('nodeNamespace', '').strip('/')
+        in ('', UNKNOWN_RMW_NAMESPACE)
+    ) or (
+        UNKNOWN_RMW_NAME in node and UNKNOWN_RMW_NAMESPACE in node
+    )
+    if node != BRIDGE_NODE and not unknown_identity:
+        raise CollectionError(
+            'ishan_gazebo_unexpected_bridge:' + direction + ':'
+            + json.dumps(result, sort_keys=True)
+        )
     # Fast DDS may expose a valid ros_gz_bridge endpoint without participant
     # node metadata. Preserve that uncertainty instead of inventing a node
     # identity or rejecting the otherwise unique, correctly typed endpoint.
     result['nodeIdentity'] = (
-        'middleware_unknown' if node == UNKNOWN_RMW_NODE else 'verified'
+        'middleware_unknown' if unknown_identity else 'verified'
     )
     return result
+
+
+def participant_prefix(endpoint_info):
+    gid = endpoint_info.get('gid', '')
+    if len(gid) < 24 or any(char not in '0123456789abcdef' for char in gid.lower()):
+        raise CollectionError('ishan_gazebo_invalid_endpoint_gid')
+    return gid[:24].lower()
+
+
+def verify_bridge_pair(command_subscriber, odometry_publisher):
+    identities = {
+        command_subscriber['nodeIdentity'],
+        odometry_publisher['nodeIdentity'],
+    }
+    if identities == {'verified'}:
+        return {'method': 'ros_node_name', 'value': BRIDGE_NODE}
+    if identities == {'middleware_unknown'}:
+        command_prefix = participant_prefix(command_subscriber)
+        odometry_prefix = participant_prefix(odometry_publisher)
+        if command_prefix != odometry_prefix:
+            raise CollectionError('ishan_gazebo_bridge_participant_mismatch')
+        return {'method': 'dds_participant_gid', 'value': command_prefix}
+    raise CollectionError('ishan_gazebo_bridge_identity_mismatch')
 
 
 def stamp(message):
@@ -70,6 +103,7 @@ def stamp(message):
 def build_observation(reader, source_checkout):
     command_subscriber = endpoint(reader, 'subscribers', CMD_TOPIC, CMD_TYPE)
     odometry_publisher = endpoint(reader, 'publishers', ODOM_TOPIC, ODOM_TYPE)
+    bridge_evidence = verify_bridge_pair(command_subscriber, odometry_publisher)
     odom = reader.once(ODOM_TOPIC, ODOM_TYPE)
     if odom.header.frame_id != 'odom' or not odom.child_frame_id:
         raise CollectionError('ishan_gazebo_unexpected_odometry_frames')
@@ -95,6 +129,7 @@ def build_observation(reader, source_checkout):
                 'messageType': ODOM_TYPE,
                 'publisher': odometry_publisher,
             },
+            'bridgeEvidence': bridge_evidence,
         },
         'odometryStamp': stamp(odom),
         'frames': {'odometry': odom.header.frame_id, 'body': odom.child_frame_id},
@@ -174,14 +209,21 @@ class Reader:
 
     @staticmethod
     def _rows(values):
-        return sorted([
-            {
-                'node': value.node_namespace.rstrip('/') + '/' + value.node_name,
+        rows = []
+        for value in values:
+            namespace = value.node_namespace.strip()
+            name = value.node_name.strip().strip('/')
+            node = '/' + '/'.join(
+                part for part in (namespace.strip('/'), name) if part
+            )
+            rows.append({
+                'node': node,
+                'nodeNamespace': namespace,
+                'nodeName': name,
                 'type': value.topic_type,
                 'gid': bytes(value.endpoint_gid).hex(),
-            }
-            for value in values
-        ], key=lambda row: (row['node'], row['gid']))
+            })
+        return sorted(rows, key=lambda row: (row['node'], row['gid']))
 
     def _endpoints(self, method, topic):
         deadline = time.monotonic() + 20
