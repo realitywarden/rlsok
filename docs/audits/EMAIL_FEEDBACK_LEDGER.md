@@ -1168,3 +1168,9 @@ verify the URI, launch environment and installed model/mesh layout. Correction
 reply. Ishan was told not to stop an already-running simulation merely to
 remove his temporary absolute-path edit; v2 records that checkout as dirty.
 This is active simulation troubleshooting, not a physical-robot result.
+
+The same incremental inbox check found a new delivery failure
+`1a0be9a885f7644b` for the old Robotont message to `veiko@robotont.eu`.
+It is evidence of non-delivery, not a recipient reply or product feedback. No
+alternate person or address was guessed, and no reply is required. The spam
+check still contains only the two PACMod undeliverables and promotions.
