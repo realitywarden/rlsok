@@ -505,3 +505,52 @@ constraints were respected rather than overridden by a mass reminder.
 
 These SENT IDs prove outreach only.  None is a returned owner capture, robot
 connection, bench trial, accepted PR or hardware validation.
+
+## Viability-filtered real-robot follow-up (2026-09-20)
+
+The owner made real-robot follow-up the first priority and required a
+thread-level filter before sending.  A positive sentence early in a thread
+was not enough: later refusal, project shutdown, lost or dismantled hardware,
+paid-only terms, a request to wait, broken hardware, travel or an already-sent
+specific request all prevented another message.
+
+Three earlier threads received corrections for a missed direct question or a
+source-only request:
+
+| Platform / thread | Gmail SENT ID | Correction |
+| --- | --- | --- |
+| Shafayat servo setup / `1a079b506d246a90` | `1a0bdff552112e3c` | Answered the previously missed lab-access question truthfully: RLSOK has no access to his lab or hardware.  Offered a future normal-startup read-only check against the exact commit, servo mapping and encoder readiness; no power or run solely for the request. |
+| RoboClaw referral / `1a09f5abb4e211ad` | `1a0bdff5d41bc982` | Followed Bo Zhao's referral to ZHANG Hongru with one corrected owner-run, read-only request instead of another source-only request.  Explicitly invited an inactive/not-the-right-person close. |
+| SO-101 / `1a08f9a0094202d7` | `1a0bdff645c74d70` | Converted Aditya's explicit willingness into a normal-use, zero-command request for the exact commit, calibration/map, controllers/interfaces and `/joint_states`; no second serial reader or motion. |
+
+Eight additional threads survived the later-state filter and received one
+project-specific follow-up:
+
+| Platform / thread | Gmail SENT ID | Why still viable and what was requested |
+| --- | --- | --- |
+| Modular DiffBot / `1a0a4339b56b198e` | `1a0be03c845b8bcd` | Moynul said the physical robot is still active and he would test alongside normal runs.  Requested an owner-run saved baseline before the normal bridge/session and confirmation that the same selected files were used afterward; no RLSOK robot connection or command. |
+| AUTOdeliverynew / `1a0adec3be10f5d9` | `1a0be03cfc21fbae` | Justin explicitly offered the physical delivery robot as a test case.  Requested the exact controller firmware and an existing read-only startup/status path, or review of a proposed `IDENTITY?` exchange before any `/cmd_vel` write. |
+| ebot_serial mobile manipulator / `1a0adfcacde5c9cd` | `1a0be03d952ab2d5` | Atharva offered to contribute and proposed the handshake.  Requested the paired firmware and exact read-only frame so the host observer can be implemented before any hardware run; no power, enable, calibration or motion solely for RLSOK. |
+| DDSM115 / `1a0ae51ea7247a2c` | `1a0be03ec39dc076` | Htet identified the real swapped-wheel-ID blind spot.  Requested the exact robot configuration and a genuinely read-only RS485 response before controller activation/RPM writes, while accepting that no such safe path may exist. |
+| RobStride / `1a01d87ea9a1e8e5` | `1a0be03fab656681` | Yamato invited a test proposal and review.  Requested current hardware availability, the exact configuration and only fields readable before enable/target commands. |
+| Unitree Go2 / `1a0ae52a13c0d01f` | `1a0be05cb534649f` | Yufei described failures from real Go2/Hokuyo bringup.  Requested a redacted zero-command navigation preflight during normal bringup, before Nav2 activation, and explicitly asked whether the hardware is still accessible. |
+| bimanual-vla Piper workstation / `1a09efc31ebb8c43` | `1a0be05d3da12719` | Song Yuyang had confirmed the 12 offline cases and said he would run the real workstation read-only step.  Requested the actual CAN/Piper/camera role resolution, RealSense RGB endpoint and timestamped collection method, with no arm activation or target. |
+| Pioneer-X / `1a0a1391d8f3729f` | `1a0be05d9e50acce` | Jose said the core hardware remained functional and welcomed the integration.  Requested the selected tracker settings and exact commits first, followed only by confirmation that those inputs were used in an ordinary owner-run session. |
+
+The following classes were deliberately not re-contacted: owners who left
+robotics or the lab; class/internship hardware no longer accessible; dismantled,
+repurposed or broken platforms; projects explicitly declined or judged out of
+scope; paid-only participation; people travelling or waiting on an upstream
+fix, parts or a stated later date; and threads already given a precise
+real-hardware/material request on 2026-09-19 or 2026-09-20.  Examples include
+Nguyễn Hậu, Jose's unavailable arm, Denis Stogl, Kirill's rover, Sigyn,
+Niranjan, Tyler, Priit's ROSBOT, FR3, geoSuctionBot, the disassembled humanoid,
+UR7e class projects, PAROL6, xArm 1S, PiDog, Raj's travelling myCobot, Giovanni's
+Monday PC check, the pending Dobot public repository, dual Kinova, MIRA,
+GOLEM/H12, the delayed dsh-ros2 pipeline and the recently requested FANUC
+UFRAME/UTOOL evidence.
+
+All eleven IDs in this section establish sending only.  They do not establish
+a reply, current hardware availability, owner execution, a robot connection,
+physical identity, motion safety or acceptance.  The real-hardware objective
+remains open pending returned evidence.
