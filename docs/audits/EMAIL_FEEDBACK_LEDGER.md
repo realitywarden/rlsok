@@ -90,7 +90,7 @@ reviewed reply without publishing private message bodies or email addresses.
 | E21 | Deep Patel / Dual YAM teleop — 2026-08-21 — Gmail `1a024bb9799e80a0`                 | The outreach did not make sense and appeared generated; no technical boundary could be evaluated.                                                                                                                                                       | Objective comprehension evidence; speculation about authorship is not a requirement.                 | Product explanation and protocol are corrected. **CODE/DOC-FIXED; EXTERNAL VALIDATION OPEN**; authorship speculation creates no technical backlog.                                                                                   | Test understanding with a real person. Do not add YAM teleop or respond to the authorship speculation as a product feature. High comprehension value.                                                                        |
 | E22 | Ivan Perez Dominguez / Ogma-Space ROS — 2026-08-21 — Gmail `1a02422a456b9004`; attribution declined `1a0447c26e6bb561` | Compile-time provenance versus runtime recheck was not clear. | Objective comprehension evidence. | v2 and merged public copy separate compile/deploy facts from dispatch-time recheck. **CODE/DOC-FIXED; EXTERNAL VALIDATION OPEN**. | Keep compile/deploy/run sequence explicit in the human protocol. No Ogma integration. Ivan Perez Dominguez declined attribution for both himself and the project and must not be added to contributor data or pages. High comprehension value. |
 | E23 | Alex and Alisa / SO-ARM101 — 2026-08-21 — Gmail `1a0238e6eccc71c9`; validation `1a038459178f828d` | Stable USB serials assign leader/follower roles independent of port number; with multiple same-role arms, calibration should bind to device serial. They later confirmed serial → role → calibration is their source of truth: USB port changes do not invalidate, while reassigning a physical serial to a different role should. | Generic physical-identity and calibration provenance invariant; external conceptual validation. | v2 device/robot identity plus calibration content provenance binds the stable mapping without binding volatile USB ports. **IMPLEMENTED; EXTERNAL CONCEPT VALIDATED**. They explicitly did not review the actual code. | Preserve the generic fixture and no-support boundary. An actual code/Shadow review remains useful before any support claim; no SO-ARM integration. Medium Shadow value. |
-| E24 | Max Conway / CorrellLab GOLEM — 2026-08-21 — Gmail `1a0262287140648b`; meeting request 2026-08-27 `1a0406eea949903b`; material request sent `1a0bd8575e2d03f2` | Upper-body motor/capability state, including contact/caught conditions, should be checked before a new H12 motion. The latest reply expresses interest and requests a real-time technical conversation but supplies no new invariant. | Adapter-owned live evidence; Core must not infer it from raw motors. The conversation request opens review/test-bed discussion only. | Runnable normalization maps only the external verdict to `upper_body.motion_ready`; review inputs, examples and questions are documented. **REFERENCE-CONTRACT; EXTERNAL TEST OPEN**; RLSOK never infers contact/caught state. | The reply asks for the exact public GOLEM commit/branch, H12 launch/config, adapter-owned `/lowstate` verdict fields, final command boundary, ROS/OS versions and a zero-command real/simulated test path, plus time windows for the requested call. Await those materials; do not infer contact from raw motors or add public attribution without consent. High external Shadow value. |
+| E24 | Max Conway / CorrellLab GOLEM — 2026-08-21 — Gmail `1a0262287140648b`; meeting request 2026-08-27 `1a0406eea949903b`; material request `1a0bd8575e2d03f2`; runnable delivery `1a0be79d13813d43` | Upper-body motor/capability state, including contact/caught conditions, should be checked before a new H12 motion. The public CorrellLab H1-2 controller was found independently and confirms `rt/lowstate` plus upper-body motor indices 12–26. | A subscribe-only owner-run observation can prove real state-stream availability and record bounded upper-body telemetry. Core still must not infer contact/caught or next-move readiness from raw motors. | CorrellLab PR #1 adds the project-specific bounded subscriber at exact upstream commit `6fef8760741af122c59ca13e5f1960a1f79b230a`; it creates no publisher, command message, motion-switcher client or robot action call. Focused offline tests pass. **PROJECT-SPECIFIC OBSERVER IMPLEMENTED; OWNER RUN OPEN**; contact/readiness remain explicitly `not_inferred`. | Max received the PR and one exact command by email. Await `h12-lowstate-status.json` from a normally connected H1-2; if the controller later owns a grasp/contact verdict, map that field rather than guessing from torque/current. No video meeting or repeat material request is needed. High external Shadow value. |
 | E25 | Erik Boasson / CycloneDDS — 2026-08-21 — Gmail `1a024e427026d74b`; validation `1a0394e14caa6912` | DDS GUIDs change when entities are recreated, ROS identities can be spoofed, and authenticated DDS Security is needed before treating them as trust evidence. The follow-up confirms that trust should be scoped to the command-critical path, unrelated participants should be ignored, and raw graph names/GUIDs are insufficient. | Generic trust-boundary guidance; vendor/RMW extraction is not portable Core behavior.                | Command-path contract refuses raw GUID/name trust and requires authenticated middleware proof. **REFERENCE-CONTRACT; EXTERNAL CONCEPT VALIDATED; EXTERNAL TEST OPEN** for CycloneDDS extraction. The actual code and a secured graph were not independently tested. | Never use raw GUID alone as durable approval identity. Do not turn RLSOK into DDS security. High negative-test value.                                                                                                        |
 | E26 | Yan Xiaojia / Elite Robots CS — 2026-08-21 — Gmail `1a023addb448bc28`; follow-up 2026-08-31, message ID not supplied in review artifact | Exact reported model is sufficient for CS63→CS66 detection and does not require another physical controller identifier. Same-model unit continuity would require a trustworthy unique hardware identifier. Controller software is distinct from driver/SDK and matters only if explicitly selected inside the execution boundary. | Concrete clarification of one future Elite adapter boundary; conceptual validation, not code or physical observer review. | The reference already selects exact model plus driver/SDK and does not require a controller hardware ID. Focused generic-v2 tests now prove model and driver drift deny before fake dispatch while unselected serial/controller-software observations do not invalidate. **REFERENCE-CONTRACT; EXTERNAL CONCEPT VALIDATED; EXTERNAL TEST OPEN** for a truthful Elite-owned model observer. | Keep driver/SDK as the independent approved software invariant. Do not require serial or controller software under the present claim, fabricate an observer, claim Elite support, or infer public-listing consent. |
 | E27 | Ruddrho Mollik / vision-guided color sorting — 2026-08-21 — Gmail `1a023bc0de26885e` | Camera calibration, robot-camera transform, workcell setup, and object/bin mapping can change the meaning of an unchanged arm command.                                                                                                                  | Generic configuration-provenance claim.                                                              | v2 calibration/frame digests and explicit content provenance can represent these selected, security-critical inputs. **IMPLEMENTED**.                                                                                                   | Integrators choose explicit sources; do not absorb perception or workcell validation into Core. Contributor opt-in recorded; no code-review, integration, endorsement, or support claim. Medium Shadow value. |
@@ -213,8 +213,10 @@ classification; RLSOK does not clear, diagnose, or classify faults.
 
 ### GOLEM / CorrellLab reference and external acceptance test
 
-1. Use a fork/branch of the public H12 controller and a non-moving Shadow
-   environment; do not send H12 goals.
+1. CorrellLab PR #1 now provides the fork/branch implementation against
+   `correlllab/h12_loco_manipulation@6fef8760741af122c59ca13e5f1960a1f79b230a`.
+   It subscribes only to `rt/lowstate`, takes 50 non-zero samples and exits; it
+   does not create a command publisher or send H12 goals.
 2. The exact input is schema v1 `sourceIdentity`, `observedAt`,
    `continuityToken`, `monitorVersion`, and external boolean
    `upperBodyMotionReady`. The reference translates only that verdict into
@@ -304,7 +306,7 @@ below.
 | --- | --- | --- | --- |
 | E05 ros2_canopen | `1a03819bc60f152c` | selected-identity CANopen fixture plus reference test | Awaiting external result |
 | E07 Clearpath | `1a03819d2a515d2a` | selected generated-configuration identity fixture plus reference test | Awaiting external result |
-| E24 GOLEM | `1a037d005f03ef8e` | `capabilities.ts` upper-body normalization plus reference test | Awaiting external result |
+| E24 GOLEM/H12 | `1a0be79d13813d43` | CorrellLab PR #1 subscribe-only H1-2 `rt/lowstate` snapshot plus the existing `capabilities.ts` external-verdict normalizer | Project-specific observer implemented and delivered; awaiting an owner-run `h12-lowstate-status.json` from the real H1-2. Contact/readiness are not inferred. |
 | E25 CycloneDDS | `1a03819dd7e127bb` | `command-path.ts` authenticated DDS identity boundary plus reference test | Conceptually validated by reply `1a0394e14caa6912`; actual code, CycloneDDS extractor, and secured graph not tested |
 | E26 Elite | `1a03819c6c6dda5d` | selected robot-model/driver identity fixture plus focused generic-v2 mismatch tests | Conceptually validated by the 2026-08-31 reply; a truthful Elite observer and actual external mismatch run remain open |
 | E31 secured Fast DDS | `1a03819e73693009` | scoped authenticated command-path trust fixture plus negative tests | Conceptually validated by reply `1a0394e14caa6912`; actual code and real secured graph not tested |
@@ -360,7 +362,7 @@ exists; source recipes, releases, sent mail and draft PRs are not substitutes:
 | PAROL6 / `1a079accbfaa60b2` | Graham offered testing, then reported that the arm is broken and needs replacement parts plus reassembly. | Owner-run result using the actual PAROL6 checkout/controller/bridge after repair; the pinned public recipe is not this result. Do not remind before the owner says the arm is ready. |
 | TRIK / `1a07658ff1d51524` | Azimbek offered a real TRIK environment. | Current wheel/brick binding and a read-only result from that environment. |
 | LelyRobot / `1a076624befe452b` | Tomo authorized work with the current system. | Confirmation of the active Python/C++ bridge and a read-only observation from the selected physical path. |
-| GOLEM/H12 / `1a01d8e3a7eb0fef` | CorrellLab offered GOLEM as a test bed and requested a technical conversation. | Adapter-owned readiness/contact verdict mapping plus a zero-command owner run; the generic capability normalizer does not infer this. |
+| GOLEM/H12 / `1a01d8e3a7eb0fef` | CorrellLab offered GOLEM as a test bed and explicitly allowed a branch/fork test. CorrellLab PR #1 now contains the subscribe-only H1-2 observer and delivery email `1a0be79d13813d43` gives one exact run command. | One owner-run `h12-lowstate-status.json` from the normally connected real H1-2. That result can establish real stream observation only; an adapter-owned contact/readiness verdict is still required before such a capability can be claimed. |
 | xArm 1S / `1a079b3b1b7e645b` | Alan offered in-person access in the San Francisco Bay Area, but has no time to restore the long-idle setup; we cannot attend from China. | Paused by the owner's explicit availability constraint. The public source mapping is not a restored xArm or a physical result; do not ask Alan to rebuild it solely for this evaluation. |
 | Nova inspection robot / `1a079b9ee5020015` | Satya agreed the boundary is real and offered a call; the proposed slots were missed. | Exact repository/commit, bringup, one robot-facing command boundary, selected hardware/configuration and a redacted example were requested once for asynchronous work. No uniquely matching public repository was found; wait without another request. |
 | Rover-arm UART / `1a066fa358e97d9f` | Rohit agreed to a 20-minute evaluation but did not supply the mapping after the original and reduced requests. | Current driver/commit plus confirmation that a read-only check is possible. The earlier intake was needlessly long, so one final reset (`1a0be0d8ff8fc813`) asks only whether the arm is still accessible and for the current repository/commit or driver file; no further reminder should follow it and no platform-specific integration can be claimed. |
@@ -1009,6 +1011,41 @@ there is no rush, confirmed that this VM is acceptable for the Gazebo run and
 asked him to send the exact command and full error output immediately rather
 than spend time debugging alone.  This is a promised simulation run, not a
 returned result yet.
+
+## CorrellLab H1-2 source-first delivery (2026-09-20)
+
+Public-source search uniquely matched the H12 controller discussed in Max's
+thread to `correlllab/h12_loco_manipulation` at
+`6fef8760741af122c59ca13e5f1960a1f79b230a`.  Its real-robot configuration
+selects `rt/lowstate`, `rt/lowcmd`, 27 H1-2 motors and upper-body indices
+12–26.  Its existing deployment program creates both a state subscriber and a
+command publisher, so running that controller would not satisfy a zero-command
+observation.
+
+Public CorrellLab PR `https://github.com/correlllab/h12_loco_manipulation/pull/1`
+therefore adds a separate bounded observer.  It imports only the Unitree
+channel factory/subscriber and H1-2 state message, subscribes to
+`rt/lowstate`, ignores zero ticks, validates finite state for all 27 motors,
+collects 50 samples and writes a local JSON summary.  Upper-body indices 12–26
+are also reported as a dedicated section.  It does not import a command
+message, create a DDS publisher or motion-switcher client, release a robot
+mode, or call a robot action.  Three focused aggregation/non-finite/static
+command-boundary tests and Python compilation passed; no SDK, DDS or physical
+robot run is claimed.
+
+The output truthfully marks `real_lowstate_observed` only after non-zero
+ticks.  It marks grasp/contact and readiness for the next move as
+`not_inferred`, because this repository exposes raw motor telemetry but no
+application-owned grasp/contact verdict.  Raw position, velocity, torque,
+temperature or voltage must not be promoted into that semantic decision.
+
+Message `1a0be79d13813d43` delivered the PR and one exact command to Max's
+confirmed `max.conway@colorado.edu` address in the original thread.  It asks
+for `h12-lowstate-status.json` after a normal real-H1-2 connection, or the
+exact command and full terminal output on failure, and requires no meeting.
+The fork commit, PR and SENT ID prove implementation, publication and email
+delivery only.  A real H1-2 connection, owner run, returned JSON, contact
+verdict and acceptance remain open.
 
 ## PiDog issue-12 source-first preparation (2026-09-20)
 
