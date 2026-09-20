@@ -788,3 +788,22 @@ status, and rejects the public fake driver's node name.  It never opens
 SocketCAN or creates a command/service surface.  Implementation, release,
 website delivery, support routing and a physical-owner run remain separate
 until recorded with their evidence.
+
+- Core commit `665b7df468e4309f208acde22a299bd5d78ebc92` is pushed.
+  Release `rebot-status-observer-v1` contains a 27,745-byte ZIP with SHA-256
+  `a5993988f7330c654edd34b0033cfb67a236394cd0f4768a151315a92b7f7cfc`;
+  the three focused checks passed from source and the exact extracted ZIP.
+- Website commit `6f2b17e` was deployed to production as
+  `dpl_9TeH4b1zz5tNY8qW4982UKiBAV2A`.  The production guide, Learn index, ZIP
+  and checksum returned HTTP 200, with the source/no-CAN boundary visible.
+  The web workspace typecheck and production build passed.
+- Message `1a0be28c1c308515` thanked Frank, confirmed that his redirect was
+  understood and closed the hardware request to him.  Message
+  `1a0be28ead4b4f64` sent the finished observer to `techsupport@seeed.io`,
+  asked them to forward it to a current physical B601-RS owner, and requested
+  in one pass the JSON, physical-arm/normal-can0 confirmation and differing
+  checkout commit.  It also provides a direct policy/contact fallback and
+  states that no video meeting is needed.
+
+The support email and published observer are not a physical run.  This item
+stays open for a reply and credible owner-run evidence.
