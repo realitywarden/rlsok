@@ -1391,3 +1391,48 @@ the owner's mapping and customer acceptance remain open.
 The same incremental Gmail audit found no newer physical-run result.  Spam
 still contains only two old PACMod recipient failures and marketing messages;
 no project reply was hidden there.
+
+## Ishan v4 customer failure and DDS-participant observer v5 (2026-09-20)
+
+Ishan's message `1a0becf77736e5ce` reported the same unknown-node failure after
+the v4 delivery.  A first reply asked only for the installed observer version;
+his answer `1a0bee6608b797aa` proves it printed `4`, so the earlier old-copy
+diagnosis was wrong and was explicitly corrected rather than blamed on his
+environment.
+
+Core commit `eb475b3` replaces the display-string-only identity decision.  V5
+preserves the raw RMW node namespace and name.  When both endpoints have the
+standard unknown-node metadata, it requires the unique correctly typed
+`/cmd_vel` subscriber and `/odom` publisher to share the same 12-byte DDS
+participant GID prefix.  Arbitrary node identities, ambiguous endpoints, bad
+types, malformed GIDs and different participants fail closed.  Six focused
+observer regressions and two source-checkout regressions passed against the
+downloaded release; no full suite or new live Gazebo run was performed.
+
+The immutable 26,388-byte `ishan-gazebo-shadow-observer-v5` ZIP has SHA-256
+`1e8d7b529f1b41419c8be7fa093fc2f7eadce8e73f4a06b08e0ed6ac02ed5acb`.
+Website source commit `2114df2` points the guide at v5 and truthfully marks a
+fresh Ishan result as pending.  Delivery message `1a0beee12dc982ed` provided
+the asset, checksum and two commands and acknowledged the incorrect old-copy
+diagnosis.  This proves implementation, publication and sending only; Ishan's
+v5 JSON and acceptance remain open.
+
+## Amal ESP32 source-only follow-up (2026-09-20)
+
+Amal's reply `1a0bed83eea064a5` states that the ESP32 bridge has not been tested
+on physical hardware, that he currently has neither the robot nor ESP32 setup,
+and that other work leaves no time for testing now.  This externally closes
+the current physical-run opportunity without closing future interest.  He did
+offer the GitHub repository and relevant code.  Reply `1a0bee5286fbf74a`
+respected the no-hardware/no-time boundary, requested only the repository URL
+and exact review commit, and did not ask him to test.  Source-specific review
+remains open; a physical result is not claimed.
+
+## Incremental mailbox and account-alert check (2026-09-20)
+
+The unrestricted incoming scan found the two actionable replies above.  The
+spam scan still contains only prior delivery failures and marketing, with no
+new project feedback.  Automated Vercel message `1a0bee1ffe0a5fa8` reports a
+new Chrome/Windows sign-in from Chuncheon, South Korea at 12:54 UTC.  It was
+not replied to or otherwise acted on; recognition of that account activity is
+an owner-only security decision and must be surfaced separately.
