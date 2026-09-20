@@ -363,7 +363,7 @@ exists; source recipes, releases, sent mail and draft PRs are not substitutes:
 | GOLEM/H12 / `1a01d8e3a7eb0fef` | CorrellLab offered GOLEM as a test bed and requested a technical conversation. | Adapter-owned readiness/contact verdict mapping plus a zero-command owner run; the generic capability normalizer does not infer this. |
 | xArm 1S / `1a079b3b1b7e645b` | Alan offered in-person access in the San Francisco Bay Area, but has no time to restore the long-idle setup; we cannot attend from China. | Paused by the owner's explicit availability constraint. The public source mapping is not a restored xArm or a physical result; do not ask Alan to rebuild it solely for this evaluation. |
 | Nova inspection robot / `1a079b9ee5020015` | Satya agreed the boundary is real and offered a call; the proposed slots were missed. | Exact repository/commit, bringup, one robot-facing command boundary, selected hardware/configuration and a redacted example were requested once for asynchronous work. No uniquely matching public repository was found; wait without another request. |
-| Rover-arm UART / `1a066fa358e97d9f` | Rohit agreed to a 20-minute evaluation but did not supply the mapping after the original and reduced requests. | Current driver/commit plus the configuration section mapping joint names/order to the 27-byte UART frame. Multiple prior requests mean no further reminder; no platform-specific integration can be claimed. |
+| Rover-arm UART / `1a066fa358e97d9f` | Rohit agreed to a 20-minute evaluation but did not supply the mapping after the original and reduced requests. | Current driver/commit plus confirmation that a read-only check is possible. The earlier intake was needlessly long, so one final reset (`1a0be0d8ff8fc813`) asks only whether the arm is still accessible and for the current repository/commit or driver file; no further reminder should follow it and no platform-specific integration can be claimed. |
 | PiDog / `1a0a0a9c3e8a5f61` | Rocky accepted the scope and will contact us when upstream issue #12 is closed. | Resolved commit plus one zero-command brain/bridge/body observation. Explicitly wait for Rocky's ping and send no reminders. |
 | ESP32 bridges / `1a0adeb95ffdf921`, `1a0aeac310cdddbf` | Amal supplied the required identity/capability fields and authentication distinction; Hiep confirmed that his current serial path has no firmware/code check. | A bridge-owned firmware protocol and owner result are still absent. The released generic signed-nonce/session contract is implementation evidence only; Hiep has already received the exact handshake material list and should not be asked repeatedly. |
 
@@ -626,7 +626,10 @@ opportunity.  They were not sent duplicate reminders.
   specific Create 3 relevance and asked one small question about a read-only
   robot identity/firmware/configuration source before teleoperation or
   coverage.  This is a contact handoff and question only, not an iRobot
-  integration or endorsement.
+  integration or endorsement.  Mark's automatic reply then said that he had
+  also left and directed correspondence to Steve Baron.  The same question
+  was forwarded once in shorter form as `1a0be0eb07b2d9ac`; no former
+  employee was contacted again.
 - Rover-arm UART / `1a066fa358e97d9f`: Rohit had originally agreed to try the
   evaluation, but the later requests had turned into a long intake and had no
   reply.  Message `1a0be0d8ff8fc813` reset the conversation in ordinary
@@ -637,3 +640,32 @@ opportunity.  They were not sent duplicate reminders.
 The pass confirms sending and thread disposition only.  It does not establish
 that either contact replied, that either robot is accessible, or that a live
 read-only observation has been completed.
+
+## Historical conversation-error repair (2026-09-20)
+
+The full-mail review is also used to find our own conversation mistakes, not
+only new incoming messages.  Repairs follow two rules: answer the missed
+question directly when the thread still has a realistic path, and do not send
+a style-only apology into a closed or repeatedly unanswered thread.
+
+- Arpit Chauhan / low-cost ROS 2 arm `19f72cabcf83ecef`: Arpit asked for a
+  call in July.  The late August reply changed the product explanation but
+  never clearly answered the requested communication format or asked whether
+  the real arm still existed.  Message `1a0be101153d0611` apologizes, says
+  video is not available, offers email/WhatsApp/LinkedIn text, and asks only
+  whether the arm and a current public source/driver remain available.  A
+  future read-only owner run depends on that answer.
+- AgileX UGV `19ff4b53e4e82797`: AgileX directly asked which country or
+  region to use for routing.  The prior reply avoided the question because it
+  was not a purchase enquiry.  Message `1a0be1014fa95015` answers mainland
+  China truthfully, identifies Zheng as the open-source RLSOK maintainer, and
+  asks for the correct public SDK/engineering contact or documentation for a
+  read-only robot/controller/firmware observation.
+
+The recurring mistakes now treated as audit checks are: failing to answer a
+direct nontechnical question; converting a requested communication method
+without saying so; asking a recipient to assemble facts already present in a
+public repository; sending a long intake before confirming current hardware
+access; addressing the wrong person or using an obsolete referral; and
+describing source, simulated or synthetic work as a live robot result.  These
+checks are applied to each still-active thread before another message is sent.
