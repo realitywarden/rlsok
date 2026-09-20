@@ -1158,9 +1158,13 @@ prove delivery of the correction only.
 
 Ishan's new message `1a0be8f93844c5cd` reported that the PR's relative
 `model.sdf` include still required him to insert an absolute path. PR #2 was
-updated at commit `8549ef5`: the launch now registers the installed package
-`sdf` directory in `IGN_GAZEBO_RESOURCE_PATH`, and the world resolves
-`model://finalassembly_v3` through `model.config`. Two focused source checks
-passed. The reply says not to stop an already-running simulation merely to
+updated and then tightened against Fortress's documented model-directory
+lookup at commit `ec90907`: the package installs the model at
+`models/finalassembly_v3`, the launch registers its parent `models` directory
+in `IGN_GAZEBO_RESOURCE_PATH`, and the world resolves
+`model://finalassembly_v3` through `model.config`. Three focused source checks
+verify the URI, launch environment and installed model/mesh layout. Correction
+`1a0be9e6020ce260` replaces the earlier intermediate commit named in the first
+reply. Ishan was told not to stop an already-running simulation merely to
 remove his temporary absolute-path edit; v2 records that checkout as dirty.
 This is active simulation troubleshooting, not a physical-robot result.
