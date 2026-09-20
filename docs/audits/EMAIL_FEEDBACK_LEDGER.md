@@ -372,6 +372,15 @@ the reader.  This makes an owner-run live result directly collectable, but does
 not itself establish that Lucas ran it or that the publisher is a particular
 Pixhawk/airframe.
 
+Website delivery: official guide
+`/learn/read-px4-mira-status-without-commanding-the-robot` was committed in
+`rlsok-cloud` as `3adca5f` and deployed to production as
+`dpl_5LzTy9xD74gvrgTCMh4GnaUMCoX5`.  The production URL returned HTTP 200 and
+contained the command, exact source commit and non-authentication/zero-command
+boundary.  The page explicitly says this source command is not present in the
+1.5.5 Windows/Mac downloads, so website publication does not silently upgrade
+those packages or claim an owner run.
+
 Completion reporting must keep four stages separate: project-specific source
 implementation, publication/delivery, owner execution, and physical-robot
 evidence.  The real-hardware goal remains open while every row above lacks the
