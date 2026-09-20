@@ -1001,3 +1001,33 @@ says no video is needed, and states that the observer cannot publish or move
 anything.  Publication, deployment and sending do not establish that Ishan
 ran the observer.  This remains a simulation-only waiting item and cannot
 satisfy the separate physical-robot evidence objective.
+
+## PiDog issue-12 source-first preparation (2026-09-20)
+
+The promised upstream gate was rechecked rather than bypassed.  PiDog
+Embodiment issue `rockywuest/pidog-embodiment#12` remains open and was last
+updated on 2026-09-15.  Rocky explicitly said he will ping when it is closed,
+so no reminder was sent.  The current main revision
+`e88a3979b7ad200c9ce016b849cd6a3b2bcc3a54` nevertheless already contains the
+PATH/I2C diagnostic fix for #12: the Nox units include `/usr/sbin`, and status
+reports the resolved robot_hat MCU address plus whether it responded.
+
+Core commit `3b22e3017d2807bf37651fa59d51d94e80436159` prepares the project-specific
+`capture-pidog-status` collector against that exact revision so work does not
+start from zero after Rocky's ping.  It reads the selected checkout, selected
+installed systemd fields and digests, installed `pidog`/`robot-hat` versions,
+and exactly one loopback HTTP `GET /status`.  It requires a clean selected
+checkout, a powered finite battery reading, MCU address `0x14`/`0x15`/`0x16`,
+`responding: true`, verdict `ok` and the corrected service PATH.  It persists
+no environment contents, tokens, faces, photos, perception, audio or
+conversation history.  It refuses remote URLs and never calls `/action` or
+the motion-producing `/selftest`, opens the daemon command socket, changes a
+service or writes I2C.
+
+Three focused offline tests, Python compilation, CLI help wiring and the full
+TypeScript typecheck passed.  Its source/unit reader also inspected the exact
+upstream checkout successfully: seven selected files, three unit files, clean
+commit and the corrected PATH.  This is a pushed preparation only.  There is
+no PiDog release asset, website claim, customer delivery or owner run yet;
+those remain intentionally gated on the upstream issue's confirmed final
+revision and Rocky's promised ping.
