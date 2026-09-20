@@ -1002,6 +1002,14 @@ anything.  Publication, deployment and sending do not establish that Ishan
 ran the observer.  This remains a simulation-only waiting item and cannot
 satisfy the separate physical-robot evidence objective.
 
+Ishan then confirmed in `1a0be6b9fd22ec51` that he is starting the run and
+will return `ishan-gazebo-status.json`; his Ubuntu environment is a slower VM
+on a Mac.  Message `1a0be70bdadcbfcf` did not add more setup burden: it said
+there is no rush, confirmed that this VM is acceptable for the Gazebo run and
+asked him to send the exact command and full error output immediately rather
+than spend time debugging alone.  This is a promised simulation run, not a
+returned result yet.
+
 ## PiDog issue-12 source-first preparation (2026-09-20)
 
 The promised upstream gate was rechecked rather than bypassed.  PiDog
