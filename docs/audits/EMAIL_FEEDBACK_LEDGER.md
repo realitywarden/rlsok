@@ -661,6 +661,14 @@ a style-only apology into a closed or repeatedly unanswered thread.
   China truthfully, identifies Zheng as the open-source RLSOK maintainer, and
   asks for the correct public SDK/engineering contact or documentation for a
   read-only robot/controller/firmware observation.
+- workbench-desk-robot `1a066fbffbcac842`: the recipient asked for a design
+  explanation before a Shadow test.  The prior answer used dense product
+  terminology and immediately requested six separate design decisions.
+  Message `1a0be10dec0c530b` replaces that failed conversation path with a
+  short explanation in ordinary language and one gating question: whether a
+  physical robot is currently connected.  Only if it is available are the
+  current commit and one real command path requested; RLSOK owns the first
+  mapping.
 
 The recurring mistakes now treated as audit checks are: failing to answer a
 direct nontechnical question; converting a requested communication method
