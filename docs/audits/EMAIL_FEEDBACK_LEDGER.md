@@ -735,3 +735,21 @@ instead.
 Publishing, deploying and sending the observer do not establish that Azimbek
 ran it.  The TRIK item remains open until the owner returns a credible capture
 from the physical robot's normal TCP/ROS path.
+
+## LelyRobot read-only sensor observer (2026-09-20)
+
+The pinned public LelyRobot source provides a useful passive boundary on an
+already-running robot: both bridge variants publish `sensor_msgs/msg/Range` on
+`/ultrasonic_left`, while commands enter separately through `/cmd_vel`.  The
+new `profile capture-lely-status` collector subscribes for one Range sample,
+requires the unique publisher to be `/arduino_bridge`, validates the frame and
+finite declared measurement bounds, and records the operator-selected Python
+or C++ bridge plus the full source commit.
+
+The collector creates no publisher or service client, does not import or open
+serial, and never sends a stop or motion command.  Its result can show that
+the selected ROS sensor path was live; it cannot authenticate the Arduino or
+firmware, prove motor safety/command delivery, or establish physical
+acceptance.  Focused source tests and the TypeScript typecheck passed.  Release,
+website delivery, customer delivery and owner execution remain separate until
+their evidence is recorded below.

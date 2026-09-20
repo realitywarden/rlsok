@@ -50,6 +50,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile export-node-settings --node </node> --output <new-settings.json> [--downstream-node </node> --topic </topic> --type <package/msg/Name>] [--python <python3>]
   rlsok profile capture-mira-status --output <new-observation.json> [--python <python3>]
   rlsok profile capture-trik-status --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-lely-status --source-commit <full-sha1> --bridge-variant <python|cpp> --output <new-observation.json> [--python <python3>]
   rlsok profile prepare-source --recipe <id> --source <checkout> --catalog <catalog.json> --urdf <expanded.urdf> --settings <runtime-settings.json> --example <message-or-goal.json> --device-id <local-id> --output <new-directory> [--frame <frame>] [--subscriber </node>] [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile refresh-source --workspace <directory> --source <checkout> --urdf <expanded.urdf> --settings <runtime-settings.json> [--controller-state <state.json>] [--node-settings <node-settings.json>]
   rlsok profile schema --output <new-directory>
@@ -306,6 +307,11 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     const o = options(rest, ['output', 'python'], ['output']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
     return python(o, ['--output', resolve(o.output)], join(dirname(collectorScript()), 'trik_status.py'));
+  }
+  if (command === 'capture-lely-status') {
+    const o = options(rest, ['output', 'python', 'source-commit', 'bridge-variant'], ['output', 'source-commit', 'bridge-variant']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['--output', resolve(o.output), '--source-commit', o['source-commit'], '--bridge-variant', o['bridge-variant']], join(dirname(collectorScript()), 'lely_status.py'));
   }
   if (command === 'check-navigation-preflight') {
     const o = options(rest, ['input', 'output'], ['input', 'output']);

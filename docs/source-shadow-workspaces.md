@@ -16,6 +16,28 @@ These fourteen mappings come from inspected public source. They create a separat
 
 The new PAROL6, Kortex seven-axis and xArm 1S MoveIt mappings, exact input requirements and command boundaries are described in [the feedback evaluation guide](email-feedback-evaluation-20260910.md).
 
+### LelyRobot live sensor-path capture
+
+When the owner's physical LelyRobot is already running for normal maintenance,
+the separate reader can capture one existing ultrasonic message without opening
+the serial port or touching `/cmd_vel`:
+
+```bash
+rlsok profile capture-lely-status \
+  --source-commit 3e286c14f21db5f14d49e9ceb1b54e7e80fafb85 \
+  --bridge-variant python \
+  --output lely-status.json
+```
+
+Select `python` or `cpp` from the process that was actually launched and use the
+full commit of the checkout actually running. The command requires exactly one
+`sensor_msgs/msg/Range` publisher named `/arduino_bridge` on
+`/ultrasonic_left`, then subscribes for one sample. It creates no publisher,
+service client or serial connection. The result demonstrates a selected ROS
+sensor path was live; it does not authenticate the Arduino/firmware, prove a
+motor stop, validate command delivery or establish physical acceptance. Do not
+power or launch the robot solely for this capture.
+
 | Recipe | Public reference | Selected boundary |
 | --- | --- | --- |
 | `parol6-arm` | grahas/parol6_ros2_control, c111b97d | Six-joint `/parol6_arm_controller/follow_joint_trajectory` |
