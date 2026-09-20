@@ -1436,3 +1436,41 @@ new project feedback.  Automated Vercel message `1a0bee1ffe0a5fa8` reports a
 new Chrome/Windows sign-in from Chuncheon, South Korea at 12:54 UTC.  It was
 not replied to or otherwise acted on; recognition of that account activity is
 an owner-only security decision and must be surfaced separately.
+
+## Quchaosheng independent v1 review and instrumented v2 (2026-09-20)
+
+Quchaosheng's independent reproduction `1a0beee67f3c470c` confirmed the exact
+source commit, release size/hash, selected-file hashes, canonical Draft and
+configuration digests, ordinary offline planner digest, public run status and
+byte identity of the shipped v1 script.  It also identified two valid gaps:
+v1's zero-dispatch object was a declaration rather than a count from an
+adapter installed at the customer's boundary, and v1 manufactured drift inside
+`evaluate()` rather than submitting a second pre-existing Draft.  He accepted
+the approval-first ordering but requested v2 before a second independent run.
+He also explicitly kept the physical mapping closed while the repository's
+BSP carrier, MCU and safety gates remain blocked.  This is an independent v1
+software reproduction, not adoption or physical acceptance; the private mail
+is summarized here rather than quoted.
+
+Core commit `7f02970` implements both corrections.  V2 imports the exact
+customer `ExecutionController` from commit
+`716864c08ea383b29b29d46c0a1452cf579a3b2a`, injects a measured fail-closed
+adapter at its `ActionAdapter.dispatch` boundary and reads the counters before
+and after both submissions.  The operator prepares two distinct Draft files
+from two ordinary offline planner artifacts before evaluation, approves only
+the baseline, and submits both through the same evaluator/runtime instance.
+The evaluator requires the configuration-level difference to be exactly
+`plannerArtifactDigest`; the baseline is `WOULD_ALLOW`, while the changed
+Draft is `WOULD_BLOCK` for both approval-Draft and configuration-digest
+mismatch.  Any adapter call changes the measured count and fails the run.
+
+The immutable 12,149-byte `quchaosheng-workbench-offline-shadow-v2` ZIP has
+SHA-256
+`00400f5a8dba514a8cb6b60caa0a84a8b8b2a30b2f49f308f2b1893fac92900f`.
+The downloaded asset passed four focused tests, reported version 2, loaded the
+actual customer controller from the exact checkout, confirmed that the
+instrumented adapter was attached, submitted the two included Drafts and
+recorded zero dispatch calls.  No new GitHub Actions run was triggered.
+Website source commit `659f81c` publishes the corrected v2 guide.  Delivery
+message `1a0bef6547fc8bc2` provides the release and precise evidence boundary.
+Quchaosheng's second independent run and any future mapping remain open.
