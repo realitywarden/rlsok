@@ -907,8 +907,10 @@ publication scope.
   Create 3 mapping or hardware result yet.
 - The spam review also surfaced an unsolicited Anvol manufacturing sales pitch
   (`1a08b51e3bd6a412`) asking which BOM part is difficult to source.  RLSOK has
-  no stated BOM sourcing need in this feedback goal, so it is not a customer
-  request, technical feedback or robot-test opportunity and was not answered.
+  no physical BOM sourcing need. A concise reply (`1a0be9f9968c9728`)
+  explained that RLSOK is software and is currently focused on integrations
+  with existing robots; it did not invent a procurement requirement or invite
+  an unrelated sales cycle.
 - Waveshare support's latest ticket update (`1a0be7c42aea46b0`) only confirms
   receipt of our explicit closure and repeats that future messages to this
   address should be Waveshare-product technical questions.  Their earlier
@@ -917,6 +919,51 @@ publication scope.
   third-party RLSOK validation.  No reply, sales redirect or renewed robot-test
   request is warranted; this opportunity is externally closed unless
   Waveshare independently reopens it.
+
+## Ishan live-run bridge-name regression and v3 correction (2026-09-20)
+
+Ishan ran the released observer and returned the exact failure in
+`1a0bea2603bd88f2`:
+`ishan_gazebo_unexpected_bridge:subscribers:/ros_gz_bridge`. This exposed a
+bug in v2: it required `/parameter_bridge`, confusing the executable name
+with the Humble / Fortress ROS graph node name.
+
+The observer now requires the live `/ros_gz_bridge` identity. A focused
+regression test exercises the exact reported mismatch and confirms the live
+graph name is accepted; together with the source-checkout tests, six focused
+offline tests pass. Core commit
+`8802680304275ea55330010fffb91b74d16c009d` was pushed to `main`.
+
+Release `ishan-gazebo-shadow-observer-v3` publishes a 25,136-byte ZIP with
+SHA-256
+`bbb352d9b109f5c7526c5aa2d080eaca2fc9f7b6099873209b36d860685d5d4c`.
+The extracted archive independently passed the same six focused tests. The
+v2 release is marked superseded and points to v3.
+
+Website commit `b784d99` was pushed and production deployment
+`dpl_HsAsNW9AnrCvareSADAa4v4EDh5D` is READY at `https://rlsok.com`. The guide
+returns HTTP 200 and contains the v3 tag, exact digest and `/ros_gz_bridge`;
+the v3 ZIP URL returns HTTP 200 with content length 25,136.
+
+Reply `1a0beaa58ef90fb7` apologized for our bug, explained the executable/node
+distinction, supplied the v3 release, digest and one corrected command, and
+asked for either the JSON or the next exact error. This establishes a shipped
+fix and delivery, not yet a successful owner rerun, simulation result or
+physical-robot result.
+
+## Older spam-folder human replies rechecked (2026-09-20)
+
+- Li Peize's dsh-ros2 reply (`1a06a623be8dcc94`) was already answered in the
+  same thread by `1a08a324127b5488`. He explicitly deferred experiments until
+  his robot pipeline and plugin are stable, so no new reminder or hardware
+  request was sent.
+- Noé Pérez Higueras's HuNavSim correction (`1a066b37d160df73`) was already
+  answered by `1a08a3245956130b`, which corrected the technical boundary and
+  explicitly said no additional material or run was needed.
+- Randy Deborggraeve (`1a0670582b96c50e`) said the Mecanum Bot project is not
+  active because of other priorities and he would need to relearn it. In line
+  with the current instruction to filter people who later said they are not
+  doing the work, the opportunity is closed without another follow-up.
 
 Ishan replied again in `1a0be4e1c864b05d`: he now understands the boundary and
 wants to try the Shadow workflow, but removed his Ubuntu VM and believed he
