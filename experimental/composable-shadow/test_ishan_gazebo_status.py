@@ -44,7 +44,12 @@ class IshanGazeboStatusTests(unittest.TestCase):
     def test_records_exact_bridge_and_odometry_without_dispatch(self):
         result = status.build_observation(self.reader(), CHECKOUT)
         self.assertEqual(result['kind'], 'RlsokIshanWarehouseGazeboStatus')
+        self.assertEqual(result['observerVersion'], '4')
         self.assertEqual(result['source']['commandBoundary']['subscriber']['node'], '/ros_gz_bridge')
+        self.assertEqual(
+            result['source']['commandBoundary']['subscriber']['nodeIdentity'],
+            'verified',
+        )
         self.assertEqual(result['frames'], {'odometry': 'odom', 'body': 'base_link_1'})
         self.assertEqual(result['dispatch']['rlsokCommandsSent'], 0)
         self.assertEqual(result['sourceCheckout'], CHECKOUT)
@@ -80,6 +85,25 @@ class IshanGazeboStatusTests(unittest.TestCase):
             result['source']['commandBoundary']['subscriber']['node'],
             '/ros_gz_bridge',
         )
+
+    def test_accepts_exact_rmw_unknown_identity_without_inventing_bridge_name(self):
+        anonymous = [{
+            'node': status.UNKNOWN_RMW_NODE,
+            'type': status.CMD_TYPE,
+            'gid': 'aa',
+        }]
+        anonymous_odom = [{
+            'node': status.UNKNOWN_RMW_NODE,
+            'type': status.ODOM_TYPE,
+            'gid': 'bb',
+        }]
+        result = status.build_observation(
+            self.reader(subscribers=anonymous, publishers=anonymous_odom),
+            CHECKOUT,
+        )
+        endpoint = result['source']['commandBoundary']['subscriber']
+        self.assertEqual(endpoint['node'], status.UNKNOWN_RMW_NODE)
+        self.assertEqual(endpoint['nodeIdentity'], 'middleware_unknown')
 
     def test_reader_has_no_command_or_service_surface(self):
         source = inspect.getsource(status.Reader)

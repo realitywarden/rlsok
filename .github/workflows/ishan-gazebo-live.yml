@@ -1,0 +1,84 @@
+name: Ishan Humble Fortress live acceptance
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  released-observer:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    container: ros:humble-ros-base-jammy
+    env:
+      ISHAN_COMMIT: ec909071f6d9275661372bba196ba47857f7bea8
+      ISHAN_WS: /tmp/ishan_ws
+      OBSERVER_ZIP: https://github.com/realitywarden/rlsok/releases/download/ishan-gazebo-shadow-observer-v4/rlsok-ishan-gazebo-shadow-observer-v4.zip
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Install Humble and Fortress runtime
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            git unzip curl xvfb ros-humble-ros-gz ros-humble-teleop-twist-keyboard
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Build the exact customer workspace
+        shell: bash
+        run: |
+          mkdir -p "$ISHAN_WS/src"
+          git clone https://github.com/ZqiEE/ros_mobile_robot.git \
+            "$ISHAN_WS/src/mobile_robot"
+          git -C "$ISHAN_WS/src/mobile_robot" checkout --detach "$ISHAN_COMMIT"
+          test "$(git -C "$ISHAN_WS/src/mobile_robot" rev-parse HEAD)" = "$ISHAN_COMMIT"
+          source /opt/ros/humble/setup.bash
+          cd "$ISHAN_WS"
+          colcon build --symlink-install --packages-select mobile_robot \
+            --event-handlers console_cohesion+
+
+      - name: Run released observer against live simulation
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          source "$ISHAN_WS/install/setup.bash"
+          curl --fail --location --retry 3 "$OBSERVER_ZIP" -o /tmp/observer.zip
+          unzip -q /tmp/observer.zip -d /tmp/observer
+          observer_root="$(find /tmp/observer -mindepth 1 -maxdepth 1 -type d | head -n1)"
+          test "$(python3 "$observer_root/experimental/composable-shadow/ishan_gazebo_status.py" --version)" = "4"
+          xvfb-run -a ros2 launch mobile_robot bringup.launch.py > /tmp/ishan-launch.log 2>&1 &
+          launch_pid=$!
+          cleanup() {
+            kill "$launch_pid" 2>/dev/null || true
+            wait "$launch_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 90); do
+            ros2 topic list 2>/dev/null | grep -qx /odom && break
+            sleep 1
+          done
+          ros2 topic list | grep -qx /cmd_vel
+          ros2 topic list | grep -qx /odom
+          cd "$observer_root/experimental/composable-shadow"
+          python3 ishan_gazebo_status.py \
+            --source-root "$ISHAN_WS/src/mobile_robot" \
+            --output /tmp/ishan-gazebo-status-v4.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          result = json.loads(Path('/tmp/ishan-gazebo-status-v4.json').read_text())
+          assert result['observerVersion'] == '4'
+          assert result['sourceCommit'] == 'ec909071f6d9275661372bba196ba47857f7bea8'
+          assert result['dispatch']['rlsokPublishersCreated'] == 0
+          assert result['dispatch']['rlsokCommandsSent'] == 0
+          assert result['frames'] == {'odometry': 'odom', 'body': 'base_link_1'}
+          print(json.dumps(result, indent=2, sort_keys=True))
+          PY
+
+      - name: Print bounded diagnostics on failure
+        if: failure()
+        shell: bash
+        run: tail -n 200 /tmp/ishan-launch.log 2>/dev/null || true

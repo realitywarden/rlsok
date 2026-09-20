@@ -28,6 +28,8 @@ ODOM_TYPE = 'nav_msgs/msg/Odometry'
 # ros_gz_bridge's Humble / Fortress parameter_bridge executable reports its
 # graph node as /ros_gz_bridge.  The executable name is not the node name.
 BRIDGE_NODE = '/ros_gz_bridge'
+UNKNOWN_RMW_NODE = '/_NODE_NAMESPACE_UNKNOWN_/_NODE_NAME_UNKNOWN_'
+OBSERVER_VERSION = '4'
 
 
 def finite(value, label):
@@ -43,11 +45,19 @@ def endpoint(reader, direction, topic, message_type):
             'ishan_gazebo_endpoint_missing_or_ambiguous:'
             + direction + ':' + topic + ':' + json.dumps(rows)
         )
-    if rows[0]['node'] != BRIDGE_NODE:
+    node = rows[0]['node']
+    if node not in (BRIDGE_NODE, UNKNOWN_RMW_NODE):
         raise CollectionError(
-            'ishan_gazebo_unexpected_bridge:' + direction + ':' + rows[0]['node']
+            'ishan_gazebo_unexpected_bridge:' + direction + ':' + node
         )
-    return rows[0]
+    result = dict(rows[0])
+    # Fast DDS may expose a valid ros_gz_bridge endpoint without participant
+    # node metadata. Preserve that uncertainty instead of inventing a node
+    # identity or rejecting the otherwise unique, correctly typed endpoint.
+    result['nodeIdentity'] = (
+        'middleware_unknown' if node == UNKNOWN_RMW_NODE else 'verified'
+    )
+    return result
 
 
 def stamp(message):
@@ -68,6 +78,7 @@ def build_observation(reader, source_checkout):
     result = {
         'schemaVersion': 1,
         'kind': 'RlsokIshanWarehouseGazeboStatus',
+        'observerVersion': OBSERVER_VERSION,
         'observedAt': utc_now(),
         'sourceCommit': source_checkout['commit'],
         'sourceCheckout': source_checkout,
@@ -207,6 +218,7 @@ class Reader:
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--version', action='version', version=OBSERVER_VERSION)
     parser.add_argument('--source-root', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args(argv)
