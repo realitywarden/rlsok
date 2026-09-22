@@ -1525,3 +1525,35 @@ Twelve focused synthetic tests passed. The offline comparator never loads ROS;
 live capture has not been exercised on DDS or a physical mower. Mowgli and
 Create 3 are included in the 1.5.7 source payload being packaged; package
 publication, site synchronization and customer delivery remain separate stages.
+
+## Local Check 1.5.7 delivery evidence — 2026-09-22
+
+The two additions above are now included in the immutable
+[1.5.7 Linux/source release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.7)
+at source `6ffd5ea9b48be9325b332412ff0f545960e40aba`. All 57 release assets
+were checked against local sizes and GitHub SHA-256 digests before publication.
+Linux packaging/build completed; native Linux installation was not exercised.
+
+The immutable [Windows ZIP](https://github.com/realitywarden/rlsok/releases/tag/windows-local-check-v1.5.7)
+and [Mac installers](https://github.com/realitywarden/rlsok/releases/tag/macos-local-check-v1.5.7)
+use packaging source `b38352f21ef23421023665489bd3d83bda7f17f6` and the exact
+same source payload. The final Windows ZIP was extracted and run on Windows;
+the embedded version, source, Node runtime and new command/files were checked.
+Both exact Mac installers were installed on matching standard GitHub-hosted
+architectures, and installed SwiftUI version/resource self-checks passed.
+Windows and both Mac examples produced `WOULD_ALLOW` and `WOULD_BLOCK`.
+Per-platform verification JSONs accompany the public releases. The Mac packages
+remain unsigned and unnotarized; no full suite or physical-robot trial was run.
+
+The website deployment is READY at cloud source
+`d12daf1f0b18afccdf0266dcc9c9f4b759c90b86`. Production download, docs,
+updates, support description, llms.txt and both current release manifests were
+checked for version/link consistency; deployment.json reports the exact source
+with no-store. The changed guide area was visually inspected. Historical
+versions, separate update feeds and vendored verification provenance were kept.
+
+These are implementation, packaging, publication and website-delivery results.
+They do not establish live Mowgli DDS interoperability, the owner's running
+commit, a physical Create 3/mower integration or customer acceptance. The
+earlier source-only/pending statements above describe their pre-release stage,
+not the current download availability.
