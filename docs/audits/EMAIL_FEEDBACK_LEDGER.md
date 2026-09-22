@@ -1557,3 +1557,37 @@ They do not establish live Mowgli DDS interoperability, the owner's running
 commit, a physical Create 3/mower integration or customer acceptance. The
 earlier source-only/pending statements above describe their pre-release stage,
 not the current download availability.
+
+## Piper reviewed USB-topology input and Local Check 1.5.8 — 2026-09-22
+
+The Piper workstation owner-run discovery exposed a concrete representation
+gap: one wrist D405 did not expose a readable serial and had been explicitly
+identified by operator-reviewed USB topology, interface and video index. The
+specialized Piper preparation input still required a serial for every camera,
+although the generic saved-setup evaluator already supported USB-path identity.
+
+The Piper input now accepts exactly one of `serial` or `usb_path`. USB-path mode
+also requires `interface` and `videoIndex`, records that the basis is port
+topology rather than unique physical-unit identity, rejects incomplete,
+duplicate or ambiguous material, and makes identity-basis/path changes subject
+to review. Thirteen focused Piper tests and 38 existing profile tests passed.
+No full suite or physical robot was run for this source change.
+
+The immutable [1.5.8 Linux/source release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.8)
+uses source `34a37de2272959b067e0d04135bc1ef167e007af`. Matching
+[Windows](https://github.com/realitywarden/rlsok/releases/tag/windows-local-check-v1.5.8)
+and [macOS](https://github.com/realitywarden/rlsok/releases/tag/macos-local-check-v1.5.8)
+packages use packaging source `340086611d1a6bf13dd90e301bd9030fcc75159e`.
+The Windows archive was extracted and executed; both Mac architecture packages
+were installed and executed on standard GitHub-hosted runners. Linux was
+packaged but not natively installed. Mac packages remain unsigned and
+unnotarized.
+
+The production website publishes the exact 1.5.8 platform manifests, release
+hashes and [Piper guide](https://github.com/realitywarden/rlsok/blob/v1.5.8/docs/piper-confirmed-roles.md).
+The owner was told that the earlier collection need not be repeated and was
+asked only for the pending resolver output shape and safe pre-GUI hook location.
+After integration, the proposed market check is observation across the next
+three normal work sessions, not extra sessions staged for RLSOK. Publication
+and email delivery do not establish GUI integration, another physical session,
+repeat use, recurring value or acceptance.
