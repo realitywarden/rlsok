@@ -7,6 +7,7 @@ import SwiftUI
 private enum WorkspacePage: String, CaseIterable, Identifiable {
     case overview = "Overview"
     case example = "Run example"
+    case templates = "Interface setup"
     case guide = "Local guide"
 
     var id: String { rawValue }
@@ -15,6 +16,7 @@ private enum WorkspacePage: String, CaseIterable, Identifiable {
         switch self {
         case .overview: return "square.grid.2x2"
         case .example: return "play.circle"
+        case .templates: return "square.3.layers.3d"
         case .guide: return "doc.text"
         }
     }
@@ -297,6 +299,7 @@ private struct ConsoleRoot: View {
             switch model.selectedPage {
             case .overview: overview
             case .example: examplePage
+            case .templates: templatePage
             case .guide: guidePage
             }
         }
@@ -350,6 +353,33 @@ private struct ConsoleRoot: View {
                         .foregroundStyle(.secondary)
                     Button("Open bundled guide") { model.openGuide() }
                         .buttonStyle(.borderedProminent)
+                }
+            }
+        }
+        .padding(24)
+    }
+
+    private var templatePage: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            pageHeader("Compose interface templates", "Reuse multiple reviewed fragments without an AI service or cloud upload.")
+            panel {
+                VStack(alignment: .leading, spacing: 14) {
+                    Label("Discover → compose → confirm", systemImage: "square.3.layers.3d")
+                        .font(.headline)
+                    Text("Fresh ROS discovery identifies interfaces. Ordered template fragments combine paths and facts; later robot defaults override earlier defaults. Meanings, units, frames, real goals and local files still require confirmation.")
+                        .foregroundStyle(.secondary)
+                    Text("rlsok profile compose-templates --input base.template.json --input controller.template.json --output composed.template.json")
+                        .font(.system(size: 11, design: .monospaced))
+                        .textSelection(.enabled)
+                    Button("Open interface setup guide") { model.openGuide() }
+                        .buttonStyle(.borderedProminent)
+                }
+            }
+            panel {
+                VStack(alignment: .leading, spacing: 10) {
+                    boundary("Templates and composition stay on this Mac", true)
+                    boundary("Source, parser and checking rules remain separate", true)
+                    boundary("Template matching proves hardware compatibility", false)
                 }
             }
         }

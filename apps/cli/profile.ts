@@ -6,7 +6,7 @@ import { executablePolicySpecSchema } from '../../packages/core/exec-spec';
 import { createFanucFixture, createFanucPublicFixture, fixtureCalibration, fixtureControllerState, fixtureUrdf } from '../../packages/composable-shadow/fixture';
 import { interfaceSchemas } from '../../packages/composable-shadow/json-schema';
 import { readConnection } from '../../packages/composable-shadow/onboarding';
-import { connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
+import { composeConnectionTemplates, connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
 import { reportMarkdown, compareReports, comparisonMarkdown } from '../../packages/composable-shadow/report';
 import { prepareSourceWorkspace, refreshSourceWorkspace } from '../../packages/composable-shadow/source-workspace';
 import { sourceRecipes } from '../../packages/composable-shadow/source-recipes';
@@ -29,6 +29,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile inspect-template --input <template.json> [--catalog <fresh-catalog.json>]
+  rlsok profile compose-templates --input <first.json> [--input <next.json> ...] --output <new-template.json>
   rlsok profile source-recipes
   rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
   rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x|modular-diffbot|piper-cpp|robstride-command-envelope|dobot-magician-homing|lerobot-so101-direct> --source <checkout> --input <selected-files.json> --output <new-directory>
@@ -89,6 +90,21 @@ function options(args: string[], allowed: string[], required: string[]): Record<
   }
   for (const key of required) if (!result[key]) throw new Error(`missing --${key}`);
   return result;
+}
+function compositionOptions(args: string[]): { inputs: string[]; output: string } {
+  const inputs: string[] = [];
+  let output = '';
+  for (let index = 0; index < args.length; index += 2) {
+    const key = args[index]?.slice(2), value = args[index + 1];
+    if (!args[index]?.startsWith('--') || !value || value.startsWith('--') || !['input', 'output'].includes(key)) throw new Error(`invalid profile option: ${args[index]}`);
+    if (key === 'input') inputs.push(value);
+    else if (output) throw new Error('duplicate --output');
+    else output = value;
+  }
+  if (!inputs.length) throw new Error('missing --input');
+  if (!output) throw new Error('missing --output');
+  if (inputs.length > 16) throw new Error('template_composition_requires_1_to_16_fragments');
+  return { inputs, output };
 }
 function read(path: string): unknown {
   if (!statSync(path).isFile() || statSync(path).size > 2 * 1024 * 1024) throw new Error('profile_input_must_be_a_file_under_2MiB');
@@ -458,6 +474,12 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     };
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
     return o.catalog && 'readyForConfiguration' in result && !result.readyForConfiguration ? 1 : 0;
+  }
+  if (command === 'compose-templates') {
+    const o = compositionOptions(rest);
+    write(resolve(o.output), composeConnectionTemplates(o.inputs.map(read)));
+    process.stdout.write(`Composed ${o.inputs.length} template fragment${o.inputs.length === 1 ? '' : 's'}: ${resolve(o.output)}\nNo private goals, fact values, approvals or robot commands were generated.\n`);
+    return 0;
   }
   if (command === 'init') {
     const o = options(rest, ['template', 'output'], ['template', 'output']);

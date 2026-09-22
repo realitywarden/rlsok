@@ -23,6 +23,52 @@ export const connectionTemplateSchema = z.object({
 
 export type ConnectionTemplate = z.infer<typeof connectionTemplateSchema>;
 
+function allocateTemplateItemId(preferred: string, fragmentId: string, used: Set<string>): string {
+  for (const candidate of [preferred, `${fragmentId}.${preferred}`]) {
+    const value = candidate.slice(0, 128);
+    if (!used.has(value)) { used.add(value); return value; }
+  }
+  for (let suffix = 2; suffix < 1000; suffix += 1) {
+    const tail = `-${suffix}`;
+    const value = `${fragmentId}.${preferred}`.slice(0, 128 - tail.length) + tail;
+    if (!used.has(value)) { used.add(value); return value; }
+  }
+  throw new Error('template_item_id_exhausted');
+}
+
+export function composeConnectionTemplates(inputs: unknown[]): ConnectionTemplate {
+  if (!inputs.length || inputs.length > 16) throw new Error('template_composition_requires_1_to_16_fragments');
+  const fragments = inputs.map(input => connectionTemplateSchema.parse(input));
+  const distributions = [...new Set(fragments.map(fragment => fragment.compatibility.rosDistro).filter((value): value is string => !!value))];
+  if (distributions.length > 1) throw new Error(`template_ros_distro_conflict:${distributions.join(',')}`);
+  const usedPaths = new Set<string>(), usedFacts = new Set<string>(), factKeys = new Set<string>();
+  const compatibilityPaths: ConnectionTemplate['compatibility']['paths'] = [];
+  const paths: ConnectionTemplate['paths'] = [], facts: ConnectionTemplate['facts'] = [];
+  let defaults: ConnectionTemplate['defaults'] = { maxObservationAgeMs: 30000 };
+  for (const fragment of fragments) {
+    const pathIds = new Map<string, string>();
+    for (const requirement of fragment.compatibility.paths) {
+      const id = allocateTemplateItemId(requirement.id, fragment.metadata.id, usedPaths);
+      pathIds.set(requirement.id, id);
+      compatibilityPaths.push({ ...requirement, id });
+    }
+    paths.push(...fragment.paths.map(path => ({ ...path, id: pathIds.get(path.id)! })));
+    for (const fact of fragment.facts) {
+      const key = `${fact.kind}|${fact.path}|${fact.pointer ?? ''}`;
+      if (factKeys.has(key)) continue;
+      factKeys.add(key);
+      facts.push({ ...fact, id: allocateTemplateItemId(fact.id, fragment.metadata.id, usedFacts) });
+    }
+    defaults = { ...defaults, ...fragment.defaults };
+  }
+  if (paths.length > 32) throw new Error('template_composition_exceeds_32_paths');
+  if (facts.length > 64) throw new Error('template_composition_exceeds_64_facts');
+  return connectionTemplateSchema.parse({ schemaVersion: 1, kind: 'RlsokConnectionTemplate',
+    metadata: { id: 'composed-template', name: fragments.length === 1 ? fragments[0]!.metadata.name : `${fragments.length} composed fragments`, version: '1.0.0',
+      description: `Locally composed from ${fragments.map(fragment => `${fragment.metadata.id}@${fragment.metadata.version}`).join(', ')}.`.slice(0, 1000), visibility: 'private', createdAt: new Date().toISOString() },
+    compatibility: { ...(distributions[0] ? { rosDistro: distributions[0] } : {}), paths: compatibilityPaths }, defaults, paths, facts });
+}
+
 export function planConnectionTemplate(templateInput: unknown, catalogInput: unknown) {
   const template = connectionTemplateSchema.parse(templateInput);
   const catalog: Catalog = catalogSchema.parse(catalogInput);

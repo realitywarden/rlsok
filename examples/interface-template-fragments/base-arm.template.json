@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokConnectionTemplate",
+  "metadata": {
+    "id": "example-base-arm",
+    "name": "Example base arm",
+    "version": "1.0.0",
+    "description": "Synthetic standard trajectory fragment for learning template composition.",
+    "visibility": "private",
+    "createdAt": "2026-09-22T00:00:00.000Z"
+  },
+  "compatibility": {
+    "rosDistro": "jazzy",
+    "paths": [
+      {
+        "id": "arm-trajectory",
+        "kind": "action",
+        "interfaceType": "control_msgs/action/FollowJointTrajectory",
+        "interfaceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ]
+  },
+  "defaults": {
+    "model": "example-arm",
+    "jointOrder": ["joint_1", "joint_2"],
+    "maxObservationAgeMs": 30000
+  },
+  "paths": [
+    {
+      "id": "arm-trajectory",
+      "kind": "action",
+      "endpointHint": "/example_arm/follow_joint_trajectory",
+      "adapter": "joint_trajectory",
+      "mapping": {
+        "jointNames": "/trajectory/joint_names",
+        "points": "/trajectory/points"
+      },
+      "requiresSemanticConfirmation": true
+    }
+  ],
+  "facts": [
+    {
+      "id": "robot-description",
+      "kind": "file_sha256",
+      "path": "files/robot.urdf"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Configure and reuse your ROS 2 interface setup
 
-Current local tool: **v1.5.9**. This workflow discovers local graph
+Current local tool: **v1.5.10**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
@@ -145,6 +145,24 @@ The CLI can inspect the same contract and show what a fresh catalog matches:
 rlsok profile inspect-template --input template.json --catalog catalog.json
 ```
 
+Multiple templates can be used as ordered fragments. Paths and fact
+descriptors combine; if IDs collide they are namespaced deterministically.
+Later fragments override earlier optional robot defaults. Conflicting declared
+ROS distributions, more than 32 combined paths, more than 64 facts or more
+than 16 fragments are refused. The result is another ordinary versioned
+template, so it remains portable across Windows, macOS, Linux and the web
+wizard:
+
+```sh
+rlsok profile compose-templates \
+  --input base-arm.template.json \
+  --input site-controller.template.json \
+  --output composed.template.json
+```
+
+Composition is local and structural. It does not copy goals, expected fact
+values, approvals or observations, and it never sends a robot command.
+
 An optional contribution candidate is more aggressively sanitized: endpoint
 names, ROS distribution, interface fingerprints, robot/controller defaults,
 joint order, goal data, device identity, expected values, frame values, bounds
@@ -177,7 +195,9 @@ The website vendors the portable Runtime validators with source-file checksums
 and a versioned source manifest. Profile schema version remains 1; the new catalog
 and connection contracts are also version 1. The Linux evaluation and npm
 tarball include the collector, validators, generated schemas and this guide.
-Stable Runtime remains v1.4.5; Cloud/API/schema and Windows updates are separate.
+The same v1.5.10 template contract and composition command are packaged for
+Windows, macOS and Linux. Cloud remains a separate optional surface; the web
+wizard performs composition in the browser without uploading the fragments.
 
 See [the first-evaluation guide](local-shadow-first-evaluation.md) for required inputs, offline use, result meaning and a same-approval before/after comparison. Validation scope is recorded in [the release notes](releases/v1.5.0-shadow.4.md). No private customer integration or physical robot validation is claimed.
 

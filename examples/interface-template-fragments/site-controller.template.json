@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokConnectionTemplate",
+  "metadata": {
+    "id": "example-site-controller",
+    "name": "Example site controller",
+    "version": "1.0.0",
+    "description": "Synthetic site controller fragment for learning template composition.",
+    "visibility": "private",
+    "createdAt": "2026-09-22T00:00:00.000Z"
+  },
+  "compatibility": {
+    "rosDistro": "jazzy",
+    "paths": [
+      {
+        "id": "inspection-pose",
+        "kind": "action",
+        "interfaceType": "example_interfaces/action/MoveToPose",
+        "interfaceSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ]
+  },
+  "defaults": {
+    "controller": "example-site-controller",
+    "maxObservationAgeMs": 15000
+  },
+  "paths": [
+    {
+      "id": "inspection-pose",
+      "kind": "action",
+      "endpointHint": "/example_arm/move_to_pose",
+      "adapter": "cartesian_pose",
+      "mapping": {
+        "px": "/target/pose/position/x",
+        "py": "/target/pose/position/y",
+        "pz": "/target/pose/position/z",
+        "qx": "/target/pose/orientation/x",
+        "qy": "/target/pose/orientation/y",
+        "qz": "/target/pose/orientation/z",
+        "qw": "/target/pose/orientation/w",
+        "frame": "/target/header/frame_id"
+      },
+      "requiresSemanticConfirmation": true
+    }
+  ],
+  "facts": [
+    {
+      "id": "robot-description",
+      "kind": "file_sha256",
+      "path": "files/robot.urdf"
+    },
+    {
+      "id": "controller-config",
+      "kind": "file_sha256",
+      "path": "files/controller.yaml"
+    }
+  ]
+}
