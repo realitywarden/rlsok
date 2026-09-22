@@ -7,7 +7,7 @@ no robot, account, Node installation, or ROS environment. It sends no robot comm
 
 Use the `.pkg` for your Mac: **arm64** for Apple silicon, **x64** for Intel.
 This package targets macOS 14 or later. After installation, open **RLSOK Local
-Check 1.5.7** in Applications. Its native local console shows package identity,
+Check 1.5.8** in Applications. Its native local console shows package identity,
 the zero-dispatch boundary and a session audit. Choose **Run example** to save
 two reports under Documents/RLSOK. The baseline matches; the changed calibration
 is flagged. These are file comparison results, not permission to move a robot.
@@ -19,7 +19,7 @@ contains the saved-file recipes. Some recipes need Python or your existing ROS
 environment; each recipe lists its own requirements. The command-line tool is:
 
 ```sh
-"/Applications/RLSOK Local Check 1.5.7.app/Contents/Resources/local-check/bin/rlsok" profile help
+"/Applications/RLSOK Local Check 1.5.8.app/Contents/Resources/local-check/bin/rlsok" profile help
 ```
 
 This is the Local Check file comparison tool. It does not replace the Windows
@@ -28,7 +28,7 @@ reports stay on your computer.
 
 ## Remove
 
-Quit the app and move **RLSOK Local Check 1.5.7** from Applications to Trash.
+Quit the app and move **RLSOK Local Check 1.5.8** from Applications to Trash.
 Your reports in Documents/RLSOK are kept. No background service is installed.
 
 ## Package verification
