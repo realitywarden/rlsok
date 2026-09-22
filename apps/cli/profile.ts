@@ -19,6 +19,7 @@ import { prepareSavedSetup } from '../../packages/composable-shadow/saved-setup-
 import { preparePiperSetup } from '../../packages/composable-shadow/piper-setup';
 import { inspectSavedInputs, savedInputMarkdown } from '../../packages/composable-shadow/saved-input-review';
 import { evaluateNavigationPreflight, navigationPreflightMarkdown } from '../../packages/composable-shadow/navigation-preflight';
+import { compareCreate3VersionFiles, create3VersionMarkdown } from '../../packages/composable-shadow/create3-version';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -30,6 +31,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
   rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x|modular-diffbot|piper-cpp|robstride-command-envelope|dobot-magician-homing|lerobot-so101-direct> --source <checkout> --input <selected-files.json> --output <new-directory>
   rlsok profile inspect-saved-inputs --recipe <aditya-so101|beast|cartesian|bounded-operation> --source <checkout> --input <selected-files.json> --output <new-directory>
+  rlsok profile compare-create3-versions --baseline <saved-version.txt> --current <saved-version.txt> --output <new-directory> [--fields <comma-separated-field-names>]
   rlsok profile discover-setup-devices --output <new-inventory.json> [--python <python3>]
   rlsok profile resolve-setup --manifest <manifest.json> --inventory <inventory.json> --output <new-directory>
   rlsok profile capture-setup --manifest <manifest.json> [--inventory <inventory.json>] --output <new-observation.json>
@@ -175,6 +177,15 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     writeFileSync(join(directory, 'report.md'), savedInputMarkdown(report), { flag: 'wx', mode: 0o600 });
     process.stdout.write(`${report.decision} | static selected inputs | hardware dispatch: NO\n`);
     return report.decision === 'NO_STATIC_ISSUES' ? 0 : 1;
+  }
+  if (command === 'compare-create3-versions') {
+    const o = options(rest, ['baseline', 'current', 'output', 'fields'], ['baseline', 'current', 'output']);
+    const report = compareCreate3VersionFiles(o.baseline, o.current, o.fields);
+    const directory = newDirectory(o.output);
+    write(join(directory, 'report.json'), report);
+    writeFileSync(join(directory, 'report.md'), create3VersionMarkdown(report), { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`${report.decision} | selected saved Create 3 fields only | robot contacted: NO | hardware dispatch: NO\n`);
+    return report.decision === 'UNCHANGED' ? 0 : 1;
   }
   if (command === 'capture-setup') {
     const o = options(rest, ['manifest', 'inventory', 'output'], ['manifest', 'output']);

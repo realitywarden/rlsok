@@ -1473,4 +1473,39 @@ instrumented adapter was attached, submitted the two included Drafts and
 recorded zero dispatch calls.  No new GitHub Actions run was triggered.
 Website source commit `659f81c` publishes the corrected v2 guide.  Delivery
 message `1a0bef6547fc8bc2` provides the release and precise evidence boundary.
-Quchaosheng's second independent run and any future mapping remain open.
+At that delivery point, the second independent run was still pending.
+
+## Workbench v2 independent reproduction — 2026-09-22 review
+
+The maintainer subsequently confirmed a fresh exact-checkout reproduction,
+byte-identical result and live positive-control counter behavior (0 to 1,
+fail-closed adapter exception). This is maintainer-reported independent
+offline evidence; it is not a new RLSOK-run physical check. The evaluator's
+decision still belongs to RLSOK: Shadow does not invoke the runtime's own
+execute/preflight path, and its PolicyValidator is constructed but not checked.
+The historical public workflow continues to cover v1 only. Offline evaluation
+remains open; code adoption and physical mapping remain closed pending the
+maintainer's BSP/hardware gates and approval authority. No further request is
+needed on this item.
+
+## Create 3 saved version comparison — source implementation, 2026-09-22
+
+Reviewed interface feedback identified a saved version output with separate
+reported robot/navigation identifiers, firmware/software values, board
+revision and boot context. The private example and all of its identifiers,
+network address and engineering-build values are excluded from the repository.
+
+`profile compare-create3-versions` now compares two operator-selected local
+text files. The default selection is robot ID, navigation serial, product and
+OS versions; an explicit field list can add/select other reported values.
+Missing/unavailable selected fields and duplicate known labels fail closed.
+Boot count and previous OS are context, not stable identity. The JSON preserves
+field coverage and input hashes, without echoing unrecognized text lines.
+
+Ten focused parser/CLI checks passed, including changed IDs/versions, identical
+unknown values, missing fields, duplicate captures, malformed inputs, report
+output and overwrite refusal. No full suite or live Create 3/SSH session was
+run. This is source implementation only: the existing 1.5.6 packages do not
+include it. Versioned packaging, applicable website publication and delivery
+verification remain pending; no physical trial, compatibility, freshness,
+authenticated identity or customer acceptance is claimed.

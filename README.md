@@ -48,6 +48,11 @@ bringup, the [navigation preflight](docs/navigation-preflight.md) checks DDS
 peers, clock skew, lidar, TF, scan/odometry and Nav2 lifecycle facts without
 publishing a command.
 
+For Create 3 operator-saved version text, the
+[saved version comparison](docs/create3-saved-version-review.md) is available
+in the source workspace (not the published 1.5.6 downloads). It compares only
+selected reported fields and makes no robot connection.
+
 ## Zero-to-Shadow
 
 For reusable interface selection and field mapping, open the

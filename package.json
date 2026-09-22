@@ -26,7 +26,7 @@
     "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "npm run test:releasegate && npm run test:decision-conformance && npm run test:cloud && npm run test:edge-authorization && npm run test:adapter-references && npm run test:composable-shadow && npm run test:integrations && npm run test:setup && npm run test:compatibility && npm run test:e2e-demo && npm run test:python-sdk && npm run ros2:test",
-    "test:composable-shadow": "node scripts/run-rlsok.cjs --test tests/composable-shadow/profile.test.ts && node scripts/run-rlsok.cjs --test tests/composable-shadow/navigation-preflight.test.ts && node scripts/run-rlsok.cjs --test tests/composable-shadow/feedback-saved-recipes.test.ts && node scripts/test-composable-collector.cjs",
+    "test:composable-shadow": "node scripts/run-rlsok.cjs --test tests/composable-shadow/profile.test.ts && node scripts/run-rlsok.cjs --test tests/composable-shadow/navigation-preflight.test.ts && node scripts/run-rlsok.cjs --test tests/composable-shadow/feedback-saved-recipes.test.ts && node scripts/run-rlsok.cjs --test tests/composable-shadow/create3-version.test.ts && node scripts/test-composable-collector.cjs",
     "demo:composable-shadow": "node scripts/run-rlsok.cjs profile demo",
     "verify": "npm run typecheck && npm run build && npm test",
     "prepack": "npm run build",
