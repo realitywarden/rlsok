@@ -1,6 +1,6 @@
 {
   "name": "@realitywarden/rlsok",
-  "version": "1.5.10",
+  "version": "1.5.11",
   "private": false,
   "description": "Robot Software Execution Authorization for learned robot policies.",
   "engines": {

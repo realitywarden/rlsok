@@ -74,7 +74,7 @@ def main():
             if stream.read(6) != b'PE\0\0\x64\x86': raise RuntimeError('windows_node_architecture_mismatch')
         templates = ROOT/'packaging/windows-local-check'
         for file in templates.iterdir():
-            destination = stage/file.name if file.suffix in ('.html',) or file.name == 'Run example.cmd' else stage/'bin'/file.name
+            destination = stage/file.name if file.suffix in ('.html',) or file.name in ('Run example.cmd', 'Start setup assistant.cmd') else stage/'bin'/file.name
             shutil.copyfile(file, destination)
         (stage/'START-HERE.md').write_text('# Start here\n\nOpen START-HERE.html, or double-click Run example.cmd. No account or installation is needed.\n', encoding='utf-8')
         (stage/'PLATFORM').write_text('win32-x64\n')

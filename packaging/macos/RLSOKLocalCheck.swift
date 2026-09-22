@@ -26,6 +26,7 @@ private enum WorkspacePage: String, CaseIterable, Identifiable {
 private final class LocalCheckModel: ObservableObject {
     @Published var selectedPage: WorkspacePage = .overview
     @Published var isRunning = false
+    @Published var isAssistantRunning = false
     @Published var latestReportURL: URL?
     @Published var status = "Ready for a local check"
     @Published var audit: [String] = [
@@ -37,6 +38,7 @@ private final class LocalCheckModel: ObservableObject {
     let sourceCommit: String
     let platform: String
     private let resourceRoot: URL
+    private var setupAssistantProcess: Process?
 
     init() {
         resourceRoot = Bundle.main.resourceURL!.appendingPathComponent("local-check", isDirectory: true)
@@ -111,6 +113,35 @@ private final class LocalCheckModel: ObservableObject {
         let guide = resourceRoot.appendingPathComponent("START-HERE.md")
         NSWorkspace.shared.open(guide)
         addAudit("Opened the bundled Local Check guide.")
+    }
+
+    func startSetupAssistant() {
+        guard !isAssistantRunning else { return }
+        let process = Process()
+        process.executableURL = resourceRoot.appendingPathComponent("bin/rlsok")
+        process.arguments = ["setup-assistant"]
+        process.currentDirectoryURL = resourceRoot
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        process.terminationHandler = { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.isAssistantRunning = false
+                self?.setupAssistantProcess = nil
+                self?.addAudit("Local Setup Assistant stopped.")
+            }
+        }
+        do {
+            try process.run()
+            setupAssistantProcess = process
+            isAssistantRunning = true
+            addAudit("Opened Local Setup Assistant on this Mac only.")
+        } catch {
+            addAudit("Could not start Local Setup Assistant: \(error.localizedDescription)")
+        }
+    }
+
+    func stopSetupAssistant() {
+        setupAssistantProcess?.terminate()
     }
 
     private func finishExample(exitCode: Int32, output: String) {
@@ -361,16 +392,21 @@ private struct ConsoleRoot: View {
 
     private var templatePage: some View {
         VStack(alignment: .leading, spacing: 18) {
-            pageHeader("Compose interface templates", "Reuse multiple reviewed fragments without an AI service or cloud upload.")
+            pageHeader("Local Setup Assistant", "Discover, compose, match and export without an AI service or cloud upload.")
             panel {
                 VStack(alignment: .leading, spacing: 14) {
                     Label("Discover → compose → confirm", systemImage: "square.3.layers.3d")
                         .font(.headline)
                     Text("Fresh ROS discovery identifies interfaces. Ordered template fragments combine paths and facts; later robot defaults override earlier defaults. Meanings, units, frames, real goals and local files still require confirmation.")
                         .foregroundStyle(.secondary)
-                    Text("rlsok profile compose-templates --input base.template.json --input controller.template.json --output composed.template.json")
-                        .font(.system(size: 11, design: .monospaced))
-                        .textSelection(.enabled)
+                    HStack {
+                        Button(model.isAssistantRunning ? "Assistant running" : "Open Local Setup Assistant") { model.startSetupAssistant() }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(model.isAssistantRunning)
+                        if model.isAssistantRunning {
+                            Button("Stop") { model.stopSetupAssistant() }.buttonStyle(.bordered)
+                        }
+                    }
                     Button("Open interface setup guide") { model.openGuide() }
                         .buttonStyle(.borderedProminent)
                 }

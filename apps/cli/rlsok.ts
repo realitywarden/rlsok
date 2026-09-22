@@ -23,6 +23,7 @@ import { runUr5eValidationCommand } from './validate-ur5e';
 import { runExternalRos2ValidationCommand } from './validate-external-ros2';
 import { runCompatibilityCommand } from './compatibility';
 import { runProfileCommand } from './profile';
+import { runSetupAssistant } from './setup-assistant';
 import {
   hardwareDispatchForCliFailure,
   operatorFailureReport,
@@ -114,7 +115,7 @@ function usage(exitCode = 1): never {
   process.stdout.write(
     'RLSOK ReleaseGate CLI\n' +
     'Robot Software Execution Authorization.\n\n' +
-    'usage: rlsok setup | rlsok profile help | rlsok compatibility inspect ... | rlsok observe | rlsok validate-ur5e ... | rlsok validate-external-ros2 ... | rlsok pair | rlsok check <release> | rlsok diff <old> <new> | rlsok shadow <release> <proposal> <evidence> | rlsok verify-evidence <bundle> [--release <ExecSpec>] | rlsok ros2 ... | rlsok cloud ...\n'
+    'usage: rlsok setup | rlsok setup-assistant | rlsok profile help | rlsok compatibility inspect ... | rlsok observe | rlsok validate-ur5e ... | rlsok validate-external-ros2 ... | rlsok pair | rlsok check <release> | rlsok diff <old> <new> | rlsok shadow <release> <proposal> <evidence> | rlsok verify-evidence <bundle> [--release <ExecSpec>] | rlsok ros2 ... | rlsok cloud ...\n'
   );
   process.exit(exitCode);
 }
@@ -136,6 +137,7 @@ async function main(): Promise<void> {
   ) verifyEvidence(args[0], args[2]);
   else if (command === 'pair') process.exitCode = await runPairCommand(args);
   else if (command === 'setup') process.exitCode = await runSetupCommand(args);
+  else if (command === 'setup-assistant') process.exitCode = await runSetupAssistant(args);
   else if (command === 'observe') process.exitCode = await runObserveCommand(args);
   else if (command === 'validate-ur5e') process.exitCode = await runUr5eValidationCommand(args);
   else if (command === 'validate-external-ros2') process.exitCode = await runExternalRos2ValidationCommand(args);

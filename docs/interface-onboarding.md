@@ -1,6 +1,6 @@
 # Configure and reuse your ROS 2 interface setup
 
-Current local tool: **v1.5.10**. This workflow discovers local graph
+Current local tool: **v1.5.11**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
@@ -30,6 +30,19 @@ Limits: 128 action endpoints and 128 topic endpoints, 4096 unambiguous graph nod
 512 message definitions and 8192 fields per installed interface. Narrow the
 isolated ROS domain if these limits are exceeded. Output files must be new.
 The catalog contains private names and definitions; handle it accordingly.
+
+For the unified local workflow on Windows, macOS or Linux, start:
+
+```sh
+rlsok setup-assistant
+```
+
+It opens a browser against a random, per-session URL served only on
+`127.0.0.1`. The assistant can run the same read-only discovery from the
+sourced terminal, import an existing catalog, combine private fragments, match
+interfaces and export a local setup workspace. It loads no external page code,
+has no upload endpoint and does not replace any existing adapter, saved-file
+recipe, observer or profile command.
 
 ## 2. Choose and map interfaces in your browser
 
@@ -195,7 +208,7 @@ The website vendors the portable Runtime validators with source-file checksums
 and a versioned source manifest. Profile schema version remains 1; the new catalog
 and connection contracts are also version 1. The Linux evaluation and npm
 tarball include the collector, validators, generated schemas and this guide.
-The same v1.5.10 template contract and composition command are packaged for
+The same v1.5.11 template contract, local assistant and composition command are packaged for
 Windows, macOS and Linux. Cloud remains a separate optional surface; the web
 wizard performs composition in the browser without uploading the fragments.
 

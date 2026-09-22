@@ -2,8 +2,8 @@
 set -eu
 case "${1:-}" in
   ""|--help|-h|help) set -- profile help ;;
-  profile|verify-evidence|--version|-V|version) ;;
-  *) echo 'RLSOK Local Check: use profile help, profile commands, or verify-evidence.' >&2; exit 2 ;;
+  profile|setup-assistant|verify-evidence|--version|-V|version) ;;
+  *) echo 'RLSOK Local Check: use setup-assistant, profile commands, or verify-evidence.' >&2; exit 2 ;;
 esac
 # BSD readlink has no -f. Resolve each link with portable shell operations.
 SELF=$0

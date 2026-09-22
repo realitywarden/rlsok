@@ -62,7 +62,7 @@ const copy = (source, target) => {
     const { interfaceSchemas } = require('../dist/packages/composable-shadow/json-schema.js');
     for (const [name, document] of Object.entries(interfaceSchemas())) json(path.join(stage, 'schemas', name), document);
     fs.mkdirSync(path.join(stage, 'bin'));
-    fs.writeFileSync(path.join(stage, 'bin/rlsok'), '#!/bin/sh\nset -eu\ncase "${1:-}" in ""|--help|-h|help) set -- profile help ;; profile|verify-evidence|--version|-V|version) ;; *) echo "RLSOK Local Check: use profile help, profile commands, or verify-evidence." >&2; exit 2 ;; esac\nSELF=$(readlink -f -- "$0")\nROOT=$(CDPATH= cd -- "$(dirname -- "$SELF")/.." && pwd)\nexec "$ROOT/bin/node" "$ROOT/lib/rlsok/dist/apps/cli/rlsok.js" "$@"\n');
+    fs.writeFileSync(path.join(stage, 'bin/rlsok'), '#!/bin/sh\nset -eu\ncase "${1:-}" in ""|--help|-h|help) set -- profile help ;; profile|setup-assistant|verify-evidence|--version|-V|version) ;; *) echo "RLSOK Local Check: use setup-assistant, profile commands, or verify-evidence." >&2; exit 2 ;; esac\nSELF=$(readlink -f -- "$0")\nROOT=$(CDPATH= cd -- "$(dirname -- "$SELF")/.." && pwd)\nexec "$ROOT/bin/node" "$ROOT/lib/rlsok/dist/apps/cli/rlsok.js" "$@"\n');
     fs.writeFileSync(path.join(stage, 'VERSION'), version + '\n');
     fs.writeFileSync(path.join(stage, 'SOURCE_COMMIT'), sourceCommit + '\n');
     fs.writeFileSync(path.join(stage, 'START-HERE.md'), '# Start here\n\nOpen [the included example guide](docs/local-check-start.md). It explains which computer to use, what to run and how to read the two results.\n');
