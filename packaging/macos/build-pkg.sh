@@ -7,7 +7,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 [[ ! -e $1 && ! -L $1 ]] || { echo 'Output already exists.' >&2; exit 1; }
 VERSION=$(cat "$ROOT/VERSION")
 PLATFORM=$(cat "$ROOT/PLATFORM")
-[[ $VERSION == 1.5.6 && $PLATFORM =~ ^darwin-(x64|arm64)$ ]] || { echo 'Unexpected payload identity.' >&2; exit 1; }
+[[ $VERSION == 1.5.7 && $PLATFORM =~ ^darwin-(x64|arm64)$ ]] || { echo 'Unexpected payload identity.' >&2; exit 1; }
 ARCH=${PLATFORM#darwin-}
 OUT=$1
 mkdir "$OUT"
