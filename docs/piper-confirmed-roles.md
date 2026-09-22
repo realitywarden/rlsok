@@ -77,6 +77,35 @@ endpoint. A full RealSense inventory often contains several video nodes per
 serial; then supply the reviewed stream's interface/index. No model-name,
 temporary-number or arbitrary-first-match fallback is used.
 
+### When a camera has no readable unit serial
+
+Starting with Local Check 1.5.8, the Piper preparation input also accepts an
+explicitly operator-confirmed USB path. Use **either** `serial` **or** `usb_path`
+for that camera, never both. A USB-path binding additionally requires the
+reviewed `interface` and `videoIndex` so that it selects the intended stream.
+For example, replace only the relevant camera entry with your actual values:
+
+```yaml
+left_wrist:
+  model: Intel RealSense D405
+  usb_path: EXAMPLE-REVIEWED-USB-PATH
+  interface: "00"
+  videoIndex: "4"
+  current_device: /dev/video22
+```
+
+The path must come from the actual discovery output and a human-confirmed role;
+RLSOK does not guess it from the model or `/dev/videoN`. This identifies a
+**port/topology, not a unique physical camera**. Replacing a camera at that same
+port cannot be detected by this binding alone and needs manual review. A change
+from serial to USB path, or to a different path, requires explicit baseline
+review; it never happens as an automatic fallback. Keep the previous baseline.
+
+`prepare-piper-setup` still imports selected roles only. Its generated
+`operator-inventory.json` is not new hardware evidence. For a later real
+workstation check use a fresh, read-only discovery inventory; do not repeatedly
+compare the prepared inventory and count that as repeated hardware use.
+
 ## Later comparisons
 
 Prepare a new selected configuration and capture it with an independently

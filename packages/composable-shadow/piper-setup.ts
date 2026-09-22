@@ -5,9 +5,17 @@ import { savedBytes, savedDocument, setupInventorySchema, setupManifestSchema, t
 
 const label = z.string().trim().min(1).max(300);
 const camera = z.object({
-  model: label, serial: label, current_device: z.string().regex(/^\/dev\/video[0-9]+$/),
+  model: label, serial: label.optional(), usb_path: label.optional(),
+  current_device: z.string().regex(/^\/dev\/video[0-9]+$/),
   interface: label.optional(), videoIndex: label.optional(),
-}).strict();
+}).strict().superRefine((value, ctx) => {
+  if (Boolean(value.serial) === Boolean(value.usb_path)) {
+    ctx.addIssue({ code: 'custom', message: 'select exactly one camera identity: serial or operator-confirmed usb_path' });
+  }
+  if (value.usb_path && (!value.interface || !value.videoIndex)) {
+    ctx.addIssue({ code: 'custom', message: 'usb_path requires the reviewed interface and videoIndex' });
+  }
+});
 const arm = z.object({ model: z.literal('PIPER'), robot_serial: label,
   can_adapter_serial: label, current_interface: label, interface: label.optional() }).strict();
 
@@ -34,7 +42,7 @@ export const piperSetupSchema = z.object({
     if (new Set(values).size !== values.length) ctx.addIssue({ code: 'custom', message: `duplicate ${what}` });
   };
   const cameras = Object.values(value.cameras), arms = Object.values(value.arms);
-  unique(cameras.map(c => c.serial), 'camera serial');
+  unique(cameras.map(c => c.serial ? `serial:${c.serial}` : `usb-path:${c.usb_path}`), 'camera identity');
   unique(cameras.map(c => c.current_device), 'camera endpoint');
   unique(arms.map(a => a.robot_serial), 'robot serial');
   unique(arms.map(a => a.can_adapter_serial), 'CAN adapter serial');
@@ -47,9 +55,10 @@ export function preparePiperSetup(input: string, source: string, sourceCommit: s
   const bindings: SetupManifest['bindings'] = [];
   const devices: z.infer<typeof setupInventorySchema>['devices'] = [];
   for (const [role, c] of Object.entries(config.cameras)) {
-    const identity = { basis: 'serial' as const, id: c.serial, interface: c.interface, videoIndex: c.videoIndex };
+    const identity = { ...(c.serial ? { basis: 'serial' as const, id: c.serial }
+      : { basis: 'usb-path' as const, id: c.usb_path! }), interface: c.interface, videoIndex: c.videoIndex };
     bindings.push({ role, kind: 'camera', identity, uses: [{ file: 'configuration', pointer: `/cameras/${role}/current_device` }] });
-    devices.push({ kind: 'camera', serial: c.serial, locator: c.current_device,
+    devices.push({ kind: 'camera', serial: c.serial, usbPath: c.usb_path, locator: c.current_device,
       aliases: [c.current_device.slice('/dev/video'.length)], interface: c.interface, videoIndex: c.videoIndex });
   }
   for (const [role, a] of Object.entries(config.arms)) {
@@ -69,7 +78,9 @@ export function preparePiperSetup(input: string, source: string, sourceCommit: s
     method: 'operator-export', devices,
     warnings: ['Imported operator-confirmed mapping; timestamp is import time, not a hardware observation.',
       'Only selected endpoints are represented. RealSense serial alone may match multiple V4L2 endpoints in a full inventory.',
-      'CAN adapter identity does not independently verify the attached Piper robot serial.'] });
+      'CAN adapter identity does not independently verify the attached Piper robot serial.',
+      ...Object.entries(config.cameras).filter(([, c]) => c.usb_path).map(([role]) =>
+        `${role}: operator-confirmed USB path identifies a port/topology, not a unique camera; replacement at the same port needs manual review.`)] });
   mkdirSync(output, { recursive: true, mode: 0o700 });
   const write = (file: string, value: unknown) => writeFileSync(join(output, file), JSON.stringify(value, null, 2) + '\n', { flag: 'wx', mode: 0o600 });
   write('configuration.json', config); write('manifest.json', manifest); write('operator-inventory.json', inventory);
@@ -78,7 +89,9 @@ export function preparePiperSetup(input: string, source: string, sourceCommit: s
     + 'This is a normalized offline review input, not a file consumed by start_gui.sh. '
     + 'Review configuration.json and operator-inventory.json before capture/approval. '
     + 'Keep this original baseline; use a NEW observation and a genuinely new inventory for later comparisons.\n\n'
-    + 'A missing or ambiguous serial is unresolved. A changed role, robot serial, mode or selected camera requires review. '
+    + 'A missing or ambiguous selected identity is unresolved; serial never silently falls back to USB path. '
+    + 'An explicitly selected USB path binds a reviewed port/topology, not a unique camera. '
+    + 'A changed role, robot serial, mode or selected camera requires review. '
     + 'Renumbering alone can be resolved into new copies without changing the approved identities. '
     + 'The delivery schema denotes end-effector pose and remains an experimental Piper mode. '
     + 'No CAN, camera, SDK, policy or GUI is opened. No operator approval is created automatically.\n', { flag: 'wx', mode: 0o600 });
