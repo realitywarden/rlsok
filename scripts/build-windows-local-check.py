@@ -13,9 +13,9 @@ import urllib.request
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.5.8'
-SOURCE = '34a37de2272959b067e0d04135bc1ef167e007af'
-LINUX_SHA = 'f40f21c8d19e59b6e388906577added6e6a7ab5eb24c940d2e04a5df988d87a8'
+VERSION = '1.5.10'
+SOURCE = 'ee7056dafce18e791937acce6e890695f898f161'
+LINUX_SHA = 'c57a174b50a03b8096e71129dee7d99eec8427f7c112a5f4631d81e17c798024'
 NODE_SHA = 'c97fa376d2becdc8863fcd3ca2dd9a83a9f3468ee7ccf7a6d076ec66a645c77a'
 NODE_NAME = 'node-v22.22.0-win-x64.zip'
 
