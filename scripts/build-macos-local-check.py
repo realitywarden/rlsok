@@ -16,9 +16,9 @@ import tempfile
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.5.10'
-SOURCE = 'ee7056dafce18e791937acce6e890695f898f161'
-LINUX_SHA = 'c57a174b50a03b8096e71129dee7d99eec8427f7c112a5f4631d81e17c798024'
+VERSION = '1.5.11'
+SOURCE = '2c9ac6655617af148e1e5d88c48fe160227817ce'
+LINUX_SHA = '4167541d6194c16bf849ec405c8ad2c35454a60604498bbc538d245da5073e63'
 NODE = {
     'x64': ('5ea50c9d6dea3dfa3abb66b2656f7a4e1c8cef23432b558d45fb538c7b5dedce', 0x01000007),
     'arm64': ('5ed4db0fcf1eaf84d91ad12462631d73bf4576c1377e192d222e48026a902640', 0x0100000c),
