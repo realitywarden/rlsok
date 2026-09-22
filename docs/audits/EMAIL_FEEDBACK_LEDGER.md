@@ -1509,3 +1509,19 @@ run. This is source implementation only: the existing 1.5.6 packages do not
 include it. Versioned packaging, applicable website publication and delivery
 verification remain pending; no physical trial, compatibility, freshness,
 authenticated identity or customer acceptance is claimed.
+
+## MowgliNext status observer — 2026-09-22 source implementation
+
+The opt-in observer targets the public MowgliNext interface at commit
+`faf658bc57b92410ee820adff9953e663b5b0230`. It subscribes only to the existing
+status stream for robot data, binds the expected publisher to full message GID,
+rejects fake/simulated source markers and incomplete firmware handshake, and
+records actual selected checkout provenance without claiming installed-build
+attestation. Saved wheel/PID selection is optional; full configuration, NTRIP
+credentials and location data are not requested. ROS node metadata traffic is
+not robot-command dispatch. The owner-running commit is still unconfirmed.
+
+Twelve focused synthetic tests passed. The offline comparator never loads ROS;
+live capture has not been exercised on DDS or a physical mower. Mowgli and
+Create 3 are included in the 1.5.7 source payload being packaged; package
+publication, site synchronization and customer delivery remain separate stages.

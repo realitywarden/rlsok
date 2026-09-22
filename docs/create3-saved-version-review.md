@@ -1,9 +1,9 @@
 # Compare two saved Create 3 version reports
 
-This source-workspace command compares an operator-selected reference with a
+This Local Check 1.5.7 command compares an operator-selected reference with a
 second saved `version` output. It does not connect to a robot, run SSH, ask for
-credentials, start ROS, or send a robot command. It is not yet included in the
-published Local Check 1.5.6 packages.
+credentials, start ROS, or send a robot command. Older 1.5.6 packages do not
+include this command.
 
 Obtain each text file through your existing authorized maintenance process.
 RLSOK does not establish whether that process is available on your firmware,
@@ -18,6 +18,10 @@ node scripts/run-rlsok.cjs profile compare-create3-versions \
   --current /private/current-version.txt \
   --output /private/create3-review-01
 ```
+
+In the self-contained Local Check package, use `rlsok profile
+compare-create3-versions` with the same arguments (`bin/rlsok` on Linux/macOS,
+`bin/rlsok.cmd` on Windows). The offline comparison needs no Python or ROS.
 
 Read `report.md` and `report.json`. By default **only** `robotId`,
 `navigationSerialNumber`, `productVersion` and `osVersion` are compared. To

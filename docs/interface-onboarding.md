@@ -1,6 +1,6 @@
 # Configure and reuse your ROS 2 interface setup
 
-Current local tool: **v1.5.6**. This workflow discovers local graph
+Current local tool: **v1.5.7**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
@@ -154,3 +154,7 @@ Absolute native W/P/R goals now have an explicit mm/degrees adapter; see
 the [1.5.4 feedback-driven additions](releases/v1.5.4.md), and the
 [1.5.6 platform delivery update](releases/v1.5.6.md).
 Earlier validation records above retain their actual historical scope.
+
+The [1.5.7 update](releases/v1.5.7.md) adds saved Create 3 version comparison
+and an opt-in Mowgli firmware observer; neither establishes physical identity
+or customer acceptance.

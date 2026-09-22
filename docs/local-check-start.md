@@ -1,6 +1,6 @@
 # Try RLSOK on your computer
 
-RLSOK Local Check **1.5.6** compares robot settings with a copy you reviewed.
+RLSOK Local Check **1.5.7** compares robot settings with a copy you reviewed.
 Try the included example first: one report shows matching settings, and the
 other identifies a changed calibration value. No robot, ROS installation or
 account is needed for this example. Nothing is sent to a robot.
@@ -20,11 +20,11 @@ Use a new folder name if `rlsok-first-check` already exists.
 
 ```sh
 mkdir rlsok-first-check && cd rlsok-first-check &&
-curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.6/rlsok-local-check-1.5.6-linux-x64.tar.gz &&
-curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.6/rlsok-local-check-1.5.6-linux-x64.tar.gz.sha256 &&
-sha256sum -c rlsok-local-check-1.5.6-linux-x64.tar.gz.sha256 &&
-tar -xzf rlsok-local-check-1.5.6-linux-x64.tar.gz &&
-./rlsok-local-check-1.5.6/bin/rlsok profile demo --output first-result
+curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.7/rlsok-local-check-1.5.7-linux-x64.tar.gz &&
+curl -fLO https://github.com/realitywarden/rlsok/releases/download/v1.5.7/rlsok-local-check-1.5.7-linux-x64.tar.gz.sha256 &&
+sha256sum -c rlsok-local-check-1.5.7-linux-x64.tar.gz.sha256 &&
+tar -xzf rlsok-local-check-1.5.7-linux-x64.tar.gz &&
+./rlsok-local-check-1.5.7/bin/rlsok profile demo --output first-result
 ```
 
 Already extracted the package? Run `./bin/rlsok profile demo --output first-result`
@@ -62,8 +62,8 @@ emailed URLs remain available at their original version. To try this version,
 use a new directory and retain existing workspaces and reviewed baselines.
 
 The separate installer is available as `install-local.sh` with its matching
-`.sha256` file in [this release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.6).
+`.sha256` file in [this release](https://github.com/realitywarden/rlsok/releases/tag/v1.5.7).
 The `install-shadow.sh` name is also supplied for existing instructions; both
 scripts select this exact package version. Do not use a source-template script.
 
-See [release notes and verification scope](releases/v1.5.6.md).
+See [release notes and verification scope](releases/v1.5.7.md).

@@ -101,6 +101,8 @@ const copy = (source, target) => {
       .replaceAll('(absolute-wpr-review.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/absolute-wpr-review.md)`));
     copy(path.join(root, 'docs/interface-onboarding.md'), path.join(output, 'INTERFACE-ONBOARDING.md'));
     copy(path.join(root, 'docs/source-shadow-workspaces.md'), path.join(output, 'SOURCE-WORKSPACES.md'));
+    copy(path.join(root, 'docs/create3-saved-version-review.md'), path.join(output, 'CREATE3-SAVED-VERSION-REVIEW.md'));
+    copy(path.join(root, 'docs/mowgli-readonly-status.md'), path.join(output, 'MOWGLI-READONLY-STATUS.md'));
     fs.writeFileSync(path.join(output, 'SAVED-SETUP-REVIEW.md'),
       fs.readFileSync(path.join(root, 'docs/saved-setup-review.md'), 'utf8')
         .replace('(piper-confirmed-roles.md)', `(https://github.com/realitywarden/rlsok/blob/v${version}/docs/piper-confirmed-roles.md)`)

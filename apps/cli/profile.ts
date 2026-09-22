@@ -54,6 +54,8 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile capture-trik-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-lely-status --source-root <actual-checkout> --bridge-variant <python|cpp> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-rebot-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
+  rlsok profile capture-mowgli-status --source-root <actual-checkout> --output <new-observation.json> [--settings <selected-saved-settings.json>] [--python <python3>]
+  rlsok profile compare-mowgli-status --baseline <saved-observation.json> --current <saved-observation.json> --output <new-report.json> [--python <python3>]
   rlsok profile capture-dual-kinova-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-ishan-gazebo-status --source-root <actual-checkout> --output <new-observation.json> [--python <python3>]
   rlsok profile capture-ruiyan-hand-status --port </dev/ttyUSB0> --device-id <1-254> --motor-count <1-8> --baud <9600-5000000> --confirm-read-only yes --output <new-observation.json> [--tactile-coefficient-index <0-255>] [--python <python3>]
@@ -331,6 +333,16 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     const o = options(rest, ['output', 'python', 'source-root', 'bridge-variant'], ['output', 'source-root', 'bridge-variant']);
     if (existsSync(o.output)) throw new Error('output_already_exists');
     return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root']), '--bridge-variant', o['bridge-variant']], join(dirname(collectorScript()), 'lely_status.py'));
+  }
+  if (command === 'capture-mowgli-status') {
+    const o = options(rest, ['output', 'python', 'source-root', 'settings'], ['output', 'source-root']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['--output', resolve(o.output), '--source-root', resolve(o['source-root']), ...(o.settings ? ['--settings', resolve(o.settings)] : [])], join(dirname(collectorScript()), 'mowgli_status.py'));
+  }
+  if (command === 'compare-mowgli-status') {
+    const o = options(rest, ['output', 'python', 'baseline', 'current'], ['output', 'baseline', 'current']);
+    if (existsSync(o.output)) throw new Error('output_already_exists');
+    return python(o, ['--output', resolve(o.output), '--baseline', resolve(o.baseline), '--current', resolve(o.current)], join(dirname(collectorScript()), 'mowgli_status.py'));
   }
   if (command === 'capture-rebot-status') {
     const o = options(rest, ['output', 'python', 'source-root'], ['output', 'source-root']);
