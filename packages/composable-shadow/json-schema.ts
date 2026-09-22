@@ -3,6 +3,7 @@ import { approvalSchema, observationSchema, profileSchema, proposalBatchSchema }
 import { catalogSchema, connectionSchema } from './onboarding';
 import { setupInventorySchema, setupManifestSchema } from './saved-setup';
 import { piperSetupSchema } from './piper-setup';
+import { connectionTemplateSchema } from './templates';
 
 /** Derive the structural contracts from the same schemas consumed by the CLI.
  * Zod refinements remain runtime checks; never imply JSON Schema covers them. */
@@ -13,6 +14,7 @@ export function interfaceSchemas(): Record<string, unknown> {
     'saved-setup-inventory.schema.json': zodToJsonSchema(setupInventorySchema, { name: 'SavedSetupInventory', target: 'jsonSchema7' }),
     'catalog.schema.json': zodToJsonSchema(catalogSchema, { name: 'InterfaceCatalog', target: 'jsonSchema7' }),
     'connection.schema.json': zodToJsonSchema(connectionSchema, { name: 'ShadowConnection', target: 'jsonSchema7' }),
+    'connection-template.schema.json': zodToJsonSchema(connectionTemplateSchema, { name: 'ConnectionTemplate', target: 'jsonSchema7' }),
     'profile.schema.json': zodToJsonSchema(profileSchema, { name: 'ShadowProfile', target: 'jsonSchema7' }),
     'observation.schema.json': zodToJsonSchema(observationSchema, { name: 'ShadowObservation', target: 'jsonSchema7' }),
     'approval.schema.json': zodToJsonSchema(approvalSchema, { name: 'LocalShadowApproval', target: 'jsonSchema7' }),
@@ -32,7 +34,8 @@ export function interfaceSchemas(): Record<string, unknown> {
         'Approval expiry must follow approval time; current validity and profile hash are checked during evaluation.',
         'Observation IDs and proposal/path IDs must be unique; all declared paths must be covered.',
         'Observed facts, interface fingerprints and environment must match and timestamps must be fresh.',
-        'Goal field values, dimensions, joint order, times, quaternion norm, frame, bounds and program allowlist are checked by the selected adapter.'
+        'Goal field values, dimensions, joint order, times, quaternion norm, frame, bounds and program allowlist are checked by the selected adapter.',
+        'Connection templates contain reusable structure only; fresh catalog matching, private values and explicit semantic confirmation remain required.'
       ],
       goalConventions: {
         topic_twist: 'Standard Twist/TwistStamped linear XYZ in m/s and angular XYZ in rad/s; explicit receiver and command frame. Stamped frame and timestamp structure are checked; no velocity safety bounds.',

@@ -1,0 +1,45 @@
+import { z } from 'zod';
+import { catalogInterfaces, catalogSchema, type Catalog } from './onboarding';
+
+const adapterSchema = z.enum(['topic_twist', 'joint_trajectory', 'cartesian_pose', 'cartesian_delta', 'cartesian_absolute_wpr', 'tp_program']);
+const id = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/);
+
+export const connectionTemplateSchema = z.object({
+  schemaVersion: z.literal(1), kind: z.literal('RlsokConnectionTemplate'),
+  metadata: z.object({ id, name: z.string().min(1).max(160), version: z.string().regex(/^\d+\.\d+\.\d+$/), description: z.string().max(1000), visibility: z.enum(['private', 'contribution-candidate']), createdAt: z.string().datetime({ offset: true }) }).strict(),
+  compatibility: z.object({ rosDistro: z.string().min(1).max(64).optional(), paths: z.array(z.object({ id, kind: z.enum(['action', 'topic']), interfaceType: z.string().min(1).max(512), interfaceSha256: z.string().regex(/^[a-f0-9]{64}$/).optional() }).strict()).min(1).max(32) }).strict(),
+  defaults: z.object({ model: z.string().max(256).optional(), controller: z.string().max(256).optional(), jointOrder: z.array(z.string().min(1).max(128)).max(256).optional(), maxObservationAgeMs: z.number().int().min(1).max(300000) }).strict(),
+  paths: z.array(z.object({ id, kind: z.enum(['action', 'topic']), endpointHint: z.string().max(512).optional(), adapter: adapterSchema, mapping: z.record(z.string().max(4096)), requiresSemanticConfirmation: z.literal(true) }).strict()).min(1).max(32),
+  facts: z.array(z.object({ id, kind: z.enum(['file_sha256', 'json_value']), path: z.string().min(1).max(1024), pointer: z.string().max(1024).optional() }).strict()).min(1).max(64),
+  contribution: z.object({ terms: z.literal('separate-contribution-agreement-required'), status: z.literal('not-submitted') }).strict().optional(),
+}).strict().superRefine((value, context) => {
+  const declared = value.compatibility.paths.map(path => path.id);
+  const configured = value.paths.map(path => path.id);
+  if (new Set(declared).size !== declared.length || new Set(configured).size !== configured.length || declared.length !== configured.length || declared.some(pathId => !configured.includes(pathId))) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Template compatibility and configured path IDs must match exactly.' });
+  }
+  if (new Set(value.facts.map(fact => fact.id)).size !== value.facts.length) context.addIssue({ code: z.ZodIssueCode.custom, message: 'Template fact IDs must be unique.' });
+});
+
+export type ConnectionTemplate = z.infer<typeof connectionTemplateSchema>;
+
+export function planConnectionTemplate(templateInput: unknown, catalogInput: unknown) {
+  const template = connectionTemplateSchema.parse(templateInput);
+  const catalog: Catalog = catalogSchema.parse(catalogInput);
+  const available = catalogInterfaces(catalog).filter(item => !item.unavailable);
+  const paths = template.compatibility.paths.map(requirement => {
+    const configured = template.paths.find(path => path.id === requirement.id)!;
+    const candidates = available.filter(item => item.kind === requirement.kind && item.interfaceType === requirement.interfaceType && (!requirement.interfaceSha256 || item.interfaceSha256 === requirement.interfaceSha256));
+    const hinted = candidates.find(item => item.endpoint === configured.endpointHint);
+    const selected = hinted ?? (candidates.length === 1 ? candidates[0] : undefined);
+    return { id: requirement.id, adapter: configured.adapter, interfaceType: requirement.interfaceType,
+      status: selected ? 'MATCHED' as const : candidates.length ? 'AMBIGUOUS' as const : 'MISSING' as const,
+      selectedEndpoint: selected?.endpoint ?? null, candidates: candidates.map(item => item.endpoint),
+      requiresSemanticConfirmation: true as const };
+  });
+  const distroMatched = !template.compatibility.rosDistro || template.compatibility.rosDistro === catalog.environment.rosDistro;
+  return { schemaVersion: 1 as const, kind: 'RlsokTemplatePlan' as const, template: { id: template.metadata.id, version: template.metadata.version },
+    catalogObservedAt: catalog.observedAt, distroMatched, readyForConfiguration: distroMatched && paths.every(path => path.status === 'MATCHED'), paths,
+    missingInputs: ['configuration ID', 'device ID', 'real example goal or message for every path', 'actual robot description and selected fact files', 'explicit confirmation of meanings, units and frames'],
+    hardwareSignalSent: false as const };
+}

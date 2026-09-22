@@ -1,6 +1,6 @@
 # Configure and reuse your ROS 2 interface setup
 
-Current local tool: **v1.5.7**. This workflow discovers local graph
+Current local tool: **v1.5.9**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
@@ -117,11 +117,42 @@ requires a new local approval. Local operator names are not authenticated by
 Cloud. Read the human-readable `report/report.md` and inspect individual checks in `report/report.json` and follow the existing
 Evidence verification procedure in [the full guide](composable-shadow.md).
 
-**Save reusable settings** writes `connection.json`, including private Goal data,
+**Export private settings** writes `connection.json`, including private Goal data,
 definitions and expected values, but not fact file bytes. Import it into the
 wizard to reuse selections and mappings. Reconfirm interface meanings and
 reselect actual files before exporting a complete workspace. Importing a new
 catalog starts a new setup; rediscovery alone does not certify changed semantics.
+
+**Save privately in this browser** is an explicit local-only alternative. It
+stores the same private connection in IndexedDB for this browser/site profile.
+It is never automatic and does not upload the setup. Each save creates a new
+local entry; delete removes only that browser copy. Export a file if the setup
+must survive browser-data clearing or move to another computer.
+
+## 5. Reuse or contribute a versioned template
+
+A private `RlsokConnectionTemplate` keeps compatible interface types and
+fingerprints, endpoint hints, adapter field mappings, fact descriptors and
+optional robot defaults. It removes actual example goals, device identity,
+fact contents and expected values. Apply it only after fresh discovery; the
+wizard matches exact interface types, prefers an endpoint hint, and otherwise
+requires one unambiguous candidate. The user must still provide real goals,
+files and device values and reconfirm meanings, units, frames and limits.
+
+The CLI can inspect the same contract and show what a fresh catalog matches:
+
+```sh
+rlsok profile inspect-template --input template.json --catalog catalog.json
+```
+
+An optional contribution candidate is more aggressively sanitized: endpoint
+names, ROS distribution, interface fingerprints, robot/controller defaults,
+joint order, goal data, device identity, expected values, frame values, bounds
+and allowlist values are removed. Interface type names, field mappings and JSON
+pointers remain because they are the reusable structure, so the contributor
+must preview them and confirm authority. Downloading the candidate neither
+uploads it nor grants RLSOK rights. Submission requires a separate contribution
+agreement and RLSOK review before anything can become an official template.
 
 The local alternative creates configuration files from saved settings:
 
@@ -135,11 +166,12 @@ relative paths before capture. It does not invent missing files or observations.
 
 ## Privacy, versioning and validation status
 
-The wizard processes file bytes in browser memory, uses no upload endpoint or
-browser persistence, and excludes `/connect` from site analytics/attribution.
-Normal page delivery requests still reach the website. Both downloaded settings
-and workspaces contain private information. Store them securely. Closing the
-tab clears working data; keep downloaded settings if you need to resume.
+The wizard processes file bytes in browser memory, uses no upload endpoint, and
+excludes `/connect` from site analytics/attribution. Normal page delivery
+requests still reach the website. Private browser persistence occurs only after
+the explicit save action and stores the connection, not selected file bytes.
+Downloaded settings and workspaces contain private information. Store them
+securely. Unsaved working data clears when the tab closes.
 
 The website vendors the portable Runtime validators with source-file checksums
 and a versioned source manifest. Profile schema version remains 1; the new catalog

@@ -6,6 +6,7 @@ import { executablePolicySpecSchema } from '../../packages/core/exec-spec';
 import { createFanucFixture, createFanucPublicFixture, fixtureCalibration, fixtureControllerState, fixtureUrdf } from '../../packages/composable-shadow/fixture';
 import { interfaceSchemas } from '../../packages/composable-shadow/json-schema';
 import { readConnection } from '../../packages/composable-shadow/onboarding';
+import { connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
 import { reportMarkdown, compareReports, comparisonMarkdown } from '../../packages/composable-shadow/report';
 import { prepareSourceWorkspace, refreshSourceWorkspace } from '../../packages/composable-shadow/source-workspace';
 import { sourceRecipes } from '../../packages/composable-shadow/source-recipes';
@@ -27,6 +28,7 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile discover --output <new-catalog.json> [--python <python3>]
   rlsok profile configure --input <connection.json> --output <new-directory>
   rlsok profile inspect-connection --input <connection.json>
+  rlsok profile inspect-template --input <template.json> [--catalog <fresh-catalog.json>]
   rlsok profile source-recipes
   rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
   rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x|modular-diffbot|piper-cpp|robstride-command-envelope|dobot-magician-homing|lerobot-so101-direct> --source <checkout> --input <selected-files.json> --output <new-directory>
@@ -445,6 +447,17 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     }
     process.stdout.write(`Configuration and mapped example goals are valid for ${connection.profile.paths.length} declared paths.\nCatalog is a local snapshot, not a fresh observation or compatibility certificate. Continue with local approve, capture and shadow.\n`);
     return 0;
+  }
+  if (command === 'inspect-template') {
+    const o = options(rest, ['input', 'catalog'], ['input']);
+    const template = connectionTemplateSchema.parse(read(o.input));
+    const result = o.catalog ? planConnectionTemplate(template, read(o.catalog)) : {
+      schemaVersion: template.schemaVersion, kind: template.kind, metadata: template.metadata,
+      requiredPaths: template.compatibility.paths, requiredFacts: template.facts,
+      scope: 'template structure only; fresh discovery, private values and semantic confirmation still required'
+    };
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    return o.catalog && 'readyForConfiguration' in result && !result.readyForConfiguration ? 1 : 0;
   }
   if (command === 'init') {
     const o = options(rest, ['template', 'output'], ['template', 'output']);

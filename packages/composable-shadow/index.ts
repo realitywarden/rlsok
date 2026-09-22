@@ -8,6 +8,7 @@ import {
 } from './schema';
 export * from './schema';
 export * from './navigation-preflight';
+export * from './templates';
 export { validateGoal } from './goals';
 import { validateGoal } from './goals';
 import { pathInterfaceType } from './contracts';
