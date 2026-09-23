@@ -103,10 +103,14 @@ try {
   ]) {
     chmodSync(join(stage, "examples", "external-validation", helper), 0o755);
   }
-  for (const dependency of ["js-yaml", "argparse", "zod", "zod-to-json-schema"]) {
+  const lock = JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8"));
+  for (const [location, metadata] of Object.entries(lock.packages)) {
+    if (!location.startsWith("node_modules/") || metadata.dev === true) continue;
+    const installed = JSON.parse(readFileSync(join(root, location, "package.json"), "utf8"));
+    if (installed.version !== metadata.version) throw new Error(`installed_dependency_version_mismatch:${location}`);
     copy(
-      join(root, "node_modules", dependency),
-      join(stage, "lib", "rlsok", "node_modules", dependency),
+      join(root, location),
+      join(stage, "lib", "rlsok", location),
     );
   }
   copyFileSync(join(root, "LICENSE"), join(stage, "LICENSE"));

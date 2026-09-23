@@ -1,6 +1,6 @@
 # Configure and reuse your ROS 2 interface setup
 
-Current local tool: **v1.5.11**. This workflow discovers local graph
+Current local tool: **v1.5.12**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
 stable Runtime release, Cloud approval, hardware attestation or motion permit.
@@ -38,11 +38,20 @@ rlsok setup-assistant
 ```
 
 It opens a browser against a random, per-session URL served only on
-`127.0.0.1`. The assistant can run the same read-only discovery from the
-sourced terminal, import an existing catalog, combine private fragments, match
-interfaces and export a local setup workspace. It loads no external page code,
-has no upload endpoint and does not replace any existing adapter, saved-file
-recipe, observer or profile command.
+`127.0.0.1`. Start with an expanded URDF and selected JSON/YAML controller
+configuration. The assistant reads the model, non-fixed joint names and
+controller/joint-list candidates, then presents what it recognized and what
+still needs confirmation. These names are suggestions, not evidence that a
+specific controller or file is active. Xacro expressions are not expanded.
+The assistant can run the same read-only discovery from the sourced terminal,
+import an existing catalog, start from one unambiguous standard interface,
+combine private fragments, match interfaces and export a local ZIP containing
+the validated connection, exact selected files and a reusable versioned
+template. The ZIP can be checked with `rlsok profile inspect-connection --input
+connection.json` after extraction. Fresh observation, local approval and
+Shadow evaluation remain separate. It loads no external page code, has no
+upload endpoint and does not replace any existing adapter, saved-file recipe,
+observer or profile command.
 
 ## 2. Choose and map interfaces in your browser
 
@@ -208,11 +217,11 @@ The website vendors the portable Runtime validators with source-file checksums
 and a versioned source manifest. Profile schema version remains 1; the new catalog
 and connection contracts are also version 1. The Linux evaluation and npm
 tarball include the collector, validators, generated schemas and this guide.
-The same v1.5.11 template contract, local assistant and composition command are packaged for
+The same v1.5.12 template contract, local assistant and composition command are packaged for
 Windows, macOS and Linux. Cloud remains a separate optional surface; the web
 wizard performs composition in the browser without uploading the fragments.
 
-See [the first-evaluation guide](local-shadow-first-evaluation.md) for required inputs, offline use, result meaning and a same-approval before/after comparison. Validation scope is recorded in [the release notes](releases/v1.5.0-shadow.4.md). No private customer integration or physical robot validation is claimed.
+See [the first-evaluation guide](local-shadow-first-evaluation.md) for required inputs, offline use, result meaning and a same-approval before/after comparison. Current validation scope is recorded in [the release notes](releases/v1.5.12.md). No private customer integration or physical robot validation is claimed.
 
 Absolute native W/P/R goals now have an explicit mm/degrees adapter; see
 [the mapping guide](absolute-wpr-review.md), the [1.5.2 verification scope](releases/v1.5.2.md),
