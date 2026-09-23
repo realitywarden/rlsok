@@ -78,7 +78,7 @@ async function body(request: IncomingMessage, maximum = MAX_BODY): Promise<unkno
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
 }
 
-function discover(python: string): Promise<unknown> {
+function discover(python: string): Promise<Catalog> {
   return mkdtemp(join(tmpdir(), 'rlsok-setup-')).then(directory => new Promise((resolve, reject) => {
     const output = join(directory, 'catalog.json');
     const child = spawn(python, [collectorScript(), '--discover', '--output', output], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
@@ -96,6 +96,18 @@ function discover(python: string): Promise<unknown> {
       finally { rmSync(directory, { recursive: true, force: true }); }
     });
   }));
+}
+
+type InterfaceSourcePlugin = { id: string; load: (input: unknown, python: string) => Promise<Catalog> };
+const interfaceSourcePlugins: readonly InterfaceSourcePlugin[] = [
+  { id: 'ros2-live-graph/v1', load: (_input, python) => discover(python) },
+  { id: 'saved-ros2-catalog/v1', load: input => readCatalog(input) }
+];
+
+export function loadInterfaceSource(pluginId: string, input: unknown, python: string): Promise<Catalog> {
+  const plugin = interfaceSourcePlugins.find(item => item.id === pluginId);
+  if (!plugin) throw new Error(`unsupported_interface_source:${pluginId}`);
+  return plugin.load(input, python);
 }
 
 export function page(token: string): string {
@@ -275,7 +287,7 @@ $('projectFolder').onchange=async event=>{try{
   if(folderCandidates.length>256)throw new Error('This folder has more than 256 candidate files. Choose the relevant files individually.');
   projectFiles=[];inspections=[];catalog=null;catalogOrigin='none';workspace=null;renderFinish();render('projectList',[]);show('projectStatus','New folder selected. Inspect the actual files.');renderInterfaceChoices();show('catalogStatus','No catalog loaded for this folder. Discover this ROS graph or import one.');$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';
   let catalogNote='',importedCatalog=null;
-  if(catalogFiles.length===1){try{const candidate=JSON.parse(await catalogFiles[0].text());if(candidate.kind==='RlsokInterfaceCatalog'){useCatalog(await api('validate-catalog',{catalog:candidate}),'this project folder');importedCatalog=catalogFiles[0];catalogNote=' Valid saved interface catalog loaded.'}}catch(error){catalogNote=' Saved catalog could not be validated: '+(error.message||String(error))+'. Import a valid catalog or discover the live graph.'}}
+  if(catalogFiles.length===1){try{const candidate=JSON.parse(await catalogFiles[0].text());if(candidate.kind==='RlsokInterfaceCatalog'){useCatalog(await api('source',{plugin:'saved-ros2-catalog/v1',catalog:candidate}),'this project folder');importedCatalog=catalogFiles[0];catalogNote=' Valid saved interface catalog loaded.'}}catch(error){catalogNote=' Saved catalog could not be validated: '+(error.message||String(error))+'. Import a valid catalog or discover the live graph.'}}
   else if(catalogFiles.length>1)catalogNote=' Several saved catalogs found; choose the intended catalog explicitly.';
   if(importedCatalog)folderCandidates=folderCandidates.filter(file=>file!==importedCatalog);
   let templateNote='',importedTemplate=null;
@@ -296,8 +308,8 @@ $('projectFolder').onchange=async event=>{try{
   if(defaults.length&&defaults.length<=16&&new Set(defaults.map(file=>file.name)).size===defaults.length){try{await inspectProjectSelection(defaults)}catch(error){show('projectStatus','Automatic inspection needs review: '+(error.message||String(error)),'bad')}}
 }catch(error){folderCandidates=[];$('folderChoices').replaceChildren();$('inspectFolder').hidden=true;show('folderStatus',error.message||String(error),'bad')}};
 $('inspectFolder').onclick=async()=>{try{const selected=[...$('folderChoices').querySelectorAll('input:checked')].map(input=>folderCandidates[Number(input.dataset.index)]);await inspectProjectSelection(selected)}catch(error){show('projectStatus',error.message||String(error),'bad')}};
-$('discover').onclick=async()=>{show('catalogStatus','Discovering…');try{useCatalog(await api('discover',{}),'this ROS graph',true)}catch(e){show('catalogStatus',e.message,'bad')}};
-$('catalog').onchange=async e=>{try{useCatalog(await api('validate-catalog',{catalog:(await files(e.target))[0]}),'the selected catalog')}catch(e){show('catalogStatus','Invalid catalog: '+e.message,'bad')}};
+$('discover').onclick=async()=>{show('catalogStatus','Discovering…');try{useCatalog(await api('source',{plugin:'ros2-live-graph/v1'}),'this ROS graph',true)}catch(e){show('catalogStatus',e.message,'bad')}};
+$('catalog').onchange=async e=>{try{useCatalog(await api('source',{plugin:'saved-ros2-catalog/v1',catalog:(await files(e.target))[0]}),'the selected catalog')}catch(e){show('catalogStatus','Invalid catalog: '+e.message,'bad')}};
 $('fragments').onchange=async e=>{try{const selected=await files(e.target);if(fragments.length+selected.length>16)throw new Error('Maximum 16 fragments');const added=await Promise.all(selected.map(fragment=>api('validate-fragment',{fragment})));fragments.push(...added);render('fragmentList',fragments.map((f,i)=>({title:f.metadata.name,detail:f.metadata.id+'@'+f.metadata.version})));invalidatePlan();updateNextStep()}catch(e){show('planStatus','Invalid fragment: '+e.message,'bad')}};
 $('clear').onclick=()=>{fragments=[];$('fragmentList').replaceChildren();workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';updateNextStep()};
 $('generate').onclick=async()=>{if(!catalog||(!fragments.length&&!$('starterInterface').value)){show('planStatus','Load a catalog and choose an interface or fragments.','bad');return}show('planStatus','Generating…');try{const [kind,endpoint]=$('starterInterface').value.split('|');const result=await api('generate',{catalog,fragments,starter:{kind,endpoint,adapter:$('starterAdapter').value,projectFiles:inspections.map(item=>({name:item.name,kind:item.kind}))}});workspace=result;$('preview').textContent=JSON.stringify(result,null,2);const ready=result.plan.readyForConfiguration;show('planStatus',ready?(catalogOrigin==='saved'?'Saved interface catalog matched structurally. Rediscover the live graph before treating the endpoint as active.':'Current graph interfaces matched. Confirm semantics and finish required inputs.'):'Plan generated with missing or ambiguous interfaces. Review the preview. ',ready?'good':'bad');show('summary',result.plan.paths.filter(path=>path.status==='MATCHED').length+' of '+result.plan.paths.length+' interfaces matched in '+(catalogOrigin==='saved'?'a saved catalog':'the current graph')+'; '+result.plan.paths.filter(path=>path.status!=='MATCHED').length+' need selection or discovery.',ready?'good':'bad');$('download').disabled=false;$('templateDownload').disabled=false;renderFinish();renderPipeline()}catch(e){show('planStatus',e.message,'bad')}};
@@ -335,6 +347,10 @@ export async function runSetupAssistant(args: string[]): Promise<number> {
       }
       if (request.headers['x-rlsok-session'] !== token) { json(response, 403, { error: 'invalid_session' }); return; }
       if (url.pathname === `${base}/api/adapters` && request.method === 'GET') { json(response, 200, ADAPTERS); return; }
+      if (url.pathname === `${base}/api/source` && request.method === 'POST') {
+        const input = await body(request) as { plugin?: string; catalog?: unknown };
+        json(response, 200, await loadInterfaceSource(input.plugin ?? '', input.catalog, python)); return;
+      }
       if (url.pathname === `${base}/api/validate-catalog` && request.method === 'POST') {
         const input = await body(request) as { catalog?: unknown };
         json(response, 200, await readCatalog(input.catalog)); return;

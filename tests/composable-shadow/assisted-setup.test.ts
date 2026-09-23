@@ -6,7 +6,7 @@ import { Script } from 'node:vm';
 import { buildAssistedConnection } from '../../packages/composable-shadow/assisted-setup';
 import { buildSetupWorkspace } from '../../apps/cli/setup-workspace';
 import { inspectProjectFile } from '../../apps/cli/setup-project';
-import { page, starterTemplate } from '../../apps/cli/setup-assistant';
+import { loadInterfaceSource, page, starterTemplate } from '../../apps/cli/setup-assistant';
 import { readCatalog } from '../../packages/composable-shadow/onboarding';
 import { composeConnectionTemplates, connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
 
@@ -44,10 +44,11 @@ test('local project inspection suggests only structural facts', () => {
 
 test('project folder sample contains a valid versioned fragment and catalog', async () => {
   const root = 'tests/fixtures/local-assistant/';
-  const catalog = await readCatalog(JSON.parse(readFileSync(root + 'catalog.json', 'utf8')));
+  const catalog = await loadInterfaceSource('saved-ros2-catalog/v1', JSON.parse(readFileSync(root + 'catalog.json', 'utf8')), 'unused');
   const fragment = connectionTemplateSchema.parse(JSON.parse(readFileSync(root + 'template.json', 'utf8')));
   assert.equal(fragment.metadata.version, '1.2.0');
   assert.equal(planConnectionTemplate(fragment, catalog).readyForConfiguration, true);
+  assert.throws(() => loadInterfaceSource('unknown/v1', catalog, 'unused'), /unsupported_interface_source/);
 });
 
 test('confirmed discovered interface yields a validated portable workspace without dispatch', async () => {
