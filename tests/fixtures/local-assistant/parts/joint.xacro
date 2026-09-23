@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="arm_joint" params="name">
+    <joint name="${name}" type="revolute">
+      <parent link="base"/>
+      <child link="arm"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-1" upper="1" effort="1" velocity="1"/>
+    </joint>
+  </xacro:macro>
+</robot>
