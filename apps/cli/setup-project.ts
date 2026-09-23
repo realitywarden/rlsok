@@ -4,8 +4,9 @@ import { XMLParser, XMLValidator } from 'fast-xml-parser';
 
 export type ProjectFileInspection = {
   name: string; sha256: string; bytes: number;
-  kind: 'robot-description' | 'configuration' | 'selected-file';
+  kind: 'robot-description' | 'configuration' | 'interface-declaration' | 'selected-file';
   parserPlugin?: string; model?: string; movableJoints?: string[]; needsExpansion?: boolean;
+  declaredFields?: Array<{ section: string; type: string; name: string }>;
   controllerCandidates: string[]; jointOrderCandidates: string[][]; warnings: string[];
 };
 
@@ -67,7 +68,41 @@ const configurationParser: ProjectParserPlugin = {
   }
 };
 
-const projectParserPlugins: readonly ProjectParserPlugin[] = [robotDescriptionParser, configurationParser];
+const interfaceDeclarationParser: ProjectParserPlugin = {
+  id: 'ros-interface-declaration/v1', accepts: name => /\.(?:msg|action|srv|idl)$/i.test(name),
+  inspect(bytes, result) {
+    result.kind = 'interface-declaration';
+    if (bytes.length > 1024 * 1024) throw new Error('interface_declaration_exceeds_1MiB');
+    if (/\.idl$/i.test(result.name)) {
+      result.declaredFields = [];
+      result.warnings.push('IDL source found. Field structure is not parsed here; discover the installed ROS interface and live endpoint.');
+      return;
+    }
+    const source = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    const lines = source.replace(/^\uFEFF/, '').split(/\r?\n/);
+    if (lines.length > 8192) throw new Error('interface_declaration_too_many_lines');
+    const sections = /\.action$/i.test(result.name) ? ['goal', 'result', 'feedback'] :
+      /\.srv$/i.test(result.name) ? ['request', 'response'] : ['message'];
+    const fields: NonNullable<ProjectFileInspection['declaredFields']> = [];
+    let section = 0, skipped = 0;
+    for (const raw of lines) {
+      const line = raw.split('#', 1)[0]!.trim();
+      if (!line) continue;
+      if (line === '---') { if (++section >= sections.length) throw new Error('unexpected_interface_section'); continue; }
+      if (line.length > 512) throw new Error('interface_declaration_line_too_long');
+      if (/^[^\s]+\s+[A-Za-z_][A-Za-z0-9_]*\s*=/.test(line)) continue;
+      const match = /^([A-Za-z_][A-Za-z0-9_/<>=\[\]]*)\s+([A-Za-z_][A-Za-z0-9_]*)$/.exec(line);
+      if (!match) { skipped += 1; continue; }
+      if (fields.length >= 256) throw new Error('interface_declaration_exceeds_256_fields');
+      fields.push({ section: sections[section]!, type: match[1]!, name: match[2]! });
+    }
+    result.declaredFields = fields;
+    if (skipped) result.warnings.push(String(skipped) + ' declaration lines were not interpreted; inspect the installed ROS type before mapping fields.');
+    result.warnings.push('Source declarations do not prove an installed type, interface fingerprint, live endpoint, receiver, units or meaning.');
+  }
+};
+
+const projectParserPlugins: readonly ProjectParserPlugin[] = [robotDescriptionParser, configurationParser, interfaceDeclarationParser];
 
 export function inspectProjectFile(name: string, base64: string): ProjectFileInspection {
   if (typeof name !== 'string' || name.length > 256 || !/^[A-Za-z0-9_. -]+$/.test(name)) throw new Error('invalid_project_filename');

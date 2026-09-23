@@ -27,6 +27,8 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="missingStatus"/);
   assert.match(html, /id="projectFolder"[^>]*webkitdirectory/);
   assert.match(html, /id="inspectFolder"/);
+  assert.match(html, /id="projectDeclaration"/);
+  assert.match(html, /id="inspectDeclaration"/);
   assert.match(html, /id="folderSavedChoices"/);
   assert.match(html, /Use this catalog/);
   assert.match(html, /Add this rule template/);
@@ -115,6 +117,20 @@ test('local project inspection suggests only structural facts', () => {
   assert.equal(config.parserPlugin, 'json-yaml-structure/v1');
   assert.deepEqual(config.jointOrderCandidates, [['axis']]);
   assert.equal(inspectProjectFile('robot.urdf', Buffer.from('<robot name="${model}"/>').toString('base64')).needsExpansion, true);
+});
+
+test('offline ROS interface declarations are previews, not discovered endpoints or semantics', () => {
+  const source = '# PX4-style source comments are not unit confirmation\nuint32 MESSAGE_VERSION = 0\nuint64 timestamp # [us]\nfloat32[12] control # normalized thrust\n';
+  const message = inspectProjectFile('ActuatorMotors.msg', Buffer.from(source).toString('base64'));
+  assert.equal(message.kind, 'interface-declaration');
+  assert.equal(message.parserPlugin, 'ros-interface-declaration/v1');
+  assert.deepEqual(message.declaredFields, [
+    { section: 'message', type: 'uint64', name: 'timestamp' },
+    { section: 'message', type: 'float32[12]', name: 'control' }
+  ]);
+  assert.match(message.warnings.join(' '), /do not prove an installed type/);
+  const action = inspectProjectFile('Inspect.action', Buffer.from('string target\n---\nbool success\n---\nstring detail\n').toString('base64'));
+  assert.deepEqual(action.declaredFields?.map(field => field.section), ['goal', 'result', 'feedback']);
 });
 
 test('project folder sample contains a valid versioned fragment and catalog', async () => {
