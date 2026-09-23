@@ -189,7 +189,7 @@ function projectSuggestions(){
 function renderPipeline(){const parsers=[...new Set(inspections.map(item=>item.parserPlugin).filter(Boolean))],checks=[...new Set((workspace?.template.paths||fragments.flatMap(fragment=>fragment.paths||[])).map(path=>path.adapter))];
   $('pipelineStatus').textContent='Source: '+(catalogOrigin==='live'?'current ROS 2 graph':catalogOrigin==='saved'?'saved ROS 2 interface catalog':'not selected')+' + local project files. Parser: '+(parsers.length?parsers.join(', '):'awaiting selected project files')+(catalog?' + ROS interface type tree':'')+'. Check: '+(checks.length?checks.join(', '):'choose a documented meaning or saved rule')+'.';}
 function updateNextStep(){if(workspace)return;
-  const next=!inspections.length?(folderXacroFiles.length?'Review the Xacro source and click Expand and inspect URDF if you trust this project.':folderCandidates.length?'Click Inspect selected project files.':'Open a project folder or choose project files.'):!catalog?'Import a catalog or click Discover this ROS graph.':fragments.length?'Click Prepare to match the saved rules to this project.':'Choose a discovered interface or reusable fragments, then click Prepare.';
+  const next=!inspections.length?(folderCandidates.some(file=>/\\.urdf$/i.test(file.name))?'Choose the intended robot/config files and click Inspect selected project files.':folderXacroFiles.length?'Review the Xacro entry file and click Expand and inspect URDF if you trust this project.':folderCandidates.length?'Choose the intended config files and click Inspect selected project files.':'Open a project folder or choose project files.'):inspections.some(item=>item.kind==='robot-description'&&item.needsExpansion)&&folderXacroFiles.length?'Review the matching Xacro entry file and expand it locally if you trust this project.':!catalog?'Import a catalog or click Discover this ROS graph.':fragments.length?'Click Prepare to match the saved rules to this project.':'Choose a discovered interface or reusable fragments, then click Prepare.';
   show('summary','Next: '+next);
   const suggestions=projectSuggestions(),missing=[];
   if(!suggestions.robot)missing.push('expanded robot URDF');
@@ -383,7 +383,7 @@ $('projectFolder').onchange=async event=>{try{
   folderXacroResources=entries.map(file=>({file,path:(file.webkitRelativePath||'').split('/').slice(1).join('/')})).filter(item=>!ignored.test(item.file.webkitRelativePath||'')&&item.path&&item.path.split('/').every(part=>/^[A-Za-z0-9_. -]+$/.test(part))&&/\\.(?:xacro|urdf|xml|json|ya?ml)$/i.test(item.path));
   folderXacroFiles=folderXacroResources.filter(item=>/\\.xacro$/i.test(item.path));renderXacroChoices();
   folderCandidates=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/\\.(?:urdf|json|ya?ml)$/i.test(file.name)&&/^[A-Za-z0-9_. -]+$/.test(file.name)&&file.size<=8*1024*1024&&!catalogFiles.includes(file)&&!templateFiles.includes(file));
-  const xacro=entries.filter(file=>/\\.xacro$/i.test(file.name)).length;
+  const xacro=folderXacroFiles.length;
   if(folderCandidates.length>256)throw new Error('This folder has more than 256 candidate files. Choose the relevant files individually.');
   renderSavedFolderChoices();
   let catalogNote='';
@@ -394,14 +394,16 @@ $('projectFolder').onchange=async event=>{try{
   else if(templateFiles.length>1)templateNote=' Several saved rule templates found; add the intended fragments explicitly.';
   else if(templateFiles.length&&fragments.length)templateNote=' Existing selected fragments were kept; add any folder template explicitly.';
   const root=$('folderChoices');root.replaceChildren();
+  const urdfCandidates=folderCandidates.filter(file=>/\\.urdf$/i.test(file.name));
+  const controllerCandidates=folderCandidates.filter(file=>/controller/i.test(file.name)&&/\\.(?:json|ya?ml)$/i.test(file.name));
   for(const [index,file] of folderCandidates.entries()){
     const label=document.createElement('label'),check=document.createElement('input'),text=document.createElement('span');
     label.className='item';check.type='checkbox';check.dataset.index=String(index);
-    check.checked=folderCandidates.filter(item=>/\\.urdf$/i.test(item.name)).length===1&&/\\.urdf$/i.test(file.name)||/controller/i.test(file.name)&&/\\.(?:json|ya?ml)$/i.test(file.name);
+    check.checked=(urdfCandidates.length===1&&urdfCandidates[0]===file)||(urdfCandidates.length===1&&controllerCandidates.length===1&&controllerCandidates[0]===file);
     text.textContent=' '+(file.webkitRelativePath||file.name)+' ('+Math.ceil(file.size/1024)+' KiB)';label.append(check,text);root.append(label);
   }
   $('inspectFolder').hidden=!folderCandidates.length;
-  show('folderStatus',folderCandidates.length+' project candidates found'+(xacro?'; '+xacro+' Xacro sources need an expanded URDF before joint names can be trusted':'')+'. Unambiguous defaults are inspected automatically; change the choices and click Inspect if needed. Files stay local.'+catalogNote+templateNote,folderCandidates.length||folderXacroFiles.length?'good':'bad');updateNextStep();
+  show('folderStatus',folderCandidates.length+' project candidates found'+(xacro?'; '+xacro+' Xacro sources available (expand the intended entry only if needed)':'')+'. Only a unique robot description and unique controller configuration are selected automatically; review the choices before continuing. Files stay local.'+catalogNote+templateNote,folderCandidates.length||folderXacroFiles.length?'good':'bad');updateNextStep();
   const defaults=[...root.querySelectorAll('input:checked')].map(input=>folderCandidates[Number(input.dataset.index)]);
   if(defaults.length&&defaults.length<=16&&new Set(defaults.map(file=>file.name)).size===defaults.length){try{await inspectProjectSelection(defaults)}catch(error){show('projectStatus','Automatic inspection needs review: '+(error.message||String(error)),'bad')}}
 }catch(error){folderCandidates=[];folderCatalogFiles=[];folderTemplateFiles=[];folderXacroFiles=[];folderXacroResources=[];$('folderChoices').replaceChildren();$('folderSavedChoices').replaceChildren();renderXacroChoices();$('inspectFolder').hidden=true;show('folderStatus',error.message||String(error),'bad')}};
