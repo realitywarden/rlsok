@@ -15,7 +15,7 @@ env:
   RELEASE_TAG: macos-local-check-v1.5.12
   VERSION: 1.5.12
   LINUX_ARCHIVE: rlsok-local-check-1.5.12-linux-x64.tar.gz
-  LINUX_SHA256: c6bad38bea68b11d755ff4c12279c27524ea4c6763e2b5c384756fb52e36d072
+  LINUX_SHA256: 813239aa26ee500a2e8606a30852292db739979aec66adaa56c731b352be43bf
 
 jobs:
   prepare-draft:
@@ -97,7 +97,7 @@ jobs:
           test -d "$app"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")" = "$VERSION"
           test "$(cat "$bundle/VERSION")" = "$VERSION"
-          test "$(cat "$bundle/SOURCE_COMMIT")" = 05760226371a2b4c9905b0343101940198dc7777
+          test "$(cat "$bundle/SOURCE_COMMIT")" = 747142754713401c0d3d022a125e3e8a661c2e82
           /usr/bin/file "$app/Contents/MacOS/RLSOKLocalCheck" | tee "$RUNNER_TEMP/console-file.txt"
           /usr/bin/file "$app/Contents/MacOS/RLSOKLocalCheck" | grep -q "${{ matrix.uname_arch }}"
           "$app/Contents/MacOS/RLSOKLocalCheck" --self-check \
@@ -135,7 +135,7 @@ jobs:
           record = {
               "schema": "rlsok.io/macos-local-check-verification/v1",
               "version": "1.5.12",
-              "sourceCommit": "05760226371a2b4c9905b0343101940198dc7777",
+              "sourceCommit": "747142754713401c0d3d022a125e3e8a661c2e82",
               "packagingSourceCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
               "runnerArchitecture": platform.machine(),
               "payloadArchitecture": arch,
