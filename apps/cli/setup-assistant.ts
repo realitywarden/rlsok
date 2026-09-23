@@ -275,7 +275,9 @@ $('projectFolder').onchange=async event=>{try{
     text.textContent=' '+(file.webkitRelativePath||file.name)+' ('+Math.ceil(file.size/1024)+' KiB)';label.append(check,text);root.append(label);
   }
   $('inspectFolder').hidden=!folderCandidates.length;
-  show('folderStatus',folderCandidates.length+' project candidates found'+(xacro?'; '+xacro+' Xacro sources need an expanded URDF before joint names can be trusted':'')+'. Select the actual robot and controller files, then inspect. Files stay local.'+catalogNote,folderCandidates.length?'good':'bad');updateNextStep();
+  show('folderStatus',folderCandidates.length+' project candidates found'+(xacro?'; '+xacro+' Xacro sources need an expanded URDF before joint names can be trusted':'')+'. Unambiguous defaults are inspected automatically; change the choices and click Inspect if needed. Files stay local.'+catalogNote,folderCandidates.length?'good':'bad');updateNextStep();
+  const defaults=[...root.querySelectorAll('input:checked')].map(input=>folderCandidates[Number(input.dataset.index)]);
+  if(defaults.length&&defaults.length<=16&&new Set(defaults.map(file=>file.name)).size===defaults.length){try{await inspectProjectSelection(defaults)}catch(error){show('projectStatus','Automatic inspection needs review: '+(error.message||String(error)),'bad')}}
 }catch(error){folderCandidates=[];$('folderChoices').replaceChildren();$('inspectFolder').hidden=true;show('folderStatus',error.message||String(error),'bad')}};
 $('inspectFolder').onclick=async()=>{try{const selected=[...$('folderChoices').querySelectorAll('input:checked')].map(input=>folderCandidates[Number(input.dataset.index)]);await inspectProjectSelection(selected)}catch(error){show('projectStatus',error.message||String(error),'bad')}};
 $('discover').onclick=async()=>{show('catalogStatus','Discovering…');try{useCatalog(await api('discover',{}),'this ROS graph')}catch(e){show('catalogStatus',e.message,'bad')}};
