@@ -196,14 +196,18 @@ class Reader:
 
     def publishers(self):
         deadline = time.monotonic() + 15
+        pending = []
         while time.monotonic() < deadline:
             rows = self.node.get_publishers_info_by_topic(TOPIC)
             if rows:
                 if len(rows) > 32: raise CollectionError('mowgli_too_many_publishers')
-                return sorted([{'node': r.node_namespace.rstrip('/') + '/' + r.node_name,
+                pending = sorted([{'node': r.node_namespace.rstrip('/') + '/' + r.node_name,
                     'type': r.topic_type, 'gid': bytes(r.endpoint_gid).hex()} for r in rows], key=lambda r: (r['node'], r['gid']))
+                if all('_NODE_NAME_UNKNOWN_' not in row['node'] and
+                       '_NODE_NAMESPACE_UNKNOWN_' not in row['node'] for row in pending):
+                    return pending
             self.executor.spin_once(timeout_sec=0.1)
-        return []
+        return pending
 
     def once(self):
         received, deadline = [], time.monotonic() + 15

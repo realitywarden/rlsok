@@ -39,6 +39,19 @@ class LelyStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(lely_status.CollectionError, 'outside_declared_bounds'):
             lely_status.build_observation(self.reader(sample=bad), CHECKOUT, 'python')
 
+    def test_waits_for_transient_unknown_publisher_identity(self):
+        unknown = value(node_namespace='_NODE_NAMESPACE_UNKNOWN_', node_name='_NODE_NAME_UNKNOWN_',
+                        topic_type=lely_status.MESSAGE_TYPE, endpoint_gid=bytes([1]))
+        resolved = value(node_namespace='/', node_name='arduino_bridge',
+                         topic_type=lely_status.MESSAGE_TYPE, endpoint_gid=bytes([1]))
+        observations = iter([[unknown], [resolved]])
+        spins = []
+        reader = lely_status.Reader.__new__(lely_status.Reader)
+        reader.node = value(get_publishers_info_by_topic=lambda _: next(observations))
+        reader.executor = value(spin_once=lambda timeout_sec: spins.append(timeout_sec))
+        self.assertEqual(reader.publishers(lely_status.TOPIC)[0]['node'], '/arduino_bridge')
+        self.assertEqual(spins, [0.1])
+
     def test_reader_has_no_command_service_or_serial_surface(self):
         source = inspect.getsource(lely_status.Reader)
         for forbidden in ('create_publisher', '.publish(', 'create_client', 'call_async', 'serial', '.write('):

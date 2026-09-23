@@ -26,7 +26,9 @@ FIELDS = ('arming_state', 'nav_state', 'failsafe', 'pre_flight_checks_pass')
 
 def build_observation(reader, source_checkout):
     publishers = reader.publishers(TOPIC)
-    if len(publishers) != 1 or publishers[0]['type'] != TYPE:
+    if (len(publishers) != 1 or publishers[0]['type'] != TYPE or
+            '_NODE_NAME_UNKNOWN_' in publishers[0]['node'] or
+            '_NODE_NAMESPACE_UNKNOWN_' in publishers[0]['node']):
         raise CollectionError('vehicle_status_publisher_missing_or_ambiguous:' + json.dumps(publishers))
     message = reader.once(TOPIC, TYPE)
     status = {}
@@ -88,14 +90,18 @@ class Reader:
         return {'rosDistro': distro, 'rmwImplementation': self.rmw(), 'domainId': int(domain)}
 
     def publishers(self, topic):
+        pending = []
         while time.monotonic() < self.deadline:
             rows = self.node.get_publishers_info_by_topic(topic)
             if rows:
                 if len(rows) > 32: raise CollectionError('too_many_vehicle_status_publishers')
-                return sorted([{'node': r.node_namespace.rstrip('/') + '/' + r.node_name,
+                pending = sorted([{'node': r.node_namespace.rstrip('/') + '/' + r.node_name,
                     'type': r.topic_type, 'gid': bytes(r.endpoint_gid).hex()} for r in rows], key=lambda r: (r['node'], r['gid']))
+                if all('_NODE_NAME_UNKNOWN_' not in row['node'] and
+                       '_NODE_NAMESPACE_UNKNOWN_' not in row['node'] for row in pending):
+                    return pending
             self.executor.spin_once(timeout_sec=0.1)
-        return []
+        return pending
 
     def once(self, topic, message_type):
         received = []
