@@ -26,6 +26,9 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="missingStatus"/);
   assert.match(html, /id="projectFolder"[^>]*webkitdirectory/);
   assert.match(html, /id="inspectFolder"/);
+  assert.match(html, /id="folderSavedChoices"/);
+  assert.match(html, /Use this catalog/);
+  assert.match(html, /Add this rule template/);
   assert.match(html, /function updateNextStep\(/);
   assert.match(html, /Add field rule/);
   assert.match(html, /Allowed values, one per line/);
