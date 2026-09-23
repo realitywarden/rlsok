@@ -7,6 +7,7 @@ import { buildAssistedConnection } from '../../packages/composable-shadow/assist
 import { buildSetupWorkspace } from '../../apps/cli/setup-workspace';
 import { inspectProjectFile } from '../../apps/cli/setup-project';
 import { loadInterfaceSource, page, starterTemplate } from '../../apps/cli/setup-assistant';
+import { expandTrustedXacro } from '../../apps/cli/setup-xacro';
 import { readCatalog } from '../../packages/composable-shadow/onboarding';
 import { composeConnectionTemplates, connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
 import { approveProfile, evaluateProfile } from '../../packages/composable-shadow/index';
@@ -29,12 +30,23 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="folderSavedChoices"/);
   assert.match(html, /Use this catalog/);
   assert.match(html, /Add this rule template/);
+  assert.match(html, /id="xacroTrust"/);
+  assert.match(html, /id="expandXacro"/);
   assert.match(html, /function updateNextStep\(/);
   assert.match(html, /Add field rule/);
   assert.match(html, /Allowed values, one per line/);
   assert.match(html, /endpoint\.addEventListener\('change',refreshPointers\)/);
   assert.match(html, /if\(!matching&&fact\.id==='robot-description'\)/);
   assert.match(html, /Valid saved interface catalog loaded/);
+});
+
+test('Xacro expansion requires trust and rejects unsafe project paths before executing a local tool', async () => {
+  await assert.rejects(expandTrustedXacro({ entry: 'robot.xacro', files: [], trusted: false }, 'missing-python'),
+    /xacro_requires_explicit_trust_confirmation/);
+  await assert.rejects(expandTrustedXacro({ entry: '../robot.xacro', files: [{ path: '../robot.xacro', base64: '' }], trusted: true }, 'missing-python'),
+    /invalid_xacro_project/);
+  await assert.rejects(expandTrustedXacro({ entry: 'robot.xacro', files: [{ path: 'robot.xacro', base64: '' }], args: ['foo;bar'], trusted: true }, 'missing-python'),
+    /invalid_xacro_arguments/);
 });
 
 test('custom ROS topic rules validate declared fields without publishing a message', async () => {

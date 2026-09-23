@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<robot name="test_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="joint_name" default="elbow"/>
+  <link name="base"/>
+  <link name="arm"/>
+  <joint name="$(arg joint_name)" type="revolute">
+    <parent link="base"/>
+    <child link="arm"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1" upper="1" effort="1" velocity="1"/>
+  </joint>
+</robot>
