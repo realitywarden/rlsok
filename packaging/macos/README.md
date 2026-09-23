@@ -10,8 +10,10 @@ This package targets macOS 14 or later. After installation, open **RLSOK Local
 Check __RLSOK_VERSION__** in Applications. Its native local console opens on
 **Interface setup**. Choose **Open Local Setup Assistant**, then open your project
 folder. The assistant shows recognized files, missing facts and the next action.
-It can import a saved interface catalog without ROS; live discovery needs your
-sourced ROS environment. File structure cannot establish units, physical meaning
+For JSON/YAML local-file checks, choose the intended file and confirm each selected
+field's meaning and unit; no ROS environment is needed. It can also import a saved
+ROS interface catalog; live ROS discovery needs your sourced ROS environment.
+File structure cannot establish units, physical meaning
 or active hardware identity. Confirm these before exporting a workspace.
 
 **Run example** remains available. It saves two reports under Documents/RLSOK:

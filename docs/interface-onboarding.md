@@ -1,5 +1,7 @@
 # Configure and reuse your ROS 2 interface setup
 
+For JSON/YAML file checking without ROS, use the separate [local data self-service path](local-data-self-service.md). This ROS workflow and all previously supported adapters remain available.
+
 Current local tool: **v1.5.12**. This workflow discovers local graph
 metadata, lets you map supported action or velocity-message meanings, and exports files the local
 Shadow CLI consumes. It sends **zero controller commands**. It is not a new
