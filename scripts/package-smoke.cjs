@@ -82,6 +82,8 @@ try {
   }
   const collectorHelp = run(python, ['-S', resolve(packageRoot, 'experimental', 'composable-shadow', 'collect.py'), '--help'], temporary);
   if (!collectorHelp.includes('--describe-interface')) throw new Error('packaged_profile_collector_missing');
+  const samplerHelp = run(python, ['-S', resolve(packageRoot, 'experimental', 'composable-shadow', 'sample_topic.py'), '--help'], temporary);
+  if (!samplerHelp.includes('--interface-sha256')) throw new Error('packaged_topic_sampler_missing');
   const husarionSidecar = resolve(
     packageRoot,
     'experimental',

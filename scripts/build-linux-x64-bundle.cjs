@@ -47,6 +47,10 @@ try {
     join(stage, "lib", "rlsok", "experimental", "composable-shadow", "collect.py"),
   );
   copy(
+    join(root, "experimental", "composable-shadow", "sample_topic.py"),
+    join(stage, "lib", "rlsok", "experimental", "composable-shadow", "sample_topic.py"),
+  );
+  copy(
     join(root, "docs", "composable-shadow.md"),
     join(stage, "COMPOSABLE_SHADOW.md"),
   );
