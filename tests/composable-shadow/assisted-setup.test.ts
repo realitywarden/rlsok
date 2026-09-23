@@ -42,6 +42,9 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /endpoint\.addEventListener\('change',refreshPointers\)/);
   assert.match(html, /if\(!matching&&fact\.id==='robot-description'\)/);
   assert.match(html, /Valid saved interface catalog loaded/);
+  assert.match(html, /id="localDataFile"/);
+  assert.match(html, /id="localDataFragments"/);
+  assert.match(html, /api\/local-data-workspace/);
 });
 
 test('topic sample requires an interface in the validated catalog before starting ROS', async () => {

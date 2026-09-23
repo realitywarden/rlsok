@@ -1,9 +1,9 @@
-import { atPointer, type Path } from '../contracts';
+import { atPointer, topicFieldRuleSchema, type Path } from '../contracts';
+import { z } from 'zod';
 import { finiteVector, poseVector } from './shared';
 
-export function validateTopicFields(path: Extract<Path, { adapter: 'topic_fields' | 'action_fields' }>, goal: Record<string, unknown>): string | null {
-  const prefix = path.adapter === 'action_fields' ? 'action_field' : 'topic_field';
-  for (const rule of path.fields.rules) {
+export function validateScalarFieldRules(rules: Array<z.infer<typeof topicFieldRuleSchema>>, goal: Record<string, unknown>, prefix: string): string | null {
+  for (const rule of rules) {
     const value = atPointer(goal, rule.pointer);
     if (typeof value !== (rule.type === 'integer' ? 'number' : rule.type) ||
       (rule.type === 'integer' && !Number.isSafeInteger(value)) ||
@@ -13,6 +13,10 @@ export function validateTopicFields(path: Extract<Path, { adapter: 'topic_fields
     if (rule.allowed && !rule.allowed.includes(value as string | number | boolean)) return `${prefix}_not_allowlisted:${rule.pointer}`;
   }
   return null;
+}
+
+export function validateTopicFields(path: Extract<Path, { adapter: 'topic_fields' | 'action_fields' }>, goal: Record<string, unknown>): string | null {
+  return validateScalarFieldRules(path.fields.rules, goal, path.adapter === 'action_fields' ? 'action_field' : 'topic_field');
 }
 
 export function validateTopicTwist(path: Extract<Path, { adapter: 'topic_twist' }>, goal: Record<string, unknown>): string | null {

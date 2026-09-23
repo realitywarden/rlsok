@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { atPointer } from '../../packages/composable-shadow/contracts';
 import { readConnection, type Connection } from '../../packages/composable-shadow/onboarding';
+import { localDataWorkspaceSchema } from '../../packages/composable-shadow/local-data';
 
 export type WorkspaceFile = { path: string; base64: string };
 
@@ -18,7 +19,7 @@ function zip(entries: Array<{ name: string; bytes: Buffer }>): Buffer {
   const names = new Set<string>();
   let offset = 0;
   for (const entry of entries) {
-    if (names.has(entry.name) || !(/^(?:files\/[^\\:\u0000-\u001f]+|profile\.json|proposals\.json|catalog\.json|connection\.json|template\.json|README\.md)$/.test(entry.name)) ||
+    if (names.has(entry.name) || !(/^(?:files\/[^\\:\u0000-\u001f]+|profile\.json|proposals\.json|catalog\.json|connection\.json|workspace\.json|template\.json|README\.md)$/.test(entry.name)) ||
       entry.name.split('/').some(part => !part || part === '.' || part === '..')) throw new Error('invalid_workspace_entry');
     names.add(entry.name);
     const name = Buffer.from(entry.name, 'utf8'), checksum = crc32(entry.bytes);
@@ -103,4 +104,29 @@ Capture and assessment require the correct local ROS environment and a current o
     entries.push({ name: 'template.json', bytes: json(connectionTemplateSchema.parse(templateInput)) });
   }
   return zip(entries);
+}
+
+export function buildLocalDataWorkspaceArchive(workspaceInput: unknown, sourceBase64: string): Buffer {
+  const workspace = localDataWorkspaceSchema.parse(workspaceInput);
+  const bytes = decode({ path: 'files/prepared-source-data', base64: sourceBase64 });
+  if (createHash('sha256').update(bytes).digest('hex') !== workspace.source.preparedSha256)
+    throw new Error('selected_local_data_source_changed_after_preparation');
+  const json = (value: unknown) => Buffer.from(JSON.stringify(value, null, 2) + '\n');
+  return zip([
+    { name: 'workspace.json', bytes: json(workspace) },
+    { name: 'template.json', bytes: json(workspace.check.template) },
+    { name: 'files/prepared-source-data', bytes },
+    { name: 'README.md', bytes: Buffer.from(`# RLSOK local structured-data check
+
+The selected file bytes, workspace and versioned rule template are private. Review the source, field meanings, units and limits before relying on a result. This is local file checking, not live robot discovery or hardware attestation.
+
+From this extracted directory, run:
+
+~~~sh
+rlsok profile check-local-data --workspace workspace.json --source files/prepared-source-data --output first-check.json
+~~~
+
+For a new snapshot from the same source, pass its path with --source and a new output filename. The JSON/YAML parser and scalar-field rules are separate. The template can be reused with another machine file and device ID; reconfirm meaning and units. No ROS graph, account, AI, cloud upload or robot command is used by this check.
+`) }
+  ]);
 }

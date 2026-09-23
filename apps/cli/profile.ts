@@ -21,6 +21,7 @@ import { preparePiperSetup } from '../../packages/composable-shadow/piper-setup'
 import { inspectSavedInputs, savedInputMarkdown } from '../../packages/composable-shadow/saved-input-review';
 import { evaluateNavigationPreflight, navigationPreflightMarkdown } from '../../packages/composable-shadow/navigation-preflight';
 import { compareCreate3VersionFiles, create3VersionMarkdown } from '../../packages/composable-shadow/create3-version';
+import { composeLocalDataTemplates, evaluateLocalDataWorkspace, prepareLocalDataWorkspace, readLocalFileSource } from '../../packages/composable-shadow/local-data';
 
 const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile init --template fanuc-humble|fanucpy-public-humble|ros2-trajectory --output <new-directory>
@@ -30,6 +31,9 @@ const help = `Composable ROS 2 Shadow profiles (local evaluation, zero dispatch)
   rlsok profile inspect-connection --input <connection.json>
   rlsok profile inspect-template --input <template.json> [--catalog <fresh-catalog.json>]
   rlsok profile compose-templates --input <first.json> [--input <next.json> ...] --output <new-template.json>
+  rlsok profile compose-local-data-templates --input <first.json> [--input <next.json> ...] --output <new-template.json>
+  rlsok profile prepare-local-data --template <rules.json> --parser <json-records/v1|yaml-records/v1> --source <actual-file> --device-id <id> --confirm-semantics yes --output <new-directory>
+  rlsok profile check-local-data --workspace <workspace.json> --source <current-file> --output <new-report.json>
   rlsok profile source-recipes
   rlsok profile prepare-piper-setup --input <confirmed-roles.yaml> --source <checkout> --source-commit <sha> --id <review-id> --output <new-directory>
   rlsok profile prepare-saved-setup --recipe <piper|metal|aditya-so101|beast|cartesian|kuka-sunrise|armpilot-remote|armpilot-3d|pioneer-x|modular-diffbot|piper-cpp|robstride-command-envelope|dobot-magician-homing|lerobot-so101-direct> --source <checkout> --input <selected-files.json> --output <new-directory>
@@ -480,6 +484,37 @@ export async function runProfileCommand(args: string[]): Promise<number> {
     write(resolve(o.output), composeConnectionTemplates(o.inputs.map(read)));
     process.stdout.write(`Composed ${o.inputs.length} template fragment${o.inputs.length === 1 ? '' : 's'}: ${resolve(o.output)}\nNo private goals, fact values, approvals or robot commands were generated.\n`);
     return 0;
+  }
+  if (command === 'compose-local-data-templates') {
+    const o = compositionOptions(rest);
+    write(resolve(o.output), composeLocalDataTemplates(o.inputs.map(read)));
+    process.stdout.write(`Composed ${o.inputs.length} local data rule fragments: ${resolve(o.output)}\nNo source file, machine identity or robot command was generated.\n`);
+    return 0;
+  }
+  if (command === 'prepare-local-data') {
+    const o = options(rest, ['template', 'parser', 'source', 'device-id', 'confirm-semantics', 'output'],
+      ['template', 'parser', 'source', 'device-id', 'confirm-semantics', 'output']);
+    if (o['confirm-semantics'] !== 'yes') throw new Error('explicit_semantic_and_unit_confirmation_required');
+    const source = readLocalFileSource(o.source);
+    const workspace = prepareLocalDataWorkspace({ templates: [read(o.template)],
+      parser: o.parser as 'json-records/v1' | 'yaml-records/v1', fileName: source.fileName,
+      bytes: source.bytes, deviceId: o['device-id'], semanticsConfirmed: true });
+    const directory = newDirectory(o.output);
+    mkdirSync(join(directory, 'files'), { mode: 0o700 });
+    write(join(directory, 'workspace.json'), workspace);
+    write(join(directory, 'template.json'), workspace.check.template);
+    writeFileSync(join(directory, 'files', 'prepared-source-data'), source.bytes, { flag: 'wx', mode: 0o600 });
+    writeFileSync(join(directory, 'README.md'), '# Local structured-data check\n\nThe selected source bytes are in files/prepared-source-data. Review workspace.json, template.json and the original file before relying on a result. Run `rlsok profile check-local-data --workspace workspace.json --source files/prepared-source-data --output first-check.json`, then pass a newly captured file to the same command for another check. Parser and rules are separate. This reads files only: it does not connect to a robot, authenticate the file producer, infer units, or send a command.\n', { flag: 'wx', mode: 0o600 });
+    process.stdout.write(`Local data workspace saved: ${directory}\nNo ROS graph, cloud upload, approval or robot command was used.\n`);
+    return 0;
+  }
+  if (command === 'check-local-data') {
+    const o = options(rest, ['workspace', 'source', 'output'], ['workspace', 'source', 'output']);
+    const source = readLocalFileSource(o.source);
+    const report = evaluateLocalDataWorkspace(read(o.workspace), source.bytes, source.fileName);
+    write(resolve(o.output), report);
+    process.stdout.write(`${report.decision}: ${report.recordsChecked} local record(s) checked; ${report.violations.length} reported violation(s). No robot command was sent.\n`);
+    return report.decision === 'LOCAL_DATA_MATCH' ? 0 : 1;
   }
   if (command === 'init') {
     const o = options(rest, ['template', 'output'], ['template', 'output']);
