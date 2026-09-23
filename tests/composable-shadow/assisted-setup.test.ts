@@ -81,4 +81,19 @@ test('confirmed discovered interface yields a validated portable workspace witho
   assert.ok(archive.includes(Buffer.from('rlsok profile shadow --profile profile.json --approval approval.json')));
   await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, confirmed: false }] }), /confirm_meaning_units_and_frame/);
   await assert.rejects(buildAssistedConnection({ ...input, fragments: [{ ...fragment, compatibility: { ...fragment.compatibility, rosDistro: 'jazzy' } }] }), /template_ros_distro_mismatch/);
+  const secondCatalog = { ...catalog, observedAt: new Date().toISOString(), topics: [{ ...catalog.topics[0]!, endpoint: '/drive/cmd_vel',
+    subscribers: [{ name: 'drive_controller', namespace: '/machine_b', count: 1 }] }] };
+  const secondUrdf = Buffer.from('<robot name="machine_b"><link name="base_b"/></robot>');
+  const secondConnection = await buildAssistedConnection({ ...input, catalog: secondCatalog,
+    robot: { ...input.robot, id: 'machine-b', deviceId: 'base-b', model: 'machine_b' },
+    facts: [{ ...facts[0]!, expected: createHash('sha256').update(secondUrdf).digest('hex') }],
+    decisions: [{ ...input.decisions[0]!, endpoint: '/drive/cmd_vel', mapping: { ...input.decisions[0]!.mapping,
+      subscriber: '/machine_b|drive_controller', commandFrame: 'base_b' } }] });
+  assert.equal(secondConnection.profile.paths[0]?.endpoint, '/drive/cmd_vel');
+  assert.equal(secondConnection.profile.robot.deviceId, 'base-b');
+  assert.equal(secondConnection.profile.robot.urdfSha256, createHash('sha256').update(secondUrdf).digest('hex'));
+  const combined = composeConnectionTemplates([fragment, { ...fragment, metadata: { ...fragment.metadata, id: 'second-rule', version: '2.0.0' } }]);
+  assert.deepEqual(combined.paths.map(path => path.id), ['velocity', 'second-rule.velocity']);
+  assert.equal(combined.facts.length, 1);
+  assert.match(combined.metadata.description, /second-rule@2\.0\.0/);
 });
