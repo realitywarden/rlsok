@@ -7,15 +7,15 @@ permissions:
   contents: write
 
 concurrency:
-  group: publish-macos-local-check-v1.5.11
+  group: publish-macos-local-check-v1.5.12
   cancel-in-progress: false
 
 env:
   GH_REPO: ${{ github.repository }}
-  RELEASE_TAG: macos-local-check-v1.5.11
-  VERSION: 1.5.11
-  LINUX_ARCHIVE: rlsok-local-check-1.5.11-linux-x64.tar.gz
-  LINUX_SHA256: 4167541d6194c16bf849ec405c8ad2c35454a60604498bbc538d245da5073e63
+  RELEASE_TAG: macos-local-check-v1.5.12
+  VERSION: 1.5.12
+  LINUX_ARCHIVE: rlsok-local-check-1.5.12-linux-x64.tar.gz
+  LINUX_SHA256: c355c0f16d87bbecb8be8b7603286a06c0a2f39920e1f557f448244a6f4465f1
 
 jobs:
   prepare-draft:
@@ -36,7 +36,7 @@ jobs:
               --latest=false \
               --target "$GITHUB_SHA" \
               --title "RLSOK Local Check $VERSION for macOS" \
-              --notes-file .github/release-notes/macos-local-check-v1.5.11.md
+              --notes-file .github/release-notes/macos-local-check-v1.5.12.md
           fi
 
   build-install-run:
@@ -63,13 +63,13 @@ jobs:
           test "$(uname -m)" = "${{ matrix.uname_arch }}"
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
 
-      - name: Download the immutable 1.5.11 payload
+      - name: Download the immutable 1.5.12 payload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir "$RUNNER_TEMP/release-input"
-          gh release download v1.5.11 --pattern "$LINUX_ARCHIVE" --dir "$RUNNER_TEMP/release-input"
+          gh release download v1.5.12 --pattern "$LINUX_ARCHIVE" --dir "$RUNNER_TEMP/release-input"
           actual="$(shasum -a 256 "$RUNNER_TEMP/release-input/$LINUX_ARCHIVE" | awk '{print $1}')"
           test "$actual" = "$LINUX_SHA256"
 
@@ -97,7 +97,7 @@ jobs:
           test -d "$app"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")" = "$VERSION"
           test "$(cat "$bundle/VERSION")" = "$VERSION"
-          test "$(cat "$bundle/SOURCE_COMMIT")" = 2c9ac6655617af148e1e5d88c48fe160227817ce
+          test "$(cat "$bundle/SOURCE_COMMIT")" = 0ff8bd16fa355018afa941103dd367ffc221f691
           /usr/bin/file "$app/Contents/MacOS/RLSOKLocalCheck" | tee "$RUNNER_TEMP/console-file.txt"
           /usr/bin/file "$app/Contents/MacOS/RLSOKLocalCheck" | grep -q "${{ matrix.uname_arch }}"
           "$app/Contents/MacOS/RLSOKLocalCheck" --self-check \
@@ -134,8 +134,8 @@ jobs:
           digest = lambda name: hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()
           record = {
               "schema": "rlsok.io/macos-local-check-verification/v1",
-              "version": "1.5.11",
-              "sourceCommit": "2c9ac6655617af148e1e5d88c48fe160227817ce",
+              "version": "1.5.12",
+              "sourceCommit": "0ff8bd16fa355018afa941103dd367ffc221f691",
               "packagingSourceCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
               "runnerArchitecture": platform.machine(),
               "payloadArchitecture": arch,
@@ -144,7 +144,7 @@ jobs:
               "nativeInstall": "passed",
               "nativeConsole": "swiftui",
               "nativeConsoleSelfCheck": "passed",
-              "nativeCliVersion": "RLSOK 1.5.11",
+              "nativeCliVersion": "RLSOK 1.5.12",
               "includedExample": {"baseline": "WOULD_ALLOW", "changedCalibration": "WOULD_BLOCK"},
               "developerIdSigned": False,
               "notarized": False,
@@ -192,7 +192,7 @@ jobs:
           mapfile -t actual < <(find release-assets -maxdepth 1 -type f -printf '%f\n' | sort)
           diff -u <(printf '%s\n' "${expected[@]}" | sort) <(printf '%s\n' "${actual[@]}")
           (cd release-assets && sha256sum -c ./*.sha256)
-          jq -e '.nativeInstall == "passed" and .nativeConsole == "swiftui" and .nativeConsoleSelfCheck == "passed" and .nativeCliVersion == "RLSOK 1.5.11" and .includedExample.baseline == "WOULD_ALLOW" and .includedExample.changedCalibration == "WOULD_BLOCK" and .developerIdSigned == false and .notarized == false' release-assets/*-verification.json >/dev/null
+          jq -e '.nativeInstall == "passed" and .nativeConsole == "swiftui" and .nativeConsoleSelfCheck == "passed" and .nativeCliVersion == "RLSOK 1.5.12" and .includedExample.baseline == "WOULD_ALLOW" and .includedExample.changedCalibration == "WOULD_BLOCK" and .developerIdSigned == false and .notarized == false' release-assets/*-verification.json >/dev/null
           (cd release-assets && sha256sum RLSOK-*.pkg rlsok-*.tar.gz macos-*-verification.json > SHA256SUMS)
           gh release upload "$RELEASE_TAG" release-assets/SHA256SUMS
           gh release edit "$RELEASE_TAG" --draft=false --latest=false
