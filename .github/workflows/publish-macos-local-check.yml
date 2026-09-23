@@ -166,11 +166,11 @@ jobs:
             "$pkg" "$pkg.sha256" \
             "$RUNNER_TEMP/macos-$arch-verification.json"
 
-  publish:
+  verify-draft:
     needs: build-install-run
     runs-on: ubuntu-24.04
     steps:
-      - name: Verify all draft assets and publish once
+      - name: Verify all draft assets without publishing
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -195,6 +195,5 @@ jobs:
           jq -e '.nativeInstall == "passed" and .nativeConsole == "swiftui" and .nativeConsoleSelfCheck == "passed" and .nativeCliVersion == "RLSOK 1.5.12" and .includedExample.baseline == "WOULD_ALLOW" and .includedExample.changedCalibration == "WOULD_BLOCK" and .developerIdSigned == false and .notarized == false' release-assets/*-verification.json >/dev/null
           (cd release-assets && sha256sum RLSOK-*.pkg rlsok-*.tar.gz macos-*-verification.json > SHA256SUMS)
           gh release upload "$RELEASE_TAG" release-assets/SHA256SUMS
-          gh release edit "$RELEASE_TAG" --draft=false --latest=false
-          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = false
+          test "$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft)" = true
           test "$(gh release view "$RELEASE_TAG" --json assets --jq '.assets | length')" = 11
