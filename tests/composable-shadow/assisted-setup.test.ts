@@ -159,6 +159,16 @@ test('local project inspection suggests only structural facts', () => {
   assert.equal(config.parserPlugin, 'json-yaml-structure/v1');
   assert.deepEqual(config.jointOrderCandidates, [['axis']]);
   assert.equal(inspectProjectFile('robot.urdf', Buffer.from('<robot name="${model}"/>').toString('base64')).needsExpansion, true);
+  const srdf = inspectProjectFile('robot.srdf', Buffer.from('<robot name="sample"><group name="arm"><chain base_link="base" tip_link="tool"/></group><group name="gripper"><joint name="finger"/></group></robot>').toString('base64'));
+  assert.equal(srdf.kind, 'configuration');
+  assert.equal(srdf.parserPlugin, 'srdf-structure/v1');
+  assert.deepEqual(srdf.planningGroups, [
+    { name: 'arm', joints: [], chains: [{ baseLink: 'base', tipLink: 'tool' }] },
+    { name: 'gripper', joints: ['finger'], chains: [] }
+  ]);
+  assert.deepEqual(srdf.jointOrderCandidates, []);
+  assert.match(srdf.warnings.join(' '), /not the active controller or actual command joint order/);
+  assert.throws(() => inspectProjectFile('robot.srdf', Buffer.from('<!DOCTYPE robot><robot name="sample"/>').toString('base64')), /srdf_dtd_or_entities_not_allowed/);
 });
 
 test('offline ROS interface declarations are previews, not discovered endpoints or semantics', () => {
@@ -239,6 +249,19 @@ test('confirmed discovered interface yields a validated portable workspace witho
   assert.ok(archive.includes(urdf));
   assert.ok(archive.includes(Buffer.from('rlsok profile capture --profile profile.json --output observation.json')));
   assert.ok(archive.includes(Buffer.from('rlsok profile shadow --profile profile.json --approval approval.json')));
+  const srdfBytes = Buffer.from('<robot name="sample"><group name="base"><joint name="wheel"/></group></robot>');
+  const semanticStarter = starterTemplate(validatedCatalog, { kind: 'topic', endpoint: '/cmd_vel', adapter: 'topic_twist',
+    projectFiles: [{ name: 'robot.urdf', kind: 'robot-description' }, { name: 'robot.srdf', kind: 'configuration' }] });
+  const semanticConnection = await buildAssistedConnection({ ...input, fragments: [semanticStarter],
+    facts: [...facts, { id: 'project-config-1', kind: 'file_sha256', path: 'files/robot.srdf',
+      expected: createHash('sha256').update(srdfBytes).digest('hex') }],
+    decisions: [{ ...input.decisions[0]!, pathId: 'path-1' }] });
+  const semanticArchive = await buildSetupWorkspace(semanticConnection, [
+    { path: 'files/robot.urdf', base64: urdf.toString('base64') },
+    { path: 'files/robot.srdf', base64: srdfBytes.toString('base64') }
+  ], semanticStarter);
+  assert.ok(semanticArchive.includes(Buffer.from('files/robot.srdf')));
+  assert.ok(semanticArchive.includes(srdfBytes));
   await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, confirmed: false }] }), /confirm_meaning_units_and_frame/);
   await assert.rejects(buildAssistedConnection({ ...input, fragments: [{ ...fragment, compatibility: { ...fragment.compatibility, rosDistro: 'jazzy' } }] }), /template_ros_distro_mismatch/);
   const secondCatalog = { ...catalog, observedAt: new Date().toISOString(), topics: [{ ...catalog.topics[0]!, endpoint: '/drive/cmd_vel',

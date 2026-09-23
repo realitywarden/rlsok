@@ -7,6 +7,7 @@ export type ProjectFileInspection = {
   kind: 'robot-description' | 'configuration' | 'interface-declaration' | 'selected-file';
   parserPlugin?: string; model?: string; movableJoints?: string[]; needsExpansion?: boolean;
   declaredFields?: Array<{ section: string; type: string; name: string }>;
+  planningGroups?: Array<{ name: string; joints: string[]; chains: Array<{ baseLink: string; tipLink: string }> }>;
   controllerCandidates: string[]; jointOrderCandidates: string[][]; warnings: string[];
 };
 
@@ -68,6 +69,40 @@ const configurationParser: ProjectParserPlugin = {
   }
 };
 
+const semanticRobotParser: ProjectParserPlugin = {
+  id: 'srdf-structure/v1', accepts: name => /\.srdf$/i.test(name),
+  inspect(bytes, result) {
+    const source = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new Error('srdf_dtd_or_entities_not_allowed');
+    if (XMLValidator.validate(source) !== true) throw new Error('invalid_semantic_robot_description_xml');
+    const parsed = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', parseAttributeValue: false, processEntities: false }).parse(source);
+    if (!parsed?.robot || typeof parsed.robot !== 'object') throw new Error('semantic_robot_description_root_required');
+    const robot = parsed.robot as Record<string, unknown>;
+    const entries = robot.group === undefined ? [] : Array.isArray(robot.group) ? robot.group : [robot.group];
+    if (entries.length > 64) throw new Error('semantic_robot_description_exceeds_64_groups');
+    const groups: NonNullable<ProjectFileInspection['planningGroups']> = [];
+    for (const entry of entries) {
+      if (!entry || typeof entry !== 'object') continue;
+      const group = entry as Record<string, unknown>;
+      const name = group['@_name'];
+      if (typeof name !== 'string' || !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(name)) continue;
+      const jointEntries = group.joint === undefined ? [] : Array.isArray(group.joint) ? group.joint : [group.joint];
+      const chainEntries = group.chain === undefined ? [] : Array.isArray(group.chain) ? group.chain : [group.chain];
+      if (jointEntries.length > 256 || chainEntries.length > 32) throw new Error('semantic_robot_group_exceeds_limits');
+      const joints = jointEntries.map(item => item && typeof item === 'object' ? (item as Record<string, unknown>)['@_name'] : undefined)
+        .filter((item): item is string => typeof item === 'string' && /^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(item));
+      const chains = chainEntries.map(item => item && typeof item === 'object' ? item as Record<string, unknown> : {})
+        .filter(item => typeof item['@_base_link'] === 'string' && typeof item['@_tip_link'] === 'string')
+        .map(item => ({ baseLink: item['@_base_link'] as string, tipLink: item['@_tip_link'] as string }));
+      groups.push({ name, joints, chains });
+    }
+    result.kind = 'configuration';
+    result.model = typeof robot['@_name'] === 'string' ? robot['@_name'] : '';
+    result.planningGroups = groups;
+    result.warnings.push('SRDF planning groups describe robot semantics, not the active controller or actual command joint order.');
+  }
+};
+
 const interfaceDeclarationParser: ProjectParserPlugin = {
   id: 'ros-interface-declaration/v1', accepts: name => /\.(?:msg|action|srv|idl)$/i.test(name),
   inspect(bytes, result) {
@@ -102,7 +137,7 @@ const interfaceDeclarationParser: ProjectParserPlugin = {
   }
 };
 
-const projectParserPlugins: readonly ProjectParserPlugin[] = [robotDescriptionParser, configurationParser, interfaceDeclarationParser];
+const projectParserPlugins: readonly ProjectParserPlugin[] = [robotDescriptionParser, configurationParser, semanticRobotParser, interfaceDeclarationParser];
 
 export function inspectProjectFile(name: string, base64: string): ProjectFileInspection {
   if (typeof name !== 'string' || name.length > 256 || !/^[A-Za-z0-9_. -]+$/.test(name)) throw new Error('invalid_project_filename');
