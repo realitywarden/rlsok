@@ -26,7 +26,9 @@ FIELDS = ('arming_state', 'nav_state', 'failsafe', 'pre_flight_checks_pass')
 
 def build_observation(reader, source_checkout):
     publishers = reader.publishers(TOPIC)
-    if len(publishers) != 1 or publishers[0]['type'] != TYPE:
+    if (len(publishers) != 1 or publishers[0]['type'] != TYPE or
+            '_NODE_NAME_UNKNOWN_' in publishers[0]['node'] or
+            '_NODE_NAMESPACE_UNKNOWN_' in publishers[0]['node']):
         raise CollectionError('vehicle_status_publisher_missing_or_ambiguous:' + json.dumps(publishers))
     message = reader.once(TOPIC, TYPE)
     status = {}

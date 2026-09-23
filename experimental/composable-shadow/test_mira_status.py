@@ -27,6 +27,8 @@ class MiraStatusTests(unittest.TestCase):
         publisher = {'node': '/agent', 'type': mira_status.TYPE, 'gid': 'aa'}
         with self.assertRaisesRegex(mira_status.CollectionError, 'ambiguous'):
             mira_status.build_observation(self.reader([publisher, {**publisher, 'gid': 'bb'}]), CHECKOUT)
+        with self.assertRaisesRegex(mira_status.CollectionError, 'publisher_missing_or_ambiguous'):
+            mira_status.build_observation(self.reader([{**publisher, 'node': '/_NODE_NAME_UNKNOWN_'}]), CHECKOUT)
         with self.assertRaisesRegex(mira_status.CollectionError, 'field_missing'):
             mira_status.build_observation(self.reader(message=SimpleNamespace(arming_state=1)), CHECKOUT)
 
