@@ -26,6 +26,8 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="projectFolder"[^>]*webkitdirectory/);
   assert.match(html, /id="inspectFolder"/);
   assert.match(html, /function updateNextStep\(/);
+  assert.match(html, /endpoint\.addEventListener\('change',refreshPointers\)/);
+  assert.match(html, /if\(!matching&&fact\.id==='robot-description'\)/);
   assert.match(html, /Valid saved interface catalog loaded/);
 });
 

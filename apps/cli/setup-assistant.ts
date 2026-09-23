@@ -220,7 +220,9 @@ function renderFinish(){
     option(endpoint,'','Choose an endpoint');for(const candidate of planned.candidates)option(endpoint,candidate,candidate);
     endpoint.value=planned.selectedEndpoint||'';
     const controls={pathId:planned.id,endpoint,mapping:{},goal:null,confirmed:null};
-    const candidates=[...(workspace.catalog.actions||[]),...(workspace.catalog.topics||[])],suggestions=fieldPointers(candidates.find(item=>item.endpoint===endpoint.value)?.typeTree),pointerList=document.createElement('datalist');pointerList.id='pointers-'+planned.id.replace(/[^A-Za-z0-9_-]/g,'-');card.append(pointerList);for(const pointer of suggestions)option(pointerList,pointer,pointer);
+    const candidates=[...(workspace.catalog.actions||[]),...(workspace.catalog.topics||[])],pointerList=document.createElement('datalist');pointerList.id='pointers-'+planned.id.replace(/[^A-Za-z0-9_-]/g,'-');card.append(pointerList);
+    function refreshPointers(){pointerList.replaceChildren();for(const pointer of fieldPointers(candidates.find(item=>item.endpoint===endpoint.value)?.typeTree))option(pointerList,pointer,pointer)}
+    refreshPointers();endpoint.addEventListener('change',refreshPointers);
     if(specification.adapter==='topic_twist'){
       const subscriber=field(card,'Intended receiving node','','select');option(subscriber,'','Choose the receiver');
       const topic=(workspace.catalog.topics||[]).find(item=>item.endpoint===endpoint.value);
@@ -242,7 +244,17 @@ function renderFinish(){
     if(unique.has(fact.path))continue;unique.add(fact.path);
     const source=field(root,fact.path+' · '+fact.kind+(fact.pointer?' · '+fact.pointer:''),'','file');source.accept=fact.path.endsWith('.urdf')?'.urdf,.xml':'*/*';
     formControls.files.set(fact.path,source);
-    const matching=projectFiles.find(file=>file.name===fact.path.split('/').pop());if(matching){const transfer=new DataTransfer();transfer.items.add(matching);source.files=transfer.files}
+    let matching=projectFiles.find(file=>file.name===fact.path.split('/').pop());
+    if(!matching&&fact.id==='robot-description'){
+      const robots=inspections.filter(item=>item.kind==='robot-description'&&!item.needsExpansion);
+      if(robots.length===1)matching=projectFiles.find(file=>file.name===robots[0].name);
+    }
+    if(!matching&&fact.kind==='file_sha256'&&fact.id!=='robot-description'){
+      const configs=inspections.filter(item=>item.kind==='configuration');
+      if(configs.length===1&&template.facts.filter(item=>item.kind==='file_sha256'&&item.id!=='robot-description').length===1)
+        matching=projectFiles.find(file=>file.name===configs[0].name);
+    }
+    if(matching){const transfer=new DataTransfer();transfer.items.add(matching);source.files=transfer.files}
   }
   updateMissing();
 }
