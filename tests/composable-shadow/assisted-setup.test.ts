@@ -45,6 +45,8 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="localDataFile"/);
   assert.match(html, /id="localDataFragments"/);
   assert.match(html, /id="localDataSaveTemplate"/);
+  assert.match(html, /id="localDataProjectFile"/);
+  assert.match(html, /localDataProjectCandidates=allCandidates/);
   assert.match(html, /api\/local-data-workspace/);
 });
 
