@@ -36,6 +36,7 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="expandXacro"/);
   assert.match(html, /Read one incoming message \(optional\)/);
   assert.match(html, /function updateNextStep\(/);
+  assert.match(html, /rosidl-catalog\/v1/);
   assert.match(html, /Add field rule/);
   assert.match(html, /Allowed values, one per line/);
   assert.match(html, /endpoint\.addEventListener\('change',refreshPointers\)/);
@@ -203,6 +204,7 @@ test('project folder sample contains a valid versioned fragment and catalog', as
   assert.deepEqual(ambiguousPlan.paths[0]?.candidates, []);
   assert.deepEqual(ambiguousPlan.paths[0]?.unusableActionServers, ['/run_program']);
   assert.throws(() => loadInterfaceSource('unknown/v1', catalog, 'unused'), /unsupported_interface_source/);
+  await assert.rejects(loadInterfaceSource('saved-ros2-catalog/v1', { ...catalog, schemaVersion: 2 }, 'unused'));
 });
 
 test('confirmed discovered interface yields a validated portable workspace without dispatch', async () => {

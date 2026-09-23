@@ -92,7 +92,7 @@ async function body(request: IncomingMessage, maximum = MAX_BODY): Promise<unkno
   return JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
 }
 
-function discover(python: string): Promise<Catalog> {
+function discover(python: string): Promise<unknown> {
   return mkdtemp(join(tmpdir(), 'rlsok-setup-')).then(directory => new Promise((resolve, reject) => {
     const output = join(directory, 'catalog.json');
     const child = spawn(python, [collectorScript(), '--discover', '--output', output], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
@@ -104,8 +104,7 @@ function discover(python: string): Promise<Catalog> {
       clearTimeout(timer);
       try {
         if (code !== 0) throw new Error(stderr.trim() || `collector_exited_${code ?? 'unknown'}`);
-        const catalog = await readCatalog(JSON.parse(readFileSync(output, 'utf8')));
-        resolve(catalog);
+        resolve(JSON.parse(readFileSync(output, 'utf8')));
       } catch (error) { reject(error); }
       finally { rmSync(directory, { recursive: true, force: true }); }
     });
@@ -140,16 +139,22 @@ export async function sampleTopic(python: string, catalogInput: unknown, endpoin
   });
 }
 
-type InterfaceSourcePlugin = { id: string; load: (input: unknown, python: string) => Promise<Catalog> };
+type InterfaceSourcePlugin = { id: string; parserId: string; read: (input: unknown, python: string) => Promise<unknown> };
+type InterfaceParserPlugin = { id: string; parse: (input: unknown) => Promise<Catalog> };
+const interfaceParserPlugins: readonly InterfaceParserPlugin[] = [
+  { id: 'rosidl-catalog/v1', parse: readCatalog }
+];
 const interfaceSourcePlugins: readonly InterfaceSourcePlugin[] = [
-  { id: 'ros2-live-graph/v1', load: (_input, python) => discover(python) },
-  { id: 'saved-ros2-catalog/v1', load: input => readCatalog(input) }
+  { id: 'ros2-live-graph/v1', parserId: 'rosidl-catalog/v1', read: (_input, python) => discover(python) },
+  { id: 'saved-ros2-catalog/v1', parserId: 'rosidl-catalog/v1', read: async input => input }
 ];
 
 export function loadInterfaceSource(pluginId: string, input: unknown, python: string): Promise<Catalog> {
   const plugin = interfaceSourcePlugins.find(item => item.id === pluginId);
   if (!plugin) throw new Error(`unsupported_interface_source:${pluginId}`);
-  return plugin.load(input, python);
+  const parser = interfaceParserPlugins.find(item => item.id === plugin.parserId);
+  if (!parser) throw new Error(`unsupported_interface_parser:${plugin.parserId}`);
+  return plugin.read(input, python).then(raw => parser.parse(raw));
 }
 
 export function page(token: string): string {
@@ -187,8 +192,8 @@ function projectSuggestions(){
   const orders=new Map();for(const order of [...configs.flatMap(item=>item.jointOrderCandidates),...(robot?.movableJoints?.length?[robot.movableJoints]:[])])orders.set(JSON.stringify(order),order);
   return {robot,robotCount:robots.length,model:robot?.model||'',controllers:[...new Set(configs.flatMap(item=>item.controllerCandidates))],orders:[...orders.values()]};
 }
-function renderPipeline(){const parsers=[...new Set([...inspections.map(item=>item.parserPlugin),declarationInspection?.parserPlugin].filter(Boolean))],checks=[...new Set((workspace?.template.paths||fragments.flatMap(fragment=>fragment.paths||[])).map(path=>path.adapter))];
-  $('pipelineStatus').textContent='Source: '+(catalogOrigin==='live'?'current ROS 2 graph':catalogOrigin==='saved'?'saved ROS 2 interface catalog':'not selected')+' + local project files. Parser: '+(parsers.length?parsers.join(', '):'awaiting selected project files')+(catalog?' + ROS interface type tree':'')+'. Check: '+(checks.length?checks.join(', '):'choose a documented meaning or saved rule')+'.';}
+function renderPipeline(){const parsers=[...new Set([...inspections.map(item=>item.parserPlugin),declarationInspection?.parserPlugin,catalog?'rosidl-catalog/v1':null].filter(Boolean))],checks=[...new Set((workspace?.template.paths||fragments.flatMap(fragment=>fragment.paths||[])).map(path=>path.adapter))];
+  $('pipelineStatus').textContent='Source: '+(catalogOrigin==='live'?'ros2-live-graph/v1':catalogOrigin==='saved'?'saved-ros2-catalog/v1':'not selected')+' + local project files. Parser: '+(parsers.length?parsers.join(', '):'awaiting selected project files')+'. Check: '+(checks.length?checks.join(', '):'choose a documented meaning or saved rule')+'.';}
 function updateNextStep(){if(workspace)return;
   const next=!inspections.length?(folderCandidates.some(file=>/\\.urdf$/i.test(file.name))?'Choose the intended robot/config files and click Inspect selected project files.':folderXacroFiles.length?'Review the Xacro entry file and click Expand and inspect URDF if you trust this project.':folderInterfaceFiles.length?(declarationInspection?'Source the project ROS environment and discover installed interfaces, or import a saved catalog.':'Inspect a project interface declaration, then discover the installed ROS graph or import a catalog.'):folderCandidates.length?'Choose the intended config files and click Inspect selected project files.':'Open a project folder or choose project files.'):projectSuggestions().robotCount>1?'Choose one intended expanded robot description and inspect again.':inspections.some(item=>item.kind==='robot-description'&&item.needsExpansion)&&folderXacroFiles.length?'Review the matching Xacro entry file and expand it locally if you trust this project.':!projectSuggestions().robot?'Choose an expanded URDF with Choose individual files, or open a project folder and select its intended URDF.':!catalog?(folderInterfaceFiles.length?'Project declarations found but no live endpoint: discover the sourced ROS graph or import a saved catalog.':'Import a catalog or click Discover this ROS graph.'):fragments.length?'Click Prepare to match the saved rules to this project.':$('starterInterface').options.length<=1?'No interface has one visible server or receiving node; correct the graph and rediscover, or import another catalog.':'Choose a discovered interface or reusable fragments, then click Prepare.';
   show('summary','Next: '+next);
