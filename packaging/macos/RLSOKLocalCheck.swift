@@ -24,7 +24,7 @@ private enum WorkspacePage: String, CaseIterable, Identifiable {
 
 @MainActor
 private final class LocalCheckModel: ObservableObject {
-    @Published var selectedPage: WorkspacePage = .overview
+    @Published var selectedPage: WorkspacePage = .templates
     @Published var isRunning = false
     @Published var isAssistantRunning = false
     @Published var latestReportURL: URL?
@@ -397,7 +397,7 @@ private struct ConsoleRoot: View {
                 VStack(alignment: .leading, spacing: 14) {
                     Label("Discover → compose → confirm", systemImage: "square.3.layers.3d")
                         .font(.headline)
-                    Text("Fresh ROS discovery identifies interfaces. Ordered template fragments combine paths and facts; later robot defaults override earlier defaults. Meanings, units, frames, real goals and local files still require confirmation.")
+                    Text("Open a project folder to identify robot descriptions and configuration candidates, then discover or import its interfaces. Reusable rules compose; machine-specific identity, controller and joint order are confirmed for this project. Meanings, units, frames and real examples still require confirmation.")
                         .foregroundStyle(.secondary)
                     HStack {
                         Button(model.isAssistantRunning ? "Assistant running" : "Open Local Setup Assistant") { model.startSetupAssistant() }
@@ -426,18 +426,27 @@ private struct ConsoleRoot: View {
         panel {
             HStack(spacing: 18) {
                 VStack(alignment: .leading, spacing: 7) {
-                    Text("Start with the included example").font(.headline)
-                    Text(model.status).font(.system(size: 12)).foregroundStyle(.secondary)
+                    Text(model.selectedPage == .example ? "Run the included example" : "Connect your own project").font(.headline)
+                    Text(model.selectedPage == .example ? model.status : "Find descriptions and configuration files, review missing facts, and prepare a local check workspace.")
+                        .font(.system(size: 12)).foregroundStyle(.secondary)
                 }
                 Spacer()
-                if model.isRunning { ProgressView().controlSize(.small) }
-                Button(model.isRunning ? "Running…" : "Run example") { model.runExample() }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(model.isRunning)
-                Button("Guide") { model.openGuide() }
-                    .buttonStyle(.bordered)
-                    .controlSize(.large)
+                if model.selectedPage == .example {
+                    if model.isRunning { ProgressView().controlSize(.small) }
+                    Button(model.isRunning ? "Running…" : "Run example") { model.runExample() }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .disabled(model.isRunning)
+                } else {
+                    Button(model.isAssistantRunning ? "Assistant running" : "Open Local Setup Assistant") { model.startSetupAssistant() }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .disabled(model.isAssistantRunning)
+                    Button("Run example") { model.runExample() }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                        .disabled(model.isRunning)
+                }
             }
         }
     }

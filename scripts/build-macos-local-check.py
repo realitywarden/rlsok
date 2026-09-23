@@ -92,7 +92,10 @@ def main():
             shutil.copyfile(ROOT/'packaging/macos/rlsok',stage/'bin/rlsok')
             shutil.copyfile(ROOT/'packaging/macos/build-pkg.sh',stage/'build-pkg.sh')
             shutil.copyfile(ROOT/'packaging/macos/RLSOKLocalCheck.swift',stage/'RLSOKLocalCheck.swift')
-            shutil.copyfile(ROOT/'packaging/macos/README.md',stage/'START-HERE.md')
+            guide = (ROOT/'packaging/macos/README.md').read_text(encoding='utf-8')
+            if guide.count('__RLSOK_VERSION__') != 4:
+                raise RuntimeError('macos_guide_version_tokens_invalid')
+            (stage/'START-HERE.md').write_text(guide.replace('__RLSOK_VERSION__', VERSION), encoding='utf-8')
             (stage/'PLATFORM').write_text(f'darwin-{arch}\n')
             manifest=json.loads((stage/'BUILD-MANIFEST.json').read_text())
             manifest.update(platform=f'darwin-{arch}',packagingSourceCommit=packaging_source,

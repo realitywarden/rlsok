@@ -76,7 +76,12 @@ def main():
         for file in templates.iterdir():
             destination = stage/file.name if file.suffix in ('.html',) or file.name in ('Run example.cmd', 'Start setup assistant.cmd') else stage/'bin'/file.name
             shutil.copyfile(file, destination)
-        (stage/'START-HERE.md').write_text('# Start here\n\nOpen START-HERE.html, or double-click Run example.cmd. No account or installation is needed.\n', encoding='utf-8')
+        guide = stage/'START-HERE.html'
+        guide_text = guide.read_text(encoding='utf-8')
+        if guide_text.count('__RLSOK_VERSION__') != 1:
+            raise RuntimeError('windows_guide_version_token_invalid')
+        guide.write_text(guide_text.replace('__RLSOK_VERSION__', VERSION), encoding='utf-8')
+        (stage/'START-HERE.md').write_text('# Start here\n\nOpen START-HERE.html, or double-click Start setup assistant.cmd to prepare a local check workspace for your project. No account or installation is needed. The included example remains optional.\n', encoding='utf-8')
         (stage/'PLATFORM').write_text('win32-x64\n')
         manifest = json.loads((stage/'BUILD-MANIFEST.json').read_text())
         manifest.update(platform='win32-x64', packagingSourceCommit=packaging_source,
