@@ -64,6 +64,16 @@ function collectorScript(): string {
   throw new Error('composable_shadow_collector_missing');
 }
 
+function sampleScript(): string {
+  let directory = __dirname;
+  for (let index = 0; index < 7; index += 1) {
+    const candidate = join(directory, 'experimental', 'composable-shadow', 'sample_topic.py');
+    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
+    directory = dirname(directory);
+  }
+  throw new Error('composable_shadow_topic_sampler_missing');
+}
+
 function json(response: ServerResponse, status: number, value: unknown): void {
   response.writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
   response.end(JSON.stringify(value));
@@ -99,6 +109,34 @@ function discover(python: string): Promise<Catalog> {
       finally { rmSync(directory, { recursive: true, force: true }); }
     });
   }));
+}
+
+export async function sampleTopic(python: string, catalogInput: unknown, endpoint: string): Promise<Record<string, unknown>> {
+  const catalog = await readCatalog(catalogInput);
+  const topic = catalog.topics?.find(item => item.endpoint === endpoint);
+  const fingerprint = topic?.interfaceSha256, messageType = topic?.messageType;
+  if (!fingerprint || !messageType || topic?.unavailable || typeof endpoint !== 'string') throw new Error('choose_available_discovered_topic');
+  return new Promise((resolve, reject) => {
+    const child = spawn(python, [sampleScript(), '--topic', endpoint, '--message-type', messageType,
+      '--interface-sha256', fingerprint], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, shell: false });
+    let stdout = '', stderr = '', settled = false;
+    const finish = (error?: Error, result?: Record<string, unknown>) => { if (settled) return; settled = true; clearTimeout(timer); error ? reject(error) : resolve(result!); };
+    const timer = setTimeout(() => { child.kill(); finish(new Error('topic_sample_timed_out')); }, 8_000);
+    child.stdout.on('data', chunk => { stdout += chunk.toString(); if (stdout.length > 1024 * 1024) { child.kill(); finish(new Error('topic_sample_exceeds_1MiB')); } });
+    child.stderr.on('data', chunk => { if (stderr.length < 16_384) stderr += chunk.toString(); });
+    child.once('error', error => finish(error));
+    child.once('close', code => {
+      if (settled) return;
+      if (code !== 0) return finish(new Error(stderr.trim() || `topic_sampler_exited_${code ?? 'unknown'}`));
+      try {
+        const result = JSON.parse(stdout) as Record<string, unknown>;
+        if (result.kind !== 'RlsokLocalTopicSample' || result.topic !== endpoint || result.messageType !== messageType ||
+          result.interfaceSha256 !== fingerprint || !result.payload || typeof result.payload !== 'object' || Array.isArray(result.payload))
+          throw new Error('topic_sample_mismatches_selected_interface');
+        finish(undefined, result);
+      } catch (error) { finish(error instanceof Error ? error : new Error('invalid_topic_sample')); }
+    });
+  });
 }
 
 type InterfaceSourcePlugin = { id: string; load: (input: unknown, python: string) => Promise<Catalog> };
@@ -142,7 +180,7 @@ function field(parent,title,value='',kind='text'){
 }
 function option(select,value,title){const item=document.createElement('option');item.value=value;item.textContent=title;select.append(item)}
 const requiredMappings={topic_twist:['linear','angular','commandFrame'],topic_fields:['rulesJson'],joint_trajectory:['jointNames','points'],cartesian_pose:['px','py','pz','qx','qy','qz','qw','frame','expectedFrame'],cartesian_delta:['tx','ty','tz','rw','rp','rr','velocity','frame','expectedFrame','maxTranslationMm','maxRotationDeg','maxVelocityMmS'],cartesian_absolute_wpr:['px','py','pz','rw','rp','rr','velocity','frame','expectedFrame','defaultVelocityMmS','maxVelocityMmS'],tp_program:['program','allowedPrograms']};
-const conventions={topic_twist:'Standard Twist: linear m/s, angular rad/s. Select the intended receiving node and confirm the command frame.',topic_fields:'Custom topic: add a rule for each field you want checked. Choose the detected field and type, then supply its actual meaning, unit and any limits. Only declared fields are checked; no live message payload or physical meaning is inferred.',joint_trajectory:'FollowJointTrajectory: exact command joint order, radians and increasing time_from_start.',cartesian_pose:'Absolute XYZ meters and normalized X/Y/Z/W quaternion; no Euler or unit conversion.',cartesian_delta:'Relative XYZ millimeters, W/P/R degrees and velocity mm/s with explicit per-component bounds.',cartesian_absolute_wpr:'Absolute XYZ millimeters and native W/P/R degrees. Zero is a literal target; no transform or unit conversion.',tp_program:'Exact program selector with an explicit allowlist. Program contents and side effects are not inspected.'};
+const conventions={topic_twist:'Standard Twist: linear m/s, angular rad/s. Select the intended receiving node and confirm the command frame.',topic_fields:'Custom topic: add a rule for each field you want checked. Choose the detected field and type, then supply its actual meaning, unit and any limits. Only declared fields are checked. A type tree does not supply a payload or physical meaning; an optional temporary subscription can copy one incoming message as an example.',joint_trajectory:'FollowJointTrajectory: exact command joint order, radians and increasing time_from_start.',cartesian_pose:'Absolute XYZ meters and normalized X/Y/Z/W quaternion; no Euler or unit conversion.',cartesian_delta:'Relative XYZ millimeters, W/P/R degrees and velocity mm/s with explicit per-component bounds.',cartesian_absolute_wpr:'Absolute XYZ millimeters and native W/P/R degrees. Zero is a literal target; no transform or unit conversion.',tp_program:'Exact program selector with an explicit allowlist. Program contents and side effects are not inspected.'};
 function projectSuggestions(){
   const robot=inspections.find(item=>item.kind==='robot-description'&&!item.needsExpansion),configs=inspections.filter(item=>item.kind==='configuration');
   const orders=new Map();for(const order of [...configs.flatMap(item=>item.jointOrderCandidates),...(robot?.movableJoints?.length?[robot.movableJoints]:[])])orders.set(JSON.stringify(order),order);
@@ -258,6 +296,16 @@ function renderFinish(){
       controls.mapping[key]=input;
     }
     controls.goal=field(card,'Real example goal or message (JSON object)','', 'textarea');
+    if(specification.adapter==='topic_twist'||specification.adapter==='topic_fields'){
+      const sample=document.createElement('button'),sampleStatus=document.createElement('div');sample.type='button';sample.className='secondary';sample.textContent='Read one incoming message (optional)';sampleStatus.className='status';card.append(sample,sampleStatus);
+      sample.onclick=async()=>{try{
+        if(catalogOrigin!=='live')throw new Error('Discover the current ROS graph before reading a live message. A saved catalog is not live-state proof.');
+        if(!endpoint.value)throw new Error('Choose the intended topic first.');
+        sampleStatus.textContent='Waiting briefly for one incoming message…';
+        const result=await api('sample-topic',{catalog:workspace.catalog,endpoint:endpoint.value});
+        controls.goal.value=JSON.stringify(result.payload,null,2);sampleStatus.textContent='One local message received at '+result.observedAt+'. Review its source, units and meaning; this did not confirm them.';updateMissing();
+      }catch(error){sampleStatus.textContent=error.message||String(error)}};
+    }
     const confirmation=field(card,'I checked this interface meaning, units, frame and limits against the actual system','','checkbox');confirmation.value='yes';controls.confirmed=confirmation;
     formControls.paths.push(controls);
   }
@@ -426,6 +474,10 @@ export async function runSetupAssistant(args: string[]): Promise<number> {
       if (url.pathname === `${base}/api/expand-xacro` && request.method === 'POST') {
         const input = await body(request, 36 * 1024 * 1024) as XacroInput;
         json(response, 200, await expandTrustedXacro(input, python)); return;
+      }
+      if (url.pathname === `${base}/api/sample-topic` && request.method === 'POST') {
+        const input = await body(request) as { catalog?: unknown; endpoint?: string };
+        json(response, 200, await sampleTopic(python, input.catalog, input.endpoint ?? '')); return;
       }
       if (url.pathname === `${base}/api/discover` && request.method === 'POST') { await body(request); json(response, 200, await discover(python)); return; }
       if (url.pathname === `${base}/api/generate` && request.method === 'POST') {

@@ -6,7 +6,7 @@ import { Script } from 'node:vm';
 import { buildAssistedConnection } from '../../packages/composable-shadow/assisted-setup';
 import { buildSetupWorkspace } from '../../apps/cli/setup-workspace';
 import { inspectProjectFile } from '../../apps/cli/setup-project';
-import { loadInterfaceSource, page, starterTemplate } from '../../apps/cli/setup-assistant';
+import { loadInterfaceSource, page, sampleTopic, starterTemplate } from '../../apps/cli/setup-assistant';
 import { expandTrustedXacro } from '../../apps/cli/setup-xacro';
 import { readCatalog } from '../../packages/composable-shadow/onboarding';
 import { composeConnectionTemplates, connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
@@ -32,12 +32,18 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /Add this rule template/);
   assert.match(html, /id="xacroTrust"/);
   assert.match(html, /id="expandXacro"/);
+  assert.match(html, /Read one incoming message \(optional\)/);
   assert.match(html, /function updateNextStep\(/);
   assert.match(html, /Add field rule/);
   assert.match(html, /Allowed values, one per line/);
   assert.match(html, /endpoint\.addEventListener\('change',refreshPointers\)/);
   assert.match(html, /if\(!matching&&fact\.id==='robot-description'\)/);
   assert.match(html, /Valid saved interface catalog loaded/);
+});
+
+test('topic sample requires an interface in the validated catalog before starting ROS', async () => {
+  const catalog = JSON.parse(readFileSync('tests/fixtures/local-assistant/custom-topic-catalog.json', 'utf8'));
+  await assert.rejects(sampleTopic('missing-python', catalog, '/not-in-catalog'), /choose_available_discovered_topic/);
 });
 
 test('Xacro expansion requires trust and rejects unsafe project paths before executing a local tool', async () => {
