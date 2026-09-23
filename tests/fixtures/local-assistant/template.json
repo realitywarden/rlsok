@@ -20,7 +20,12 @@
       }
     ]
   },
-  "defaults": { "maxObservationAgeMs": 30000 },
+  "defaults": {
+    "model": "OLD-ROBOT-DO-NOT-COPY",
+    "controller": "old_controller_do_not_copy",
+    "jointOrder": ["old_joint_do_not_copy"],
+    "maxObservationAgeMs": 30000
+  },
   "paths": [
     {
       "id": "program",

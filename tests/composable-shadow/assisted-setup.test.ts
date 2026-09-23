@@ -122,6 +122,7 @@ test('project folder sample contains a valid versioned fragment and catalog', as
   const catalog = await loadInterfaceSource('saved-ros2-catalog/v1', JSON.parse(readFileSync(root + 'catalog.json', 'utf8')), 'unused');
   const fragment = connectionTemplateSchema.parse(JSON.parse(readFileSync(root + 'template.json', 'utf8')));
   assert.equal(fragment.metadata.version, '1.2.0');
+  assert.equal(fragment.defaults.model, 'OLD-ROBOT-DO-NOT-COPY');
   assert.equal(planConnectionTemplate(fragment, catalog).readyForConfiguration, true);
   const multipleServers = { ...catalog, actions: catalog.actions.map(action => ({ ...action, serverCount: 2 })) };
   const ambiguousPlan = planConnectionTemplate(fragment, multipleServers);

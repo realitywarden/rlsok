@@ -267,9 +267,10 @@ function renderFinish(){
   if(!plan.distroMatched){const warning=document.createElement('p');warning.className='missing';warning.textContent='ROS distribution differs from this template. Use compatible fragments or rediscover the correct environment.';root.append(warning)}
   const identity=document.createElement('div');identity.className='two';root.append(identity);
   const suggestions=projectSuggestions();
-  for(const [key,title,value] of [['id','Configuration ID',''],['deviceId','Device ID',''],['model','Robot model',template.defaults.model||suggestions.model],['controller','Controller implementation',template.defaults.controller||(suggestions.controllers.length===1?suggestions.controllers[0]:'')]])
+  if(template.defaults.model||template.defaults.controller||template.defaults.jointOrder?.length){const note=document.createElement('p');note.className='missing';note.textContent='This saved template contains robot-specific defaults from another setup. They are not copied into this machine. Review the current project and enter its actual identity, controller and command joint order.';root.append(note)}
+  for(const [key,title,value] of [['id','Configuration ID',''],['deviceId','Device ID',''],['model','Robot model',suggestions.model],['controller','Controller implementation',suggestions.controllers.length===1?suggestions.controllers[0]:'']])
     formControls.robot[key]=field(identity,title,value);
-  formControls.robot.jointOrder=field(root,'Joint names in actual command order (comma separated)',(template.defaults.jointOrder||((suggestions.orders.length===1)?suggestions.orders[0]:[])).join(', '));
+  formControls.robot.jointOrder=field(root,'Joint names in actual command order (comma separated)',((suggestions.orders.length===1)?suggestions.orders[0]:[]).join(', '));
   if(suggestions.controllers.length>1||suggestions.orders.length>1){const note=document.createElement('p');note.className='missing';note.textContent='Several controller or joint-order candidates were found. Compare them with the real command controller and choose deliberately.';root.append(note)}
   formControls.robot.age=field(root,'Maximum observation age in milliseconds',String(template.defaults.maxObservationAgeMs),'number');
   for(const planned of plan.paths){
