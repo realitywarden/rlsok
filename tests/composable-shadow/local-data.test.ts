@@ -48,7 +48,9 @@ test('local data composition and source parsing fail closed on absent semantics 
   const source = readLocalFileSource('tests/fixtures/local-assistant/controllers.yaml');
   assert.throws(() => prepareLocalDataWorkspace({ templates: [fragment], parser: 'yaml-records/v1',
     fileName: source.fileName, bytes: source.bytes, deviceId: 'arm-a', semanticsConfirmed: false }));
-  assert.throws(() => composeLocalDataTemplates([fragment, fragment]), /overlap/);
+  assert.throws(() => composeLocalDataTemplates([fragment, fragment]), /duplicate_local_data_fragment_identity/);
+  assert.throws(() => composeLocalDataTemplates([fragment, { ...fragment,
+    metadata: { ...fragment.metadata, id: 'another-controller-class' } }]), /overlap/);
   assert.throws(() => prepareLocalDataWorkspace({ templates: [{ ...fragment, check: { ...fragment.check,
     rules: [{ pointer: '/missing', type: 'string', meaning: 'unknown', unit: 'label' }] } }],
     parser: 'yaml-records/v1', fileName: source.fileName, bytes: source.bytes, deviceId: 'arm-a', semanticsConfirmed: true }), /absent/);

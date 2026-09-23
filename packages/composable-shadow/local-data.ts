@@ -105,6 +105,8 @@ export function inspectLocalData(parser: z.infer<typeof parserId>, bytes: Uint8A
 export function composeLocalDataTemplates(inputs: unknown[]): LocalDataTemplate {
   if (!inputs.length || inputs.length > 16) throw new Error('local_data_composition_requires_1_to_16_fragments');
   const fragments = inputs.map(input => localDataTemplateSchema.parse(input));
+  const identities = fragments.map(fragment => `${fragment.metadata.id}@${fragment.metadata.version}`);
+  if (new Set(identities).size !== identities.length) throw new Error('duplicate_local_data_fragment_identity');
   const combined = fragments.flatMap(fragment => fragment.check.rules);
   if (combined.length > 32 || new Set(combined.map(rule => rule.pointer)).size !== combined.length)
     throw new Error('local_data_fragment_rules_exceed_limit_or_overlap');
