@@ -30,6 +30,20 @@ class MiraStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(mira_status.CollectionError, 'field_missing'):
             mira_status.build_observation(self.reader(message=SimpleNamespace(arming_state=1)), CHECKOUT)
 
+    def test_waits_for_transient_unknown_publisher_identity(self):
+        unknown = SimpleNamespace(node_namespace='_NODE_NAMESPACE_UNKNOWN_', node_name='_NODE_NAME_UNKNOWN_',
+                                  topic_type=mira_status.TYPE, endpoint_gid=bytes([1]))
+        resolved = SimpleNamespace(node_namespace='/', node_name='micro_xrce_agent',
+                                   topic_type=mira_status.TYPE, endpoint_gid=bytes([1]))
+        observations = iter([[unknown], [resolved]])
+        spins = []
+        reader = mira_status.Reader.__new__(mira_status.Reader)
+        reader.node = SimpleNamespace(get_publishers_info_by_topic=lambda _: next(observations))
+        reader.executor = SimpleNamespace(spin_once=lambda timeout_sec: spins.append(timeout_sec))
+        reader.deadline = mira_status.time.monotonic() + 5
+        self.assertEqual(reader.publishers(mira_status.TOPIC)[0]['node'], '/micro_xrce_agent')
+        self.assertEqual(spins, [0.1])
+
     def test_reader_has_no_command_or_service_surface(self):
         source = inspect.getsource(mira_status.Reader)
         for forbidden in ('create_publisher', '.publish(', 'create_client', 'call_async'):

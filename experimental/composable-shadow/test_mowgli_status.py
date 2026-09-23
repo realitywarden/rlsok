@@ -143,5 +143,18 @@ class MowgliTests(unittest.TestCase):
         self.assertIn('VOLATILE', source)
         self.assertIn('enable_rosout=False', source)
 
+    def test_waits_for_transient_unknown_publisher_identity(self):
+        unknown = NS(node_namespace='_NODE_NAMESPACE_UNKNOWN_', node_name='_NODE_NAME_UNKNOWN_',
+                     topic_type=m.MESSAGE_TYPE, endpoint_gid=GID)
+        resolved = NS(node_namespace='/', node_name='hardware_bridge',
+                      topic_type=m.MESSAGE_TYPE, endpoint_gid=GID)
+        observations = iter([[unknown], [resolved]])
+        spins = []
+        live = m.Reader.__new__(m.Reader)
+        live.node = NS(get_publishers_info_by_topic=lambda _: next(observations))
+        live.executor = NS(spin_once=lambda timeout_sec: spins.append(timeout_sec))
+        self.assertEqual(live.publishers()[0]['node'], m.HARDWARE_NODE)
+        self.assertEqual(spins, [0.1])
+
 
 if __name__ == '__main__': unittest.main()
