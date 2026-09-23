@@ -1,92 +1,18 @@
-import { atPointer, type Profile, type Path } from './contracts';
+import { type Profile, type Path } from './contracts';
+import { validateTopicFields, validateTopicTwist } from './checks/topic';
+import { validateCartesianPose, validateCartesianDelta, validateCartesianAbsoluteWpr } from './checks/cartesian';
+import { validateProgram, validateTrajectory } from './checks/action';
 
-const finiteVector = (value: unknown, size: number): value is number[] =>
-  Array.isArray(value) && value.length === size && value.every(n => typeof n === 'number' && Number.isFinite(n));
-
-function poseVector(goal: Record<string, unknown>, mapping: string | string[], keys: string[]): unknown {
-  if (Array.isArray(mapping)) return mapping.map(pointer => atPointer(goal, pointer));
-  const value = atPointer(goal, mapping);
-  if (Array.isArray(value)) return value;
-  if (value && typeof value === 'object' && Object.keys(value).length === keys.length &&
-      keys.every(key => Object.prototype.hasOwnProperty.call(value, key))) {
-    return keys.map(key => (value as Record<string, unknown>)[key]);
+// The source and message parser do not choose these checks. The validated
+// profile's adapter ID dispatches one independent semantic rule module.
+export function validateGoal(profile: Profile, path: Path, goal: Record<string, unknown>): string | null {
+  switch (path.adapter) {
+    case 'topic_fields': return validateTopicFields(path, goal);
+    case 'topic_twist': return validateTopicTwist(path, goal);
+    case 'tp_program': return validateProgram(path, goal);
+    case 'cartesian_pose': return validateCartesianPose(path, goal);
+    case 'cartesian_delta': return validateCartesianDelta(path, goal);
+    case 'cartesian_absolute_wpr': return validateCartesianAbsoluteWpr(path, goal);
+    case 'joint_trajectory': return validateTrajectory(profile, path, goal);
   }
-  return undefined;
-}
-
-export function validateGoal(p: Profile, path: Path, goal: Record<string, unknown>): string | null {
-  if (path.adapter === 'topic_fields') {
-    for (const rule of path.fields.rules) {
-      const value = atPointer(goal, rule.pointer);
-      if (typeof value !== (rule.type === 'integer' ? 'number' : rule.type) ||
-        (rule.type === 'integer' && !Number.isSafeInteger(value)) ||
-        (rule.type === 'number' && !Number.isFinite(value))) return `topic_field_type_invalid:${rule.pointer}`;
-      if (typeof value === 'number' && (rule.minimum !== undefined && value < rule.minimum || rule.maximum !== undefined && value > rule.maximum))
-        return `topic_field_out_of_bounds:${rule.pointer}`;
-      if (rule.allowed && !rule.allowed.includes(value as string | number | boolean)) return `topic_field_not_allowlisted:${rule.pointer}`;
-    }
-    return null;
-  }
-  if (path.adapter === 'topic_twist') {
-    const linear = poseVector(goal, path.fields.linear, ['x', 'y', 'z']);
-    const angular = poseVector(goal, path.fields.angular, ['x', 'y', 'z']);
-    if (!finiteVector(linear, 3) || !finiteVector(angular, 3)) return 'twist_vectors_invalid';
-    if (path.messageType === 'geometry_msgs/msg/TwistStamped') {
-      if (atPointer(goal, '/header/frame_id') !== path.commandFrame) return 'twist_frame_mismatch';
-      const stamp = atPointer(goal, '/header/stamp') as { sec?: unknown; nanosec?: unknown } | undefined;
-      if (!stamp || !Number.isInteger(stamp.sec) || Number(stamp.sec) < 0 || Number(stamp.sec) > 2147483647 ||
-          !Number.isInteger(stamp.nanosec) || Number(stamp.nanosec) < 0 || Number(stamp.nanosec) >= 1e9) return 'twist_stamp_invalid';
-    }
-    return null;
-  }
-  if (path.adapter === 'tp_program') {
-    const program = atPointer(goal, path.fields.program);
-    return typeof program === 'string' && path.fields.allowedPrograms.includes(program) ? null : 'program_not_allowlisted';
-  }
-  if (path.adapter === 'cartesian_pose') {
-    const position = poseVector(goal, path.fields.position, ['x', 'y', 'z']);
-    const orientation = poseVector(goal, path.fields.orientation, ['x', 'y', 'z', 'w']);
-    if (!finiteVector(position, 3) || !finiteVector(orientation, 4)) return 'cartesian_pose_invalid';
-    if (Math.abs(orientation.reduce((sum, v) => sum + v * v, 0) - 1) > 1e-6) return 'cartesian_quaternion_invalid';
-    return atPointer(goal, path.fields.frame) === path.fields.expectedFrame ? null : 'cartesian_frame_mismatch';
-  }
-  if (path.adapter === 'cartesian_delta') {
-    const translation = path.fields.translation.map(pointer => atPointer(goal, pointer));
-    const rotation = path.fields.rotation.map(pointer => atPointer(goal, pointer));
-    const velocity = atPointer(goal, path.fields.velocity);
-    if (!finiteVector(translation, 3) || !finiteVector(rotation, 3)) return 'cartesian_delta_invalid';
-    if (translation.some(value => Math.abs(value) > path.fields.maxTranslationMm)) return 'cartesian_delta_translation_out_of_bounds';
-    if (rotation.some(value => Math.abs(value) > path.fields.maxRotationDeg)) return 'cartesian_delta_rotation_out_of_bounds';
-    if (typeof velocity !== 'number' || !Number.isFinite(velocity) || velocity <= 0 || velocity > path.fields.maxVelocityMmS) return 'cartesian_delta_velocity_invalid';
-    return atPointer(goal, path.fields.frame) === path.fields.expectedFrame ? null : 'cartesian_delta_frame_mismatch';
-  }
-  if (path.adapter === 'cartesian_absolute_wpr') {
-    // Native absolute XYZ (mm) and FANUC W/P/R (degrees). Never reinterpret as
-    // relative displacement, normalize angles, convert to a quaternion or send.
-    const position = path.fields.position.map(pointer => atPointer(goal, pointer));
-    const rotation = path.fields.rotation.map(pointer => atPointer(goal, pointer));
-    const velocity = atPointer(goal, path.fields.velocity);
-    if (!finiteVector(position, 3) || !finiteVector(rotation, 3)) return 'cartesian_absolute_wpr_pose_invalid';
-    if (typeof velocity !== 'number' || !Number.isInteger(velocity) || velocity < 0 || velocity > 65535) return 'cartesian_absolute_wpr_velocity_invalid';
-    const effectiveVelocity = velocity === 0 ? path.fields.defaultVelocityMmS : velocity;
-    if (effectiveVelocity > path.fields.maxVelocityMmS) return 'cartesian_absolute_wpr_velocity_out_of_bounds';
-    return atPointer(goal, path.fields.frame) === path.fields.expectedFrame ? null : 'cartesian_absolute_wpr_frame_mismatch';
-  }
-  const names = atPointer(goal, path.fields.jointNames);
-  if (!Array.isArray(names) || names.length !== p.jointOrder.length || names.some((name, index) => name !== p.jointOrder[index])) return 'trajectory_joint_order_mismatch';
-  const points = atPointer(goal, path.fields.points);
-  if (!Array.isArray(points) || points.length < 1 || points.length > 10000) return 'trajectory_points_invalid';
-  let previous = -1;
-  for (const point of points) {
-    if (!point || typeof point !== 'object' || !finiteVector(point.positions, p.jointOrder.length)) return 'trajectory_positions_invalid';
-    for (const field of ['velocities', 'accelerations', 'effort']) {
-      if (point[field] !== undefined && (!Array.isArray(point[field]) || (point[field].length !== 0 && !finiteVector(point[field], p.jointOrder.length)))) return 'trajectory_optional_vector_invalid';
-    }
-    const duration = point.time_from_start;
-    if (!duration || !Number.isSafeInteger(duration.sec) || duration.sec < 0 || !Number.isInteger(duration.nanosec) || duration.nanosec < 0 || duration.nanosec >= 1e9) return 'trajectory_time_invalid';
-    const current = duration.sec * 1e9 + duration.nanosec;
-    if (!Number.isSafeInteger(current) || current <= previous) return 'trajectory_time_not_increasing';
-    previous = current;
-  }
-  return null;
 }
