@@ -32,10 +32,12 @@ test('local assistant serves syntactically valid browser logic with reusable tem
 test('local project inspection suggests only structural facts', () => {
   const robot = inspectProjectFile('robot.urdf', Buffer.from('<robot name="sample"><joint name="axis" type="revolute"/></robot>').toString('base64'));
   assert.equal(robot.model, 'sample');
+  assert.equal(robot.parserPlugin, 'urdf-structure/v1');
   assert.deepEqual(robot.movableJoints, ['axis']);
   assert.deepEqual(robot.controllerCandidates, []);
   const config = inspectProjectFile('control.yaml', Buffer.from('arm_controller:\n  type: JointTrajectoryController\n  joints: [axis]\n').toString('base64'));
   assert.deepEqual(config.controllerCandidates, ['arm_controller']);
+  assert.equal(config.parserPlugin, 'json-yaml-structure/v1');
   assert.deepEqual(config.jointOrderCandidates, [['axis']]);
   assert.equal(inspectProjectFile('robot.urdf', Buffer.from('<robot name="${model}"/>').toString('base64')).needsExpansion, true);
 });
