@@ -136,6 +136,13 @@ function projectSuggestions(){
 function updateNextStep(){if(workspace)return;
   const next=!inspections.length?(folderCandidates.length?'Click Inspect selected project files.':'Open a project folder or choose project files.'):!catalog?'Import a catalog or click Discover this ROS graph.':'Choose a discovered interface or reusable fragments, then click Prepare.';
   show('summary','Next: '+next);
+  const suggestions=projectSuggestions(),missing=[];
+  if(!suggestions.robot)missing.push('expanded robot URDF');
+  if(!catalog)missing.push('interface discovery or saved catalog');
+  missing.push(suggestions.controllers.length?'confirm active controller ('+suggestions.controllers.length+' candidate'+(suggestions.controllers.length===1?'':'s')+')':'actual controller identity');
+  missing.push(suggestions.orders.length?'confirm command joint order ('+suggestions.orders.length+' candidate'+(suggestions.orders.length===1?'':'s')+') if applicable':'command joint order if applicable');
+  missing.push('example goal/message and confirmed units, frame and meaning');
+  show('missingStatus','Still needed: '+missing.join('; ')+'.','bad');
 }
 function showProject(){const suggestion=projectSuggestions();render('projectList',inspections.map(item=>({title:item.name+' · '+item.kind,detail:[item.model&&'model '+item.model,item.movableJoints?.length&&item.movableJoints.length+' movable joints',item.controllerCandidates.length&&item.controllerCandidates.length+' controller candidates',...item.warnings].filter(Boolean).join(' · ')||'File recognized; no safe configuration assumption.'})));
   show('projectStatus',inspections.length+' files inspected. '+(suggestion.robot?'Expanded robot description recognized.':'Expanded URDF still needed.')+' '+(suggestion.orders.length?'Joint-order candidates found; confirm command order.':'Command joint order still needed.'),suggestion.robot?'good':'bad');updateNextStep()}
