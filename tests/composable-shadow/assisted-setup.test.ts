@@ -159,6 +159,10 @@ test('local project inspection suggests only structural facts', () => {
   assert.equal(config.parserPlugin, 'json-yaml-structure/v1');
   assert.deepEqual(config.jointOrderCandidates, [['axis']]);
   assert.equal(inspectProjectFile('robot.urdf', Buffer.from('<robot name="${model}"/>').toString('base64')).needsExpansion, true);
+  const controlUrdf = inspectProjectFile('control.urdf', Buffer.from('<robot name="sample"><joint name="axis" type="revolute"/><ros2_control name="System" type="system"><joint name="axis"><command_interface name="position"/><state_interface name="position"/></joint></ros2_control></robot>').toString('base64'));
+  assert.deepEqual(controlUrdf.declaredCommandInterfaces, [{ joint: 'axis', interfaces: ['position'] }]);
+  assert.deepEqual(controlUrdf.jointOrderCandidates, []);
+  assert.match(controlUrdf.warnings.join(' '), /not proof of an active controller/);
   const srdf = inspectProjectFile('robot.srdf', Buffer.from('<robot name="sample"><group name="arm"><chain base_link="base" tip_link="tool"/></group><group name="gripper"><joint name="finger"/></group></robot>').toString('base64'));
   assert.equal(srdf.kind, 'configuration');
   assert.equal(srdf.parserPlugin, 'srdf-structure/v1');

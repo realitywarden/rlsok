@@ -8,6 +8,7 @@ export type ProjectFileInspection = {
   parserPlugin?: string; model?: string; movableJoints?: string[]; needsExpansion?: boolean;
   declaredFields?: Array<{ section: string; type: string; name: string }>;
   planningGroups?: Array<{ name: string; joints: string[]; chains: Array<{ baseLink: string; tipLink: string }> }>;
+  declaredCommandInterfaces?: Array<{ joint: string; interfaces: string[] }>;
   controllerCandidates: string[]; jointOrderCandidates: string[][]; warnings: string[];
 };
 
@@ -35,6 +36,32 @@ const robotDescriptionParser: ProjectParserPlugin = {
       .filter(joint => joint['@_type'] !== 'fixed' && joint.mimic === undefined)
       .map(joint => joint['@_name']).filter((value): value is string => typeof value === 'string');
     result.needsExpansion = needsExpansion;
+    if (!needsExpansion) {
+      const controlEntries = robot.ros2_control === undefined ? [] : Array.isArray(robot.ros2_control) ? robot.ros2_control : [robot.ros2_control];
+      const declared: NonNullable<ProjectFileInspection['declaredCommandInterfaces']> = [];
+      for (const controlEntry of controlEntries.slice(0, 32)) {
+        if (!controlEntry || typeof controlEntry !== 'object') continue;
+        const section = controlEntry as Record<string, unknown>;
+        const hardwareJoints = section.joint === undefined ? [] : Array.isArray(section.joint) ? section.joint : [section.joint];
+        for (const jointEntry of hardwareJoints.slice(0, 256)) {
+          if (!jointEntry || typeof jointEntry !== 'object') continue;
+          const joint = jointEntry as Record<string, unknown>;
+          const name = joint['@_name'];
+          if (typeof name !== 'string' || !/^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(name)) continue;
+          const raw = joint.command_interface === undefined ? [] : Array.isArray(joint.command_interface) ? joint.command_interface : [joint.command_interface];
+          const interfaces = raw.slice(0, 32).map(item => item && typeof item === 'object' ? (item as Record<string, unknown>)['@_name'] : undefined)
+            .filter((item): item is string => typeof item === 'string' && /^[A-Za-z_][A-Za-z0-9_]{0,127}$/.test(item));
+          if (interfaces.length) declared.push({ joint: name, interfaces: [...new Set(interfaces)] });
+        }
+      }
+      if (declared.length) {
+        result.declaredCommandInterfaces = declared;
+        result.warnings.push('URDF ros2_control interfaces are declarations, not proof of an active controller, command order, units or hardware ownership.');
+      }
+      if (controlEntries.length > 32 || controlEntries.some(entry => entry && typeof entry === 'object' &&
+        (Array.isArray((entry as Record<string, unknown>).joint) ? ((entry as Record<string, unknown>).joint as unknown[]).length : 0) > 256))
+        result.warnings.push('Some ros2_control declarations exceeded preview limits and were not shown.');
+    }
     if (needsExpansion) result.warnings.push('Xacro expressions are not expanded. Supply an expanded URDF before using joint names.');
   }
 };
