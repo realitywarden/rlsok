@@ -15,6 +15,18 @@ function poseVector(goal: Record<string, unknown>, mapping: string | string[], k
 }
 
 export function validateGoal(p: Profile, path: Path, goal: Record<string, unknown>): string | null {
+  if (path.adapter === 'topic_fields') {
+    for (const rule of path.fields.rules) {
+      const value = atPointer(goal, rule.pointer);
+      if (typeof value !== (rule.type === 'integer' ? 'number' : rule.type) ||
+        (rule.type === 'integer' && !Number.isSafeInteger(value)) ||
+        (rule.type === 'number' && !Number.isFinite(value))) return `topic_field_type_invalid:${rule.pointer}`;
+      if (typeof value === 'number' && (rule.minimum !== undefined && value < rule.minimum || rule.maximum !== undefined && value > rule.maximum))
+        return `topic_field_out_of_bounds:${rule.pointer}`;
+      if (rule.allowed && !rule.allowed.includes(value as string | number | boolean)) return `topic_field_not_allowlisted:${rule.pointer}`;
+    }
+    return null;
+  }
   if (path.adapter === 'topic_twist') {
     const linear = poseVector(goal, path.fields.linear, ['x', 'y', 'z']);
     const angular = poseVector(goal, path.fields.angular, ['x', 'y', 'z']);

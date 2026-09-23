@@ -38,14 +38,15 @@ function configuration(p: Profile, path: Path, observation: Observation | undefi
       command: { interfaceType: pathInterfaceType(actual ?? path), endpoint: actual?.endpoint ?? path.endpoint },
       controller: { implementation: p.robot.controller, version: 'composable-shadow/v1' },
       // v2 names command channels as joints; reuse the existing Husarion Twist convention.
-      jointCommandMapping: (path.adapter === 'topic_twist' ? ['linear.x', 'linear.y', 'linear.z', 'angular.x', 'angular.y', 'angular.z'] : p.jointOrder).map((joint, commandIndex) => ({ joint, commandIndex }))
+      jointCommandMapping: (path.adapter === 'topic_twist' ? ['linear.x', 'linear.y', 'linear.z', 'angular.x', 'angular.y', 'angular.z'] :
+        path.adapter === 'topic_fields' ? path.fields.rules.map(rule => rule.pointer) : p.jointOrder).map((joint, commandIndex) => ({ joint, commandIndex }))
     },
     provenance: [
       { kind: 'content', sourceIdentity: 'composition', purpose: 'controller_configuration', contentSha256: profileHash(p) },
       { kind: 'content', sourceIdentity: 'interface', purpose: 'controller_configuration', contentSha256: actual?.interfaceSha256 ?? path.interfaceSha256 },
       { kind: 'content', sourceIdentity: 'ros-environment', purpose: 'other', contentSha256: hashObject(observation?.environment ?? p.environment) },
       ...facts,
-      ...(path.adapter === 'topic_twist' ? [{ kind: 'content' as const, sourceIdentity: 'topic-subscriber', purpose: 'controller_configuration' as const,
+      ...(path.adapter === 'topic_twist' || path.adapter === 'topic_fields' ? [{ kind: 'content' as const, sourceIdentity: 'topic-subscriber', purpose: 'controller_configuration' as const,
         contentSha256: hashObject(actual && 'subscriber' in actual ? actual.subscriber : path.subscriber) }] : [])
     ],
     observation: { observedAt: observation?.observedAt ?? now, environment: {
@@ -82,7 +83,7 @@ export async function evaluateProfile(input: {
   for (const path of p.paths) {
     const checks = [...common];
     const actual = o.paths.find(item => item.id === path.id);
-    if (path.adapter === 'topic_twist') {
+    if (path.adapter === 'topic_twist' || path.adapter === 'topic_fields') {
       const topic = actual && 'subscriber' in actual ? actual : undefined;
       check(checks, 'topic.subscription', topic?.subscriberCount === 1, 'topic_subscription_missing_or_ambiguous');
       check(checks, 'topic.subscriber', topic?.subscriber.name === path.subscriber.name && topic?.subscriber.namespace === path.subscriber.namespace, 'topic_subscriber_mismatch');
@@ -117,11 +118,11 @@ export async function evaluateProfile(input: {
       apiVersion: 'realitywarden.io/v1alpha1', kind: 'ExecutablePolicy',
       metadata: { name: `${p.id}.${path.id}`, releaseId: `${p.id}.${path.id}.${a.profileSha256.slice(0, 16)}`, createdAt: a.approvedAt },
       model: { artifact: 'profile.json', sha256: profileDigest, framework: 'ros2', policyType: `shadow/${path.adapter}`, codeRevision: 'composable-shadow/v1' },
-      actionContract: { representation: path.adapter === 'topic_twist' ? 'twist' : path.adapter === 'joint_trajectory' ? 'trajectory' : path.adapter === 'tp_program' ? 'program' : path.adapter,
-        dimension: path.adapter === 'joint_trajectory' ? p.jointOrder.length : path.adapter === 'cartesian_pose' ? 7 : ['cartesian_delta', 'cartesian_absolute_wpr', 'topic_twist'].includes(path.adapter) ? 6 : 1,
+      actionContract: { representation: path.adapter === 'topic_twist' ? 'twist' : path.adapter === 'topic_fields' ? 'structured_message' : path.adapter === 'joint_trajectory' ? 'trajectory' : path.adapter === 'tp_program' ? 'program' : path.adapter,
+        dimension: path.adapter === 'joint_trajectory' ? p.jointOrder.length : path.adapter === 'topic_fields' ? path.fields.rules.length : path.adapter === 'cartesian_pose' ? 7 : ['cartesian_delta', 'cartesian_absolute_wpr', 'topic_twist'].includes(path.adapter) ? 6 : 1,
         jointOrder: path.adapter === 'joint_trajectory' ? p.jointOrder : [],
         units: { position: path.adapter === 'joint_trajectory' ? 'radian' : ['cartesian_pose', 'topic_twist'].includes(path.adapter) ? 'meter' : ['cartesian_delta', 'cartesian_absolute_wpr'].includes(path.adapter) ? 'millimeter' : 'none',
-          velocity: path.adapter === 'joint_trajectory' ? 'radian_per_second' : ['cartesian_delta', 'cartesian_absolute_wpr'].includes(path.adapter) ? 'mm_per_second' : path.adapter === 'topic_twist' ? 'linear:m/s;angular:rad/s' : 'none' },
+          velocity: path.adapter === 'joint_trajectory' ? 'radian_per_second' : ['cartesian_delta', 'cartesian_absolute_wpr'].includes(path.adapter) ? 'mm_per_second' : path.adapter === 'topic_twist' ? 'linear:m/s;angular:rad/s' : path.adapter === 'topic_fields' ? 'declared-per-field' : 'none' },
         normalizerSha256: hashObject(path.fields), preprocessorSha256: hashObject(path.adapter), postprocessorSha256: hashObject('zero-dispatch') },
       robot: { profileId: p.id, profileSha256: profileDigest, urdfSha256: p.robot.urdfSha256, controllerType: p.robot.controller, controllerConfigSha256: binding },
       runtimePolicy: { policySha256: profileDigest, maxStateAgeMs: p.maxObservationAgeMs, maxConfigurationAgeMs: p.maxObservationAgeMs, failClosed: true },
@@ -154,7 +155,8 @@ export async function evaluateProfile(input: {
       releaseId: spec.metadata.releaseId, executablePolicyHash: identity, createdAt: timestamp, entries, testReportSha256: spec.evidence.testReportSha256 };
     const decision = entries[0]!.evidence;
     results.push({ pathId: path.id, adapter: path.adapter, endpoint: path.endpoint,
-      interfaceType: pathInterfaceType(path), ...(path.adapter === 'topic_twist' ? { subscriber: path.subscriber, commandFrame: path.commandFrame } : {}),
+      interfaceType: pathInterfaceType(path), ...(path.adapter === 'topic_twist' ? { subscriber: path.subscriber, commandFrame: path.commandFrame } :
+        path.adapter === 'topic_fields' ? { subscriber: path.subscriber } : {}),
       decision: decision.decision === 'allowed' ? 'WOULD_ALLOW' : 'WOULD_BLOCK',
       reason: checks.find(c => !c.passed)?.reason ?? decision.decisionReason, checks,
       expectedConfigurationDigest: binding, observedConfigurationDigest: observedConfig ? configurationDigest(observedConfig) : null,

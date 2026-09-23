@@ -158,6 +158,7 @@ export function goalFields(tree: TypeTree): Array<{ pointer: string; kind: strin
 
 function mappedPointers(path: Path): string[] {
   if (path.adapter === 'topic_twist') return [path.fields.linear, path.fields.angular, ...(path.messageType === 'geometry_msgs/msg/TwistStamped' ? ['/header/frame_id', '/header/stamp'] : [])];
+  if (path.adapter === 'topic_fields') return path.fields.rules.map(rule => rule.pointer);
   if (path.adapter === 'joint_trajectory') return [path.fields.jointNames, path.fields.points];
   if (path.adapter === 'tp_program') return [path.fields.program];
   if (path.adapter === 'cartesian_delta') return [...path.fields.translation, ...path.fields.rotation, path.fields.velocity, path.fields.frame];
@@ -210,9 +211,9 @@ export async function readConnection(input: unknown): Promise<Connection> {
   const urdf = profile.facts.filter(fact => fact.kind === 'file_sha256' && fact.expected === profile.robot.urdfSha256);
   if (!urdf.length) throw new Error('Add the actual robot description file as a checked fact.');
   for (const path of profile.paths) {
-    const action = catalogInterfaces(catalog).find(item => item.endpoint === path.endpoint && item.kind === (path.adapter === 'topic_twist' ? 'topic' : 'action'));
+    const action = catalogInterfaces(catalog).find(item => item.endpoint === path.endpoint && item.kind === (path.adapter === 'topic_twist' || path.adapter === 'topic_fields' ? 'topic' : 'action'));
     if (!action?.typeTree || action.unavailable) throw new Error(`Select an available interface: ${path.id}`);
-    if (path.adapter === 'topic_twist') {
+    if (path.adapter === 'topic_twist' || path.adapter === 'topic_fields') {
       if (action.kind !== 'topic' || action.messageType !== path.messageType ||
           action.subscribers.find(node => node.name === path.subscriber.name && node.namespace === path.subscriber.namespace)?.count !== 1) throw new Error(`Select exactly one visible subscription on the intended receiving node: ${path.id}`);
     } else if (action.kind !== 'action' || action.serverCount !== 1 || action.actionType !== path.actionType) throw new Error(`Select an available interface with exactly one visible server node: ${path.id}`);
@@ -224,7 +225,7 @@ export async function readConnection(input: unknown): Promise<Connection> {
     if (!proposal) throw new Error(`Missing example goal: ${path.id}`);
     for (const pointer of pointers) {
       const node = goalField(action.typeTree, pointer);
-      if (!node) throw new Error(`Field is absent from the installed Goal definition: ${path.id} ${pointer}`);
+      if (!node) throw new Error(`Field is absent from the installed interface definition: ${path.id} ${pointer}`);
       if (!mappedValueMatches(action.typeTree, node, atPointer(proposal.goal, pointer))) throw new Error(`Mapped value does not fit the installed field type or bounds: ${path.id} ${pointer}`);
     }
     const error = validateGoal(profile, path, proposal.goal);

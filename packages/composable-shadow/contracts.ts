@@ -12,6 +12,17 @@ export const subscriberSchema = z.object({
   namespace: z.string().regex(/^\/(?:[A-Za-z_][A-Za-z0-9_]*(?:\/[A-Za-z_][A-Za-z0-9_]*)*)?$/)
 }).strict();
 export const messageTypeSchema = z.string().regex(/^[a-z][a-z0-9_]*\/msg\/[A-Z][A-Za-z0-9]*$/);
+export const topicFieldRuleSchema = z.object({ pointer, meaning: text, unit: text,
+  type: z.enum(['number', 'integer', 'string', 'boolean']),
+  minimum: z.number().finite().optional(), maximum: z.number().finite().optional(),
+  allowed: z.array(z.union([z.string(), z.number().finite(), z.boolean()])).min(1).max(32).optional()
+}).strict().superRefine((rule, context) => {
+  const issue = (message: string) => context.addIssue({ code: z.ZodIssueCode.custom, message });
+  if ((rule.minimum !== undefined || rule.maximum !== undefined) && !['number', 'integer'].includes(rule.type)) issue('numeric bounds require numeric topic field');
+  if (rule.minimum !== undefined && rule.maximum !== undefined && rule.minimum > rule.maximum) issue('topic field minimum exceeds maximum');
+  if (rule.allowed?.some(value => typeof value !== (rule.type === 'integer' ? 'number' : rule.type) ||
+    (rule.type === 'integer' && !Number.isSafeInteger(value)))) issue('topic field allowlist type mismatch');
+});
 export const environmentSchema = z.object({
   rosDistro: text, rmwImplementation: text, domainId: z.number().int().min(0).max(232)
 }).strict();
@@ -24,6 +35,10 @@ export const pathSchema = z.discriminatedUnion('adapter', [
     messageType: z.enum(['geometry_msgs/msg/Twist', 'geometry_msgs/msg/TwistStamped']),
     subscriber: subscriberSchema,
     fields: z.object({ linear: pointer, angular: pointer }).strict(), commandFrame: text
+  }).strict(),
+  z.object({ id, endpoint, interfaceSha256: digest, checks: z.array(id).min(1).max(64),
+    adapter: z.literal('topic_fields'), messageType: messageTypeSchema, subscriber: subscriberSchema,
+    fields: z.object({ rules: z.array(topicFieldRuleSchema).min(1).max(32) }).strict()
   }).strict(),
   z.object({ ...commonPath, adapter: z.literal('joint_trajectory'), fields: z.object({
     jointNames: pointer, points: pointer
@@ -66,7 +81,7 @@ export const profileSchema = z.object({
   paths: z.array(pathSchema).min(1).max(32)
 }).strict().superRefine((p, ctx) => {
   const issue = (message: string) => ctx.addIssue({ code: z.ZodIssueCode.custom, message });
-  if (p.paths.some(path => path.adapter !== 'topic_twist') && !p.jointOrder.length) issue('joint order required for action paths');
+  if (p.paths.some(path => path.adapter !== 'topic_twist' && path.adapter !== 'topic_fields') && !p.jointOrder.length) issue('joint order required for action paths');
   for (const [name, values] of [
     ['jointOrder', p.jointOrder], ['facts', p.facts.map(f => f.id)],
     ['paths', p.paths.map(a => a.id)], ['endpoints', p.paths.map(a => a.endpoint)]
@@ -79,6 +94,9 @@ export const profileSchema = z.object({
     if (a.adapter === 'topic_twist') {
       const prefix = a.messageType === 'geometry_msgs/msg/TwistStamped' ? '/twist' : '';
       if (a.fields.linear !== `${prefix}/linear` || a.fields.angular !== `${prefix}/angular`) issue(`Twist topic requires standard vector fields: ${a.id}`);
+    }
+    if (a.adapter === 'topic_fields') {
+      if (new Set(a.fields.rules.map(rule => rule.pointer)).size !== a.fields.rules.length) issue(`duplicate topic rule pointers: ${a.id}`);
     }
     if (new Set(a.checks).size !== a.checks.length) issue(`duplicate checks: ${a.id}`);
     if (a.checks.some(c => !p.facts.some(f => f.id === c))) issue(`unknown fact: ${a.id}`);

@@ -36,7 +36,8 @@ export const executablePolicySpecSchema = z.object({
       'cartesian_absolute_wpr',
       'twist',
       'trajectory',
-      'program'
+      'program',
+      'structured_message'
     ]),
     dimension: z.number().int().positive(),
     jointOrder: z.array(z.string().min(1)),
@@ -83,7 +84,7 @@ export const executablePolicySpecSchema = z.object({
       || spec.actionContract.units.position !== 'none' || spec.actionContract.units.velocity !== 'none') {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ['actionContract'], message: 'program contract requires one program selector, no joints and no physical units' });
     }
-  } else if (spec.actionContract.units.position === 'none') {
+  } else if (spec.actionContract.representation !== 'structured_message' && spec.actionContract.units.position === 'none') {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ['actionContract', 'units'], message: 'physical action contract requires physical position units' });
   }
   if (

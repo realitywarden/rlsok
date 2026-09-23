@@ -71,7 +71,7 @@ function observation(workspace: string, connection: Connection): any {
   return { schemaVersion: 1, profileId: connection.profile.id, collector: 'fixture/v1', observedAt: now.toISOString(), environment: connection.catalog.environment,
     facts: connection.profile.facts.map(f => ({ id: f.id, kind: f.kind, value: f.kind === 'json_value'
       ? JSON.parse(readFileSync(join(workspace, f.path), 'utf8')).configurationSha256 : hash(readFileSync(join(workspace, f.path))), observedAt: now.toISOString() })),
-    paths: [path.adapter === 'topic_twist' ? { id: path.id, endpoint: path.endpoint, interfaceSha256: path.interfaceSha256, messageType: path.messageType, subscriber: path.subscriber, subscriberCount: 1 }
+    paths: [path.adapter === 'topic_twist' || path.adapter === 'topic_fields' ? { id: path.id, endpoint: path.endpoint, interfaceSha256: path.interfaceSha256, messageType: path.messageType, subscriber: path.subscriber, subscriberCount: 1 }
       : { id: path.id, endpoint: path.endpoint, interfaceSha256: path.interfaceSha256, actionType: path.actionType, serverCount: 1 }] };
 }
 

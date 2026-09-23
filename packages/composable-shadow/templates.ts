@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { catalogInterfaces, catalogSchema, type Catalog } from './onboarding';
+import { topicFieldRuleSchema } from './contracts';
 
-const adapterSchema = z.enum(['topic_twist', 'joint_trajectory', 'cartesian_pose', 'cartesian_delta', 'cartesian_absolute_wpr', 'tp_program']);
+const adapterSchema = z.enum(['topic_twist', 'topic_fields', 'joint_trajectory', 'cartesian_pose', 'cartesian_delta', 'cartesian_absolute_wpr', 'tp_program']);
 const id = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/);
 
 export const connectionTemplateSchema = z.object({
@@ -9,7 +10,7 @@ export const connectionTemplateSchema = z.object({
   metadata: z.object({ id, name: z.string().min(1).max(160), version: z.string().regex(/^\d+\.\d+\.\d+$/), description: z.string().max(1000), visibility: z.enum(['private', 'contribution-candidate']), createdAt: z.string().datetime({ offset: true }) }).strict(),
   compatibility: z.object({ rosDistro: z.string().min(1).max(64).optional(), paths: z.array(z.object({ id, kind: z.enum(['action', 'topic']), interfaceType: z.string().min(1).max(512), interfaceSha256: z.string().regex(/^[a-f0-9]{64}$/).optional() }).strict()).min(1).max(32) }).strict(),
   defaults: z.object({ model: z.string().max(256).optional(), controller: z.string().max(256).optional(), jointOrder: z.array(z.string().min(1).max(128)).max(256).optional(), maxObservationAgeMs: z.number().int().min(1).max(300000) }).strict(),
-  paths: z.array(z.object({ id, kind: z.enum(['action', 'topic']), endpointHint: z.string().max(512).optional(), adapter: adapterSchema, mapping: z.record(z.string().max(4096)), requiresSemanticConfirmation: z.literal(true) }).strict()).min(1).max(32),
+  paths: z.array(z.object({ id, kind: z.enum(['action', 'topic']), endpointHint: z.string().max(512).optional(), adapter: adapterSchema, mapping: z.record(z.string().max(65536)), requiresSemanticConfirmation: z.literal(true) }).strict()).min(1).max(32),
   facts: z.array(z.object({ id, kind: z.enum(['file_sha256', 'json_value']), path: z.string().min(1).max(1024), pointer: z.string().max(1024).optional() }).strict()).min(1).max(64),
   contribution: z.object({ terms: z.literal('separate-contribution-agreement-required'), status: z.literal('not-submitted') }).strict().optional(),
 }).strict().superRefine((value, context) => {
@@ -19,6 +20,19 @@ export const connectionTemplateSchema = z.object({
     context.addIssue({ code: z.ZodIssueCode.custom, message: 'Template compatibility and configured path IDs must match exactly.' });
   }
   if (new Set(value.facts.map(fact => fact.id)).size !== value.facts.length) context.addIssue({ code: z.ZodIssueCode.custom, message: 'Template fact IDs must be unique.' });
+  for (const path of value.paths) {
+    const declaredKind = value.compatibility.paths.find(item => item.id === path.id)?.kind;
+    if (declaredKind !== path.kind || (path.kind === 'topic') !== ['topic_twist', 'topic_fields'].includes(path.adapter))
+      context.addIssue({ code: z.ZodIssueCode.custom, message: `Template path kind and adapter disagree: ${path.id}` });
+    if (path.adapter === 'topic_fields' && path.mapping.rulesJson?.trim()) {
+      let rules: unknown;
+      try { rules = JSON.parse(path.mapping.rulesJson); }
+      catch { context.addIssue({ code: z.ZodIssueCode.custom, message: `Invalid topic field rules JSON: ${path.id}` }); continue; }
+      const parsed = z.array(topicFieldRuleSchema).min(1).max(32).safeParse(rules);
+      if (!parsed.success || new Set(parsed.data.map(rule => rule.pointer)).size !== parsed.data.length)
+        context.addIssue({ code: z.ZodIssueCode.custom, message: `Invalid topic field rules: ${path.id}` });
+    }
+  }
 });
 
 export type ConnectionTemplate = z.infer<typeof connectionTemplateSchema>;

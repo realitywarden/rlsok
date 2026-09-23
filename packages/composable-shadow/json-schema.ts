@@ -31,6 +31,7 @@ export function interfaceSchemas(): Record<string, unknown> {
         'File facts require SHA256 expected values and no pointer; JSON facts require a pointer.',
         'The trajectory adapter requires control_msgs/action/FollowJointTrajectory.',
         'Topic Twist requires standard Twist/TwistStamped mappings and an explicit matching subscription with count one; joint order may be empty only for topic-only profiles.',
+        'Custom topic field rules require explicit meanings and units, an installed message definition, a selected receiver and one real message shape; only declared fields are checked.',
         'Approval expiry must follow approval time; current validity and profile hash are checked during evaluation.',
         'Observation IDs and proposal/path IDs must be unique; all declared paths must be covered.',
         'Observed facts, interface fingerprints and environment must match and timestamps must be fresh.',
@@ -39,13 +40,14 @@ export function interfaceSchemas(): Record<string, unknown> {
       ],
       goalConventions: {
         topic_twist: 'Standard Twist/TwistStamped linear XYZ in m/s and angular XYZ in rad/s; explicit receiver and command frame. Stamped frame and timestamp structure are checked; no velocity safety bounds.',
+        topic_fields: 'User-declared pointer, type, meaning and unit for each selected field, with optional bounds or allowlist. No unit conversion, live payload sampling, physical-semantic inference or message publishing.',
         cartesian_pose: 'Absolute position in meters; quaternion in x,y,z,w order. A pointer selects a numeric array or a ROS x/y/z[/w] object; alternatively supply one pointer per component.',
         cartesian_delta: 'Relative translation in millimeters, W/P/R rotation in degrees, positive velocity in millimeters per second.',
         cartesian_absolute_wpr: 'Absolute XYZ in millimeters and native FANUC W/P/R in degrees, without conversion or angle normalization. uint16 velocity in mm/s; zero uses the explicitly reviewed default. The frame label must match; it does not verify the active controller frame/tool or perform TF. Finite targets and selected velocity limits do not establish reachability or motion safety.',
         tp_program: 'Exact program selector from the approved allowlist.',
         joint_trajectory: 'ROS FollowJointTrajectory shape with configured joint order, radians and increasing time_from_start.'
       },
-      limitation: 'These JSON contracts are not ROS interface definitions. describe-interface inspects the installed ROS message or Goal/Result/Feedback tree; adapters do not certify arbitrary extra fields or robot motion.'
+      limitation: 'These JSON contracts are not ROS interface definitions. describe-interface inspects the installed ROS message or Goal/Result/Feedback tree; only declared custom fields are checked, and no adapter certifies arbitrary extra fields or robot motion.'
     }
   };
 }

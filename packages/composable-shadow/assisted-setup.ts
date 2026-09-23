@@ -36,6 +36,11 @@ function fields(adapter: string, mapping: Record<string, string>): unknown {
   throw new Error(`unsupported_adapter:${adapter}`);
 }
 
+function topicRules(value: string | undefined): unknown {
+  try { return { rules: JSON.parse(value ?? '') }; }
+  catch { throw new Error('topic_field_rules_must_be_json_array'); }
+}
+
 export async function buildAssistedConnection(input: AssistedSetupInput): Promise<Connection> {
   const catalog = await readCatalog(input.catalog);
   const template = composeConnectionTemplates(input.fragments);
@@ -55,10 +60,12 @@ export async function buildAssistedConnection(input: AssistedSetupInput): Promis
     const mapping = { ...configured.mapping, ...decision.mapping };
     const common = { id: requirement.id, endpoint: selected.endpoint, interfaceSha256: selected.interfaceSha256, adapter: configured.adapter,
       checks: input.facts.map(fact => fact.id) };
-    if (configured.adapter === 'topic_twist') {
+    if (configured.adapter === 'topic_twist' || configured.adapter === 'topic_fields') {
       if (selected.kind !== 'topic') throw new Error(`topic_required:${requirement.id}`);
       const receiver = selected.subscribers.find(node => `${node.namespace}|${node.name}` === mapping.subscriber && node.count === 1);
       if (!receiver) throw new Error(`choose_unambiguous_receiver:${requirement.id}`);
+      if (configured.adapter === 'topic_fields') return { ...common, messageType: selected.messageType,
+        subscriber: { name: receiver.name, namespace: receiver.namespace }, fields: topicRules(mapping.rulesJson) };
       return { ...common, messageType: selected.messageType, subscriber: { name: receiver.name, namespace: receiver.namespace },
         fields: { linear: mapping.linear, angular: mapping.angular }, commandFrame: mapping.commandFrame };
     }

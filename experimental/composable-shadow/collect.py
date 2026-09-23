@@ -513,9 +513,11 @@ def validate_profile(profile: Any) -> dict[str, Any]:
     for path in profile["paths"]:
         if not ENDPOINT.fullmatch(require_text(path.get("endpoint"), "path.endpoint")):
             raise CollectionError("action endpoint must be a fully qualified ROS name")
-        if path.get("adapter") == "topic_twist":
-            if path.get("messageType") not in ("geometry_msgs/msg/Twist", "geometry_msgs/msg/TwistStamped"):
+        if path.get("adapter") in ("topic_twist", "topic_fields"):
+            if path.get("adapter") == "topic_twist" and path.get("messageType") not in ("geometry_msgs/msg/Twist", "geometry_msgs/msg/TwistStamped"):
                 raise CollectionError("unsupported topic message semantics")
+            if path.get("adapter") == "topic_fields" and not MESSAGE_TYPE.fullmatch(require_text(path.get("messageType"), "path.messageType")):
+                raise CollectionError("messageType must be package/msg/Type")
             node = path.get("subscriber", {})
             if (not isinstance(node, dict) or not NODE_NAME.fullmatch(require_text(node.get("name"), "subscriber.name"))
                     or (node.get("namespace") != "/" and not ENDPOINT.fullmatch(require_text(node.get("namespace"), "subscriber.namespace")))):
@@ -531,14 +533,14 @@ def collect_observation(profile: dict[str, Any], root: Path, provider: Any,
                         now: Callable[[], str] = utc_now) -> dict[str, Any]:
     validate_profile(profile)
     environment = provider.environment()
-    action_endpoints = {path["endpoint"] for path in profile["paths"] if path.get("adapter") != "topic_twist"}
-    topic_endpoints = {path["endpoint"] for path in profile["paths"] if path.get("adapter") == "topic_twist"}
+    action_endpoints = {path["endpoint"] for path in profile["paths"] if path.get("adapter") not in ("topic_twist", "topic_fields")}
+    topic_endpoints = {path["endpoint"] for path in profile["paths"] if path.get("adapter") in ("topic_twist", "topic_fields")}
     graph = provider.action_servers(action_endpoints) if action_endpoints else {}
     topics = provider.topic_subscribers(topic_endpoints) if topic_endpoints else {}
     graph_observed_at = now()
     paths: list[dict[str, Any]] = []
     for path in profile["paths"]:
-        if path.get("adapter") == "topic_twist":
+        if path.get("adapter") in ("topic_twist", "topic_fields"):
             metadata = topics.get(path["endpoint"])
             if metadata is None:
                 # A completed graph query found no selected endpoint. Omit it,

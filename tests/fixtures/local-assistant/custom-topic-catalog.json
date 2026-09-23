@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokInterfaceCatalog",
+  "collector": "ros2-read-only/v1",
+  "observedAt": "2026-09-23T00:00:00.000Z",
+  "environment": {
+    "rosDistro": "jazzy",
+    "rmwImplementation": "rmw_fastrtps_cpp",
+    "domainId": 2
+  },
+  "actions": [],
+  "topics": [{
+    "endpoint": "/drive_input",
+    "messageType": "example_interfaces/msg/DriveInput",
+    "subscribers": [{ "name": "receiver", "namespace": "/robot", "count": 1 }],
+    "interfaceSha256": "868a5eb5abca810e020daa03adc31e687fd186d9087ee9d41b96c3166d45db7f",
+    "typeTree": {
+      "algorithm": "rosidl-message-fields-tree/v1",
+      "messageType": "example_interfaces/msg/DriveInput",
+      "components": { "Message": { "kind": "message", "name": "example_interfaces/msg/DriveInput" } },
+      "definitions": { "example_interfaces/msg/DriveInput": { "fields": [
+        { "name": "speed", "type": { "kind": "primitive", "name": "double" } },
+        { "name": "enabled", "type": { "kind": "primitive", "name": "boolean" } }
+      ] } }
+    }
+  }],
+  "limitations": []
+}

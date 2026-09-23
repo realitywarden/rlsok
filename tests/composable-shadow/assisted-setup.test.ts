@@ -9,6 +9,7 @@ import { inspectProjectFile } from '../../apps/cli/setup-project';
 import { loadInterfaceSource, page, starterTemplate } from '../../apps/cli/setup-assistant';
 import { readCatalog } from '../../packages/composable-shadow/onboarding';
 import { composeConnectionTemplates, connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
+import { approveProfile, evaluateProfile } from '../../packages/composable-shadow/index';
 
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
@@ -26,9 +27,60 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="projectFolder"[^>]*webkitdirectory/);
   assert.match(html, /id="inspectFolder"/);
   assert.match(html, /function updateNextStep\(/);
+  assert.match(html, /Add field rule/);
+  assert.match(html, /Allowed values, one per line/);
   assert.match(html, /endpoint\.addEventListener\('change',refreshPointers\)/);
   assert.match(html, /if\(!matching&&fact\.id==='robot-description'\)/);
   assert.match(html, /Valid saved interface catalog loaded/);
+});
+
+test('custom ROS topic rules validate declared fields without publishing a message', async () => {
+  const messageType = 'example_interfaces/msg/DriveInput';
+  const tree = { algorithm: 'rosidl-message-fields-tree/v1', messageType,
+    components: { Message: { kind: 'message', name: messageType } },
+    definitions: { [messageType]: { fields: [
+      { name: 'speed', type: { kind: 'primitive', name: 'double' } },
+      { name: 'enabled', type: { kind: 'primitive', name: 'boolean' } }
+    ] } } };
+  const fingerprint = createHash('sha256').update(canonical(tree)).digest('hex');
+  const observedAt = new Date().toISOString();
+  const catalog = await readCatalog({ schemaVersion: 1, kind: 'RlsokInterfaceCatalog', collector: 'ros2-read-only/v1', observedAt,
+    environment: { rosDistro: 'jazzy', rmwImplementation: 'rmw_fastrtps_cpp', domainId: 2 }, actions: [],
+    topics: [{ endpoint: '/drive_input', messageType, subscribers: [{ name: 'receiver', namespace: '/robot', count: 1 }],
+      interfaceSha256: fingerprint, typeTree: tree }], limitations: [] });
+  const rules = [{ pointer: '/speed', type: 'number', meaning: 'wheel speed', unit: 'rad/s', minimum: -10, maximum: 10 },
+    { pointer: '/enabled', type: 'boolean', meaning: 'enable flag', unit: 'boolean', allowed: [true] }];
+  const fragment = { schemaVersion: 1, kind: 'RlsokConnectionTemplate',
+    metadata: { id: 'drive-input', name: 'Drive input rules', version: '1.0.0', description: '', visibility: 'private', createdAt: observedAt },
+    compatibility: { rosDistro: 'jazzy', paths: [{ id: 'drive', kind: 'topic', interfaceType: messageType, interfaceSha256: fingerprint }] },
+    defaults: { maxObservationAgeMs: 30000 }, paths: [{ id: 'drive', kind: 'topic', adapter: 'topic_fields',
+      mapping: { rulesJson: JSON.stringify(rules) }, requiresSemanticConfirmation: true }],
+    facts: [{ id: 'robot-description', kind: 'file_sha256', path: 'files/robot.urdf' }] };
+  assert.equal(connectionTemplateSchema.safeParse(fragment).success, true);
+  assert.equal(connectionTemplateSchema.safeParse({ ...fragment, paths: [{ ...fragment.paths[0]!, mapping: {
+    rulesJson: JSON.stringify([{ pointer: '/speed', type: 'number', meaning: 'wheel speed', unit: '' }]) } }] }).success, false);
+  const urdf = Buffer.from('<robot name="drive"><link name="base"/></robot>');
+  const facts = [{ id: 'robot-description', kind: 'file_sha256' as const, path: 'files/robot.urdf', expected: createHash('sha256').update(urdf).digest('hex') }];
+  const input = { catalog, fragments: [fragment], robot: { id: 'drive', deviceId: 'drive-1', model: 'drive', controller: 'receiver',
+    jointOrder: [], maxObservationAgeMs: 30000 }, facts,
+    decisions: [{ pathId: 'drive', endpoint: '/drive_input', mapping: { subscriber: '/robot|receiver' },
+      goal: { speed: 2, enabled: true }, confirmed: true }] };
+  const connection = await buildAssistedConnection(input);
+  assert.equal(connection.profile.paths[0]?.adapter, 'topic_fields');
+  const approval = approveProfile(connection.profile, 'local-operator', new Date(Date.now() + 60000).toISOString());
+  const observation = { schemaVersion: 1, profileId: connection.profile.id, observedAt, collector: 'fixture/v1',
+    environment: catalog.environment, facts: facts.map(fact => ({ id: fact.id, kind: fact.kind, value: fact.expected, observedAt })),
+    paths: [{ id: 'drive', endpoint: '/drive_input', messageType, interfaceSha256: fingerprint,
+      subscriber: { name: 'receiver', namespace: '/robot' }, subscriberCount: 1 }] };
+  const report = await evaluateProfile({ profile: connection.profile, approval, observation, proposals: connection.proposals });
+  assert.equal(report.decision, 'WOULD_ALLOW');
+  assert.equal(report.hardwareSignalSent, false);
+  const outOfBounds = { ...input, decisions: [{ ...input.decisions[0]!, goal: { speed: 20, enabled: true } }] };
+  await assert.rejects(buildAssistedConnection(outOfBounds), /topic_field_out_of_bounds/);
+  await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, goal: { speed: 2 } }] }), /topic_field_type_invalid|Mapped value does not fit/);
+  await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, mapping: { subscriber: '/robot|receiver',
+    rulesJson: JSON.stringify([{ pointer: '/speed', type: 'number', meaning: 'wheel speed', unit: '', minimum: -10, maximum: 10 }]) } }] }), /too_small|String must contain|validation/i);
+  await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, confirmed: false }] }), /confirm_meaning_units_and_frame/);
 });
 
 test('local project inspection suggests only structural facts', () => {

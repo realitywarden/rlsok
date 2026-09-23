@@ -90,6 +90,18 @@ class TopicTests(unittest.TestCase):
             self.assertEqual(missing['paths'], [])
             self.assertEqual(missing['facts'][0]['value'], changed['facts'][0]['value'])
 
+    def test_custom_topic_field_path_uses_read_only_topic_observation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'controller.yaml').write_bytes(b'controller: A\n')
+            profile = {'schemaVersion': 1, 'mode': 'shadow', 'id': 'custom-topic',
+                       'facts': [{'id': 'controller', 'kind': 'file_sha256', 'path': 'controller.yaml', 'expected': '0' * 64}],
+                       'paths': [{'id': 'custom', 'adapter': 'topic_fields', 'endpoint': '/sim/cmd_vel',
+                                  'messageType': 'geometry_msgs/msg/Twist', 'subscriber': {'name': 'gait_input', 'namespace': '/sim'}}]}
+            observed = collect.collect_observation(profile, root, self.provider(), lambda: NOW)
+            self.assertEqual(observed['paths'][0]['subscriberCount'], 1)
+            self.assertEqual(observed['paths'][0]['messageType'], 'geometry_msgs/msg/Twist')
+
     def test_no_command_client_publisher_or_subscription_api(self):
         tree = ast.parse((Path(__file__).parent / 'collect.py').read_text(encoding='utf8'))
         names = {node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
