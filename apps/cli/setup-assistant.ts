@@ -5,7 +5,7 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { spawn } from 'node:child_process';
-import { composeConnectionTemplates, planConnectionTemplate } from '../../packages/composable-shadow/templates';
+import { composeConnectionTemplates, connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
 import { catalogInterfaces, readCatalog, type Catalog } from '../../packages/composable-shadow/onboarding';
 import { buildAssistedConnection, type AssistedSetupInput } from '../../packages/composable-shadow/assisted-setup';
 import { buildSetupWorkspace, type WorkspaceFile } from './setup-workspace';
@@ -115,7 +115,7 @@ export function page(token: string): string {
 <div class="card"><h2>Adapter registry</h2><p>Data source, parser, and safety checks stay separate so integrations remain reusable.</p><div id="adapters" class="list"></div></div>
 <div class="card"><h2>4. Review the plan</h2><p>The plan shows recognized interfaces and gaps. The workspace ZIP below includes validated configuration and actual files after you confirm the remaining inputs.</p><div class="two"><label class="field">Reusable template ID<input id="templateId" value="local-project"></label><label class="field">Template version<input id="templateVersion" value="1.0.0"></label></div><label class="field">Reusable template name<input id="templateName" value="Local project rules"></label><p>Save after mapping fields to reuse them. Machine endpoint, receiver and frame remain parameters for the next project.</p><button id="download" disabled>Download plan JSON</button><button id="templateDownload" disabled class="secondary">Save reusable template</button><div id="summary" class="status">Next: read project files and discover interfaces.</div><div id="missingStatus" class="status"></div><details><summary>Advanced plan JSON</summary><pre id="preview">Nothing generated yet.</pre></details></div>
 </aside></div><section id="finish" class="card" hidden><h2>Finish the check workspace</h2><p>Review detected paths, attach actual files and provide a real example message or goal for each path. Confirm units and meaning from your interface documentation.</p><div id="finishFields"></div><button id="complete">Validate and download workspace ZIP</button><div id="completeStatus" class="status"></div></section></main><script>
-const token=${safeToken};let catalog=null,fragments=[],workspace=null,formControls=null,projectFiles=[],inspections=[],folderCandidates=[];
+const token=${safeToken};let catalog=null,catalogOrigin='none',fragments=[],workspace=null,formControls=null,projectFiles=[],inspections=[],folderCandidates=[];
 const $=id=>document.getElementById(id);const show=(id,text,kind='')=>{const el=$(id);el.textContent=text;el.className='status '+kind};const render=(target,items)=>{const root=$(target);root.replaceChildren(...items.map(item=>{const row=document.createElement('div'),title=document.createElement('strong'),detail=document.createElement('small');row.className='item';title.textContent=item.title;detail.textContent=item.detail;row.append(title,detail);return row}))};
 async function api(path,payload){const response=await fetch('/'+token+'/api/'+path,{method:'POST',headers:{'content-type':'application/json','x-rlsok-session':token},body:JSON.stringify(payload||{})});const value=await response.json();if(!response.ok)throw new Error(value.error||'Request failed');return value}
 async function files(input){return Promise.all([...input.files].map(file=>file.text().then(JSON.parse)))}
@@ -134,7 +134,7 @@ function projectSuggestions(){
   return {robot,model:robot?.model||'',controllers:[...new Set(configs.flatMap(item=>item.controllerCandidates))],orders:[...orders.values()]};
 }
 function updateNextStep(){if(workspace)return;
-  const next=!inspections.length?(folderCandidates.length?'Click Inspect selected project files.':'Open a project folder or choose project files.'):!catalog?'Import a catalog or click Discover this ROS graph.':'Choose a discovered interface or reusable fragments, then click Prepare.';
+  const next=!inspections.length?(folderCandidates.length?'Click Inspect selected project files.':'Open a project folder or choose project files.'):!catalog?'Import a catalog or click Discover this ROS graph.':fragments.length?'Click Prepare to match the saved rules to this project.':'Choose a discovered interface or reusable fragments, then click Prepare.';
   show('summary','Next: '+next);
   const suggestions=projectSuggestions(),missing=[];
   if(!suggestions.robot)missing.push('expanded robot URDF');
@@ -182,7 +182,7 @@ function renderAdapterChoices(){
 function invalidatePlan(){if(!workspace)return;workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';updateNextStep()}
 $('starterInterface').onchange=()=>{renderAdapterChoices();invalidatePlan()};
 $('starterAdapter').onchange=invalidatePlan;
-function useCatalog(value,origin){catalog=value;workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';renderInterfaceChoices();show('catalogStatus',(catalog.actions.length+(catalog.topics||[]).length)+' interfaces loaded from '+origin+'. Confirm the intended endpoint and meaning; a saved catalog is not live-state proof.','good')}
+function useCatalog(value,origin,live=false){catalog=value;catalogOrigin=live?'live':'saved';workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';renderInterfaceChoices();show('catalogStatus',(catalog.actions.length+(catalog.topics||[]).length)+' interfaces loaded from '+origin+'. Confirm the intended endpoint and meaning.'+(live?' Discovery is graph-only, not physical-hardware proof.':' A saved catalog is not live-state proof.'),'good')}
 function renderFinish(){
   const root=$('finishFields');root.replaceChildren();formControls={robot:{},paths:[],files:new Map()};
   if(!workspace){$('finish').hidden=true;updateMissing();return}
@@ -200,7 +200,7 @@ function renderFinish(){
     const specification=template.paths.find(path=>path.id===planned.id),card=document.createElement('section');card.className='path';root.append(card);
     const heading=document.createElement('h3');heading.textContent=planned.id+' · '+specification.adapter;card.append(heading);
     const convention=document.createElement('p');convention.textContent=conventions[specification.adapter]||'Confirm the physical meaning against the actual interface documentation.';card.append(convention);
-    const status=document.createElement('p');status.textContent=planned.status==='MATCHED'?'Recognized '+planned.selectedEndpoint:planned.status==='AMBIGUOUS'?'Several compatible endpoints found; choose the intended one.':'Required interface is missing from discovery.';card.append(status);
+    const status=document.createElement('p');status.textContent=planned.status==='MATCHED'?(catalogOrigin==='saved'?'Matched in saved catalog (not live-verified) ':'Recognized in current graph ')+planned.selectedEndpoint:planned.status==='AMBIGUOUS'?'Several compatible endpoints found; choose the intended one.':'Required interface is missing from discovery.';card.append(status);
     const endpoint=field(card,'Selected endpoint','','select');
     option(endpoint,'','Choose an endpoint');for(const candidate of planned.candidates)option(endpoint,candidate,candidate);
     endpoint.value=planned.selectedEndpoint||'';
@@ -266,14 +266,20 @@ $('projectFiles').onchange=async event=>{try{await inspectProjectSelection([...e
 $('projectFolder').onchange=async event=>{try{
   const entries=[...event.target.files],ignored=/(?:^|\\/)(?:\\.git|node_modules|build|install|log|dist)(?:\\/|$)/i;
   const catalogFiles=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/^(?:catalog|interface-catalog|rlsok-interface-catalog)\\.json$/i.test(file.name)&&file.size<=2*1024*1024);
+  const templateFiles=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/^(?:template|rlsok-connection-template|connection-template|fragment(?:-[A-Za-z0-9._-]+)?)\\.json$/i.test(file.name)&&file.size<=2*1024*1024);
   folderCandidates=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/\\.(?:urdf|json|ya?ml)$/i.test(file.name)&&/^[A-Za-z0-9_. -]+$/.test(file.name)&&file.size<=8*1024*1024);
   const xacro=entries.filter(file=>/\\.xacro$/i.test(file.name)).length;
   if(folderCandidates.length>256)throw new Error('This folder has more than 256 candidate files. Choose the relevant files individually.');
-  projectFiles=[];inspections=[];catalog=null;workspace=null;renderFinish();render('projectList',[]);show('projectStatus','New folder selected. Inspect the actual files.');renderInterfaceChoices();show('catalogStatus','No catalog loaded for this folder. Discover this ROS graph or import one.');$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';
+  projectFiles=[];inspections=[];catalog=null;catalogOrigin='none';workspace=null;renderFinish();render('projectList',[]);show('projectStatus','New folder selected. Inspect the actual files.');renderInterfaceChoices();show('catalogStatus','No catalog loaded for this folder. Discover this ROS graph or import one.');$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';
   let catalogNote='',importedCatalog=null;
   if(catalogFiles.length===1){try{const candidate=JSON.parse(await catalogFiles[0].text());if(candidate.kind==='RlsokInterfaceCatalog'){useCatalog(await api('validate-catalog',{catalog:candidate}),'this project folder');importedCatalog=catalogFiles[0];catalogNote=' Valid saved interface catalog loaded.'}}catch(error){catalogNote=' Saved catalog could not be validated: '+(error.message||String(error))+'. Import a valid catalog or discover the live graph.'}}
   else if(catalogFiles.length>1)catalogNote=' Several saved catalogs found; choose the intended catalog explicitly.';
   if(importedCatalog)folderCandidates=folderCandidates.filter(file=>file!==importedCatalog);
+  let templateNote='',importedTemplate=null;
+  if(templateFiles.length===1&&!fragments.length){try{const candidate=JSON.parse(await templateFiles[0].text());if(candidate.kind==='RlsokConnectionTemplate'){const valid=await api('validate-fragment',{fragment:candidate});fragments=[valid];importedTemplate=templateFiles[0];render('fragmentList',[{title:valid.metadata.name,detail:valid.metadata.id+'@'+valid.metadata.version}]);templateNote=' One versioned rule template loaded.'}}catch(error){templateNote=' Saved rule template could not be validated: '+(error.message||String(error))+'. Select a valid fragment explicitly.'}}
+  else if(templateFiles.length>1)templateNote=' Several saved rule templates found; add the intended fragments explicitly.';
+  else if(templateFiles.length&&fragments.length)templateNote=' Existing selected fragments were kept; add any folder template explicitly.';
+  if(importedTemplate)folderCandidates=folderCandidates.filter(file=>file!==importedTemplate);
   const root=$('folderChoices');root.replaceChildren();
   for(const [index,file] of folderCandidates.entries()){
     const label=document.createElement('label'),check=document.createElement('input'),text=document.createElement('span');
@@ -282,16 +288,16 @@ $('projectFolder').onchange=async event=>{try{
     text.textContent=' '+(file.webkitRelativePath||file.name)+' ('+Math.ceil(file.size/1024)+' KiB)';label.append(check,text);root.append(label);
   }
   $('inspectFolder').hidden=!folderCandidates.length;
-  show('folderStatus',folderCandidates.length+' project candidates found'+(xacro?'; '+xacro+' Xacro sources need an expanded URDF before joint names can be trusted':'')+'. Unambiguous defaults are inspected automatically; change the choices and click Inspect if needed. Files stay local.'+catalogNote,folderCandidates.length?'good':'bad');updateNextStep();
+  show('folderStatus',folderCandidates.length+' project candidates found'+(xacro?'; '+xacro+' Xacro sources need an expanded URDF before joint names can be trusted':'')+'. Unambiguous defaults are inspected automatically; change the choices and click Inspect if needed. Files stay local.'+catalogNote+templateNote,folderCandidates.length?'good':'bad');updateNextStep();
   const defaults=[...root.querySelectorAll('input:checked')].map(input=>folderCandidates[Number(input.dataset.index)]);
   if(defaults.length&&defaults.length<=16&&new Set(defaults.map(file=>file.name)).size===defaults.length){try{await inspectProjectSelection(defaults)}catch(error){show('projectStatus','Automatic inspection needs review: '+(error.message||String(error)),'bad')}}
 }catch(error){folderCandidates=[];$('folderChoices').replaceChildren();$('inspectFolder').hidden=true;show('folderStatus',error.message||String(error),'bad')}};
 $('inspectFolder').onclick=async()=>{try{const selected=[...$('folderChoices').querySelectorAll('input:checked')].map(input=>folderCandidates[Number(input.dataset.index)]);await inspectProjectSelection(selected)}catch(error){show('projectStatus',error.message||String(error),'bad')}};
-$('discover').onclick=async()=>{show('catalogStatus','Discovering…');try{useCatalog(await api('discover',{}),'this ROS graph')}catch(e){show('catalogStatus',e.message,'bad')}};
+$('discover').onclick=async()=>{show('catalogStatus','Discovering…');try{useCatalog(await api('discover',{}),'this ROS graph',true)}catch(e){show('catalogStatus',e.message,'bad')}};
 $('catalog').onchange=async e=>{try{useCatalog(await api('validate-catalog',{catalog:(await files(e.target))[0]}),'the selected catalog')}catch(e){show('catalogStatus','Invalid catalog: '+e.message,'bad')}};
-$('fragments').onchange=async e=>{try{const added=await files(e.target);if(fragments.length+added.length>16)throw new Error('Maximum 16 fragments');fragments.push(...added);render('fragmentList',fragments.map((f,i)=>({title:f.metadata?.name||'Fragment '+(i+1),detail:(f.metadata?.id||'unknown')+'@'+(f.metadata?.version||'?')})));invalidatePlan()}catch(e){show('planStatus','Invalid fragment: '+e.message,'bad')}};
+$('fragments').onchange=async e=>{try{const selected=await files(e.target);if(fragments.length+selected.length>16)throw new Error('Maximum 16 fragments');const added=await Promise.all(selected.map(fragment=>api('validate-fragment',{fragment})));fragments.push(...added);render('fragmentList',fragments.map((f,i)=>({title:f.metadata.name,detail:f.metadata.id+'@'+f.metadata.version})));invalidatePlan();updateNextStep()}catch(e){show('planStatus','Invalid fragment: '+e.message,'bad')}};
 $('clear').onclick=()=>{fragments=[];$('fragmentList').replaceChildren();workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';updateNextStep()};
-$('generate').onclick=async()=>{if(!catalog||(!fragments.length&&!$('starterInterface').value)){show('planStatus','Load a catalog and choose an interface or fragments.','bad');return}show('planStatus','Generating…');try{const [kind,endpoint]=$('starterInterface').value.split('|');const result=await api('generate',{catalog,fragments,starter:{kind,endpoint,adapter:$('starterAdapter').value,projectFiles:inspections.map(item=>({name:item.name,kind:item.kind}))}});workspace=result;$('preview').textContent=JSON.stringify(result,null,2);const ready=result.plan.readyForConfiguration;show('planStatus',ready?'All declared interfaces matched. Confirm semantics and finish required inputs.':'Plan generated with missing or ambiguous interfaces. Review the preview. ',ready?'good':'bad');show('summary',result.plan.paths.filter(path=>path.status==='MATCHED').length+' of '+result.plan.paths.length+' interfaces recognized; '+result.plan.paths.filter(path=>path.status!=='MATCHED').length+' need selection or discovery.',ready?'good':'bad');$('download').disabled=false;$('templateDownload').disabled=false;renderFinish()}catch(e){show('planStatus',e.message,'bad')}};
+$('generate').onclick=async()=>{if(!catalog||(!fragments.length&&!$('starterInterface').value)){show('planStatus','Load a catalog and choose an interface or fragments.','bad');return}show('planStatus','Generating…');try{const [kind,endpoint]=$('starterInterface').value.split('|');const result=await api('generate',{catalog,fragments,starter:{kind,endpoint,adapter:$('starterAdapter').value,projectFiles:inspections.map(item=>({name:item.name,kind:item.kind}))}});workspace=result;$('preview').textContent=JSON.stringify(result,null,2);const ready=result.plan.readyForConfiguration;show('planStatus',ready?(catalogOrigin==='saved'?'Saved interface catalog matched structurally. Rediscover the live graph before treating the endpoint as active.':'Current graph interfaces matched. Confirm semantics and finish required inputs.'):'Plan generated with missing or ambiguous interfaces. Review the preview. ',ready?'good':'bad');show('summary',result.plan.paths.filter(path=>path.status==='MATCHED').length+' of '+result.plan.paths.length+' interfaces matched in '+(catalogOrigin==='saved'?'a saved catalog':'the current graph')+'; '+result.plan.paths.filter(path=>path.status!=='MATCHED').length+' need selection or discovery.',ready?'good':'bad');$('download').disabled=false;$('templateDownload').disabled=false;renderFinish()}catch(e){show('planStatus',e.message,'bad')}};
 $('download').onclick=()=>{if(!workspace)return;const blob=new Blob([JSON.stringify(workspace,null,2)+'\\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rlsok-local-setup-workspace.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 $('templateDownload').onclick=()=>{try{const template=reusableTemplate(),blob=new Blob([JSON.stringify(template,null,2)+'\\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rlsok-connection-template.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);show('planStatus','Versioned private template downloaded. Re-import it and supply machine-specific parameters on the next project.','good')}catch(error){show('planStatus',error.message||String(error),'bad')}};
 $('complete').onclick=async()=>{show('completeStatus','Checking selected files and configuration…');try{await finish();show('completeStatus','Workspace ZIP downloaded. Review the generated files before local evaluation.','good')}catch(error){show('completeStatus',error.message||String(error),'bad')}};
@@ -329,6 +335,10 @@ export async function runSetupAssistant(args: string[]): Promise<number> {
       if (url.pathname === `${base}/api/validate-catalog` && request.method === 'POST') {
         const input = await body(request) as { catalog?: unknown };
         json(response, 200, await readCatalog(input.catalog)); return;
+      }
+      if (url.pathname === `${base}/api/validate-fragment` && request.method === 'POST') {
+        const input = await body(request) as { fragment?: unknown };
+        json(response, 200, connectionTemplateSchema.parse(input.fragment)); return;
       }
       if (url.pathname === `${base}/api/inspect-project` && request.method === 'POST') {
         const input = await body(request, 12 * 1024 * 1024) as { name?: string; base64?: string };

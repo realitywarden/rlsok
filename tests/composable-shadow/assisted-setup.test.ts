@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { Script } from 'node:vm';
 import { buildAssistedConnection } from '../../packages/composable-shadow/assisted-setup';
@@ -7,7 +8,7 @@ import { buildSetupWorkspace } from '../../apps/cli/setup-workspace';
 import { inspectProjectFile } from '../../apps/cli/setup-project';
 import { page, starterTemplate } from '../../apps/cli/setup-assistant';
 import { readCatalog } from '../../packages/composable-shadow/onboarding';
-import { composeConnectionTemplates, planConnectionTemplate } from '../../packages/composable-shadow/templates';
+import { composeConnectionTemplates, connectionTemplateSchema, planConnectionTemplate } from '../../packages/composable-shadow/templates';
 
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
@@ -37,6 +38,14 @@ test('local project inspection suggests only structural facts', () => {
   assert.deepEqual(config.controllerCandidates, ['arm_controller']);
   assert.deepEqual(config.jointOrderCandidates, [['axis']]);
   assert.equal(inspectProjectFile('robot.urdf', Buffer.from('<robot name="${model}"/>').toString('base64')).needsExpansion, true);
+});
+
+test('project folder sample contains a valid versioned fragment and catalog', async () => {
+  const root = 'tests/fixtures/local-assistant/';
+  const catalog = await readCatalog(JSON.parse(readFileSync(root + 'catalog.json', 'utf8')));
+  const fragment = connectionTemplateSchema.parse(JSON.parse(readFileSync(root + 'template.json', 'utf8')));
+  assert.equal(fragment.metadata.version, '1.2.0');
+  assert.equal(planConnectionTemplate(fragment, catalog).readyForConfiguration, true);
 });
 
 test('confirmed discovered interface yields a validated portable workspace without dispatch', async () => {

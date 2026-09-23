@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokConnectionTemplate",
+  "metadata": {
+    "id": "sample-program-check",
+    "name": "Sample program rule",
+    "version": "1.2.0",
+    "description": "Synthetic, private reusable rule for local assistant checks.",
+    "visibility": "private",
+    "createdAt": "2026-09-23T00:00:00.000Z"
+  },
+  "compatibility": {
+    "rosDistro": "humble",
+    "paths": [
+      {
+        "id": "program",
+        "kind": "action",
+        "interfaceType": "example_interfaces/action/RunProgram",
+        "interfaceSha256": "61ed6f80ee81efc40924e51d729f2a85d73b252366952ac1b917b5176688bd4e"
+      }
+    ]
+  },
+  "defaults": { "maxObservationAgeMs": 30000 },
+  "paths": [
+    {
+      "id": "program",
+      "kind": "action",
+      "adapter": "tp_program",
+      "mapping": { "program": "/program_name", "allowedPrograms": "SAMPLE" },
+      "requiresSemanticConfirmation": true
+    }
+  ],
+  "facts": [
+    { "id": "robot-description", "kind": "file_sha256", "path": "files/robot.urdf" },
+    { "id": "project-config-1", "kind": "file_sha256", "path": "files/controllers.yaml" }
+  ]
+}
