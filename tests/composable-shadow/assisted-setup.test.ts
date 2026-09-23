@@ -123,6 +123,12 @@ test('project folder sample contains a valid versioned fragment and catalog', as
   const fragment = connectionTemplateSchema.parse(JSON.parse(readFileSync(root + 'template.json', 'utf8')));
   assert.equal(fragment.metadata.version, '1.2.0');
   assert.equal(planConnectionTemplate(fragment, catalog).readyForConfiguration, true);
+  const multipleServers = { ...catalog, actions: catalog.actions.map(action => ({ ...action, serverCount: 2 })) };
+  const ambiguousPlan = planConnectionTemplate(fragment, multipleServers);
+  assert.equal(ambiguousPlan.readyForConfiguration, false);
+  assert.equal(ambiguousPlan.paths[0]?.status, 'AMBIGUOUS');
+  assert.deepEqual(ambiguousPlan.paths[0]?.candidates, []);
+  assert.deepEqual(ambiguousPlan.paths[0]?.unusableActionServers, ['/run_program']);
   assert.throws(() => loadInterfaceSource('unknown/v1', catalog, 'unused'), /unsupported_interface_source/);
 });
 
@@ -146,6 +152,14 @@ test('confirmed discovered interface yields a validated portable workspace witho
   const generated = composeConnectionTemplates([starterTemplate(validatedCatalog, { kind: 'topic', endpoint: '/cmd_vel', adapter: 'topic_twist',
     projectFiles: [{ name: 'robot.urdf', kind: 'robot-description' }, { name: 'control.yaml', kind: 'configuration' }] })]);
   assert.equal(planConnectionTemplate(generated, validatedCatalog).readyForConfiguration, true);
+  const duplicateReceiver = { ...validatedCatalog, topics: validatedCatalog.topics!.map(topic => ({
+    ...topic, subscribers: topic.subscribers.map(node => ({ ...node, count: 2 }))
+  })) };
+  const noUniqueReceiver = planConnectionTemplate(generated, duplicateReceiver);
+  assert.equal(noUniqueReceiver.readyForConfiguration, false);
+  assert.equal(noUniqueReceiver.paths[0]?.status, 'AMBIGUOUS');
+  assert.deepEqual(noUniqueReceiver.paths[0]?.candidates, []);
+  assert.deepEqual(noUniqueReceiver.paths[0]?.unusableTopicReceivers, ['/cmd_vel']);
   assert.deepEqual(generated.facts.map(fact => fact.path), ['files/robot.urdf', 'files/control.yaml']);
   const fragment = { schemaVersion: 1, kind: 'RlsokConnectionTemplate',
     metadata: { id: 'mobile-base', name: 'Mobile base', version: '1.0.0', description: 'Local test', visibility: 'private', createdAt: new Date().toISOString() },

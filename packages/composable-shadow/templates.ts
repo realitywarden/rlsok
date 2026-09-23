@@ -89,12 +89,15 @@ export function planConnectionTemplate(templateInput: unknown, catalogInput: unk
   const available = catalogInterfaces(catalog).filter(item => !item.unavailable);
   const paths = template.compatibility.paths.map(requirement => {
     const configured = template.paths.find(path => path.id === requirement.id)!;
-    const candidates = available.filter(item => item.kind === requirement.kind && item.interfaceType === requirement.interfaceType && (!requirement.interfaceSha256 || item.interfaceSha256 === requirement.interfaceSha256));
+    const matching = available.filter(item => item.kind === requirement.kind && item.interfaceType === requirement.interfaceType && (!requirement.interfaceSha256 || item.interfaceSha256 === requirement.interfaceSha256));
+    const unusableActionServers = matching.filter(item => item.kind === 'action' && item.serverCount !== 1).map(item => item.endpoint);
+    const unusableTopicReceivers = matching.filter(item => item.kind === 'topic' && !item.subscribers.some(node => node.count === 1)).map(item => item.endpoint);
+    const candidates = matching.filter(item => item.kind === 'action' ? item.serverCount === 1 : item.subscribers.some(node => node.count === 1));
     const hinted = candidates.find(item => item.endpoint === configured.endpointHint);
     const selected = hinted ?? (candidates.length === 1 ? candidates[0] : undefined);
     return { id: requirement.id, adapter: configured.adapter, interfaceType: requirement.interfaceType,
-      status: selected ? 'MATCHED' as const : candidates.length ? 'AMBIGUOUS' as const : 'MISSING' as const,
-      selectedEndpoint: selected?.endpoint ?? null, candidates: candidates.map(item => item.endpoint),
+      status: selected ? 'MATCHED' as const : matching.length ? 'AMBIGUOUS' as const : 'MISSING' as const,
+      selectedEndpoint: selected?.endpoint ?? null, candidates: candidates.map(item => item.endpoint), unusableActionServers, unusableTopicReceivers,
       requiresSemanticConfirmation: true as const };
   });
   const distroMatched = !template.compatibility.rosDistro || template.compatibility.rosDistro === catalog.environment.rosDistro;
