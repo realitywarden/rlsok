@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { catalogInterfaces, catalogSchema, type Catalog } from './onboarding';
 import { topicFieldRuleSchema } from './contracts';
 
-const adapterSchema = z.enum(['topic_twist', 'topic_fields', 'joint_trajectory', 'cartesian_pose', 'cartesian_delta', 'cartesian_absolute_wpr', 'tp_program']);
+const adapterSchema = z.enum(['topic_twist', 'topic_fields', 'action_fields', 'joint_trajectory', 'cartesian_pose', 'cartesian_delta', 'cartesian_absolute_wpr', 'tp_program']);
 const id = z.string().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/);
 
 export const connectionTemplateSchema = z.object({
@@ -24,13 +24,13 @@ export const connectionTemplateSchema = z.object({
     const declaredKind = value.compatibility.paths.find(item => item.id === path.id)?.kind;
     if (declaredKind !== path.kind || (path.kind === 'topic') !== ['topic_twist', 'topic_fields'].includes(path.adapter))
       context.addIssue({ code: z.ZodIssueCode.custom, message: `Template path kind and adapter disagree: ${path.id}` });
-    if (path.adapter === 'topic_fields' && path.mapping.rulesJson?.trim()) {
+    if ((path.adapter === 'topic_fields' || path.adapter === 'action_fields') && path.mapping.rulesJson?.trim()) {
       let rules: unknown;
       try { rules = JSON.parse(path.mapping.rulesJson); }
-      catch { context.addIssue({ code: z.ZodIssueCode.custom, message: `Invalid topic field rules JSON: ${path.id}` }); continue; }
+      catch { context.addIssue({ code: z.ZodIssueCode.custom, message: `Invalid field rules JSON: ${path.id}` }); continue; }
       const parsed = z.array(topicFieldRuleSchema).min(1).max(32).safeParse(rules);
       if (!parsed.success || new Set(parsed.data.map(rule => rule.pointer)).size !== parsed.data.length)
-        context.addIssue({ code: z.ZodIssueCode.custom, message: `Invalid topic field rules: ${path.id}` });
+        context.addIssue({ code: z.ZodIssueCode.custom, message: `Invalid field rules: ${path.id}` });
     }
   }
 });

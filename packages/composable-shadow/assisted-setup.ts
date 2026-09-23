@@ -36,9 +36,9 @@ function fields(adapter: string, mapping: Record<string, string>): unknown {
   throw new Error(`unsupported_adapter:${adapter}`);
 }
 
-function topicRules(value: string | undefined): unknown {
+function fieldRules(value: string | undefined): unknown {
   try { return { rules: JSON.parse(value ?? '') }; }
-  catch { throw new Error('topic_field_rules_must_be_json_array'); }
+  catch { throw new Error('field_rules_must_be_json_array'); }
 }
 
 export async function buildAssistedConnection(input: AssistedSetupInput): Promise<Connection> {
@@ -65,12 +65,13 @@ export async function buildAssistedConnection(input: AssistedSetupInput): Promis
       const receiver = selected.subscribers.find(node => `${node.namespace}|${node.name}` === mapping.subscriber && node.count === 1);
       if (!receiver) throw new Error(`choose_unambiguous_receiver:${requirement.id}`);
       if (configured.adapter === 'topic_fields') return { ...common, messageType: selected.messageType,
-        subscriber: { name: receiver.name, namespace: receiver.namespace }, fields: topicRules(mapping.rulesJson) };
+        subscriber: { name: receiver.name, namespace: receiver.namespace }, fields: fieldRules(mapping.rulesJson) };
       return { ...common, messageType: selected.messageType, subscriber: { name: receiver.name, namespace: receiver.namespace },
         fields: { linear: mapping.linear, angular: mapping.angular }, commandFrame: mapping.commandFrame };
     }
     if (selected.kind !== 'action' || selected.serverCount !== 1) throw new Error(`choose_unambiguous_action_server:${requirement.id}`);
-    return { ...common, actionType: selected.actionType, fields: fields(configured.adapter, mapping) };
+    return { ...common, actionType: selected.actionType,
+      fields: configured.adapter === 'action_fields' ? fieldRules(mapping.rulesJson) : fields(configured.adapter, mapping) };
   });
   const urdf = input.facts.find(fact => fact.kind === 'file_sha256' && (fact.id === 'robot-description' || /\.urdf$/i.test(fact.path)));
   if (!urdf) throw new Error('robot_description_file_fact_required');

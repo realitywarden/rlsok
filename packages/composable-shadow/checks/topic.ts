@@ -1,15 +1,16 @@
 import { atPointer, type Path } from '../contracts';
 import { finiteVector, poseVector } from './shared';
 
-export function validateTopicFields(path: Extract<Path, { adapter: 'topic_fields' }>, goal: Record<string, unknown>): string | null {
+export function validateTopicFields(path: Extract<Path, { adapter: 'topic_fields' | 'action_fields' }>, goal: Record<string, unknown>): string | null {
+  const prefix = path.adapter === 'action_fields' ? 'action_field' : 'topic_field';
   for (const rule of path.fields.rules) {
     const value = atPointer(goal, rule.pointer);
     if (typeof value !== (rule.type === 'integer' ? 'number' : rule.type) ||
       (rule.type === 'integer' && !Number.isSafeInteger(value)) ||
-      (rule.type === 'number' && !Number.isFinite(value))) return `topic_field_type_invalid:${rule.pointer}`;
+      (rule.type === 'number' && !Number.isFinite(value))) return `${prefix}_type_invalid:${rule.pointer}`;
     if (typeof value === 'number' && (rule.minimum !== undefined && value < rule.minimum || rule.maximum !== undefined && value > rule.maximum))
-      return `topic_field_out_of_bounds:${rule.pointer}`;
-    if (rule.allowed && !rule.allowed.includes(value as string | number | boolean)) return `topic_field_not_allowlisted:${rule.pointer}`;
+      return `${prefix}_out_of_bounds:${rule.pointer}`;
+    if (rule.allowed && !rule.allowed.includes(value as string | number | boolean)) return `${prefix}_not_allowlisted:${rule.pointer}`;
   }
   return null;
 }

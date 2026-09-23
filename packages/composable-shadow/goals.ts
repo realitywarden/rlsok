@@ -8,6 +8,7 @@ import { validateProgram, validateTrajectory } from './checks/action';
 export function validateGoal(profile: Profile, path: Path, goal: Record<string, unknown>): string | null {
   switch (path.adapter) {
     case 'topic_fields': return validateTopicFields(path, goal);
+    case 'action_fields': return validateTopicFields(path, goal);
     case 'topic_twist': return validateTopicTwist(path, goal);
     case 'tp_program': return validateProgram(path, goal);
     case 'cartesian_pose': return validateCartesianPose(path, goal);

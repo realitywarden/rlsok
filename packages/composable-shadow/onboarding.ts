@@ -158,7 +158,7 @@ export function goalFields(tree: TypeTree): Array<{ pointer: string; kind: strin
 
 function mappedPointers(path: Path): string[] {
   if (path.adapter === 'topic_twist') return [path.fields.linear, path.fields.angular, ...(path.messageType === 'geometry_msgs/msg/TwistStamped' ? ['/header/frame_id', '/header/stamp'] : [])];
-  if (path.adapter === 'topic_fields') return path.fields.rules.map(rule => rule.pointer);
+  if (path.adapter === 'topic_fields' || path.adapter === 'action_fields') return path.fields.rules.map(rule => rule.pointer);
   if (path.adapter === 'joint_trajectory') return [path.fields.jointNames, path.fields.points];
   if (path.adapter === 'tp_program') return [path.fields.program];
   if (path.adapter === 'cartesian_delta') return [...path.fields.translation, ...path.fields.rotation, path.fields.velocity, path.fields.frame];

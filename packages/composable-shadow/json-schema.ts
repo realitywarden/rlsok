@@ -30,8 +30,9 @@ export function interfaceSchemas(): Record<string, unknown> {
         'Every path check must reference a declared fact and every fact must be used.',
         'File facts require SHA256 expected values and no pointer; JSON facts require a pointer.',
         'The trajectory adapter requires control_msgs/action/FollowJointTrajectory.',
-        'Topic Twist requires standard Twist/TwistStamped mappings and an explicit matching subscription with count one; joint order may be empty only for topic-only profiles.',
+        'Topic Twist requires standard Twist/TwistStamped mappings and an explicit matching subscription with count one; joint order may be empty for custom field-only and program-selector paths.',
         'Custom topic field rules require explicit meanings and units, an installed message definition, a selected receiver and one real message shape; only declared fields are checked.',
+        'Custom action Goal field rules require explicit meanings and units, an installed action definition, exactly one visible server and one real Goal shape; only declared fields are checked and no Goal is sent.',
         'Approval expiry must follow approval time; current validity and profile hash are checked during evaluation.',
         'Observation IDs and proposal/path IDs must be unique; all declared paths must be covered.',
         'Observed facts, interface fingerprints and environment must match and timestamps must be fresh.',
@@ -41,6 +42,7 @@ export function interfaceSchemas(): Record<string, unknown> {
       goalConventions: {
         topic_twist: 'Standard Twist/TwistStamped linear XYZ in m/s and angular XYZ in rad/s; explicit receiver and command frame. Stamped frame and timestamp structure are checked; no velocity safety bounds.',
         topic_fields: 'User-declared pointer, type, meaning and unit for each selected field, with optional bounds or allowlist. No unit conversion, live payload sampling, physical-semantic inference or message publishing.',
+        action_fields: 'User-declared Goal pointer, type, meaning and unit for each selected field, with optional bounds or allowlist. No unit conversion, physical-semantic inference or Goal dispatch.',
         cartesian_pose: 'Absolute position in meters; quaternion in x,y,z,w order. A pointer selects a numeric array or a ROS x/y/z[/w] object; alternatively supply one pointer per component.',
         cartesian_delta: 'Relative translation in millimeters, W/P/R rotation in degrees, positive velocity in millimeters per second.',
         cartesian_absolute_wpr: 'Absolute XYZ in millimeters and native FANUC W/P/R in degrees, without conversion or angle normalization. uint16 velocity in mm/s; zero uses the explicitly reviewed default. The frame label must match; it does not verify the active controller frame/tool or perform TF. Finite targets and selected velocity limits do not establish reachability or motion safety.',

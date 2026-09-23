@@ -106,6 +106,48 @@ test('custom ROS topic rules validate declared fields without publishing a messa
   await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, confirmed: false }] }), /confirm_meaning_units_and_frame/);
 });
 
+test('custom ROS action Goal rules validate installed fields without sending a Goal', async () => {
+  const actionType = 'example_interfaces/action/Inspect';
+  const tree = { algorithm: 'rosidl-action-fields-tree/v1', actionType,
+    components: { Goal: { kind: 'message', name: 'Inspect_Goal' }, Result: { kind: 'message', name: 'Inspect_Result' },
+      Feedback: { kind: 'message', name: 'Inspect_Feedback' } },
+    definitions: { Inspect_Goal: { fields: [
+      { name: 'target', type: { kind: 'string', maximumSize: null } },
+      { name: 'threshold', type: { kind: 'primitive', name: 'double' } }
+    ] }, Inspect_Result: { fields: [] }, Inspect_Feedback: { fields: [] } } };
+  const fingerprint = createHash('sha256').update(canonical(tree)).digest('hex');
+  const observedAt = new Date().toISOString();
+  const catalog = await readCatalog({ schemaVersion: 1, kind: 'RlsokInterfaceCatalog', collector: 'ros2-read-only/v1', observedAt,
+    environment: { rosDistro: 'jazzy', rmwImplementation: 'rmw_fastrtps_cpp', domainId: 3 },
+    actions: [{ endpoint: '/inspect', actionType, serverCount: 1, interfaceSha256: fingerprint, typeTree: tree }], limitations: [] });
+  const rules = [{ pointer: '/target', type: 'string', meaning: 'part identifier', unit: 'identifier', allowed: ['part-a'] },
+    { pointer: '/threshold', type: 'number', meaning: 'inspection threshold', unit: 'mm', minimum: 0, maximum: 5 }];
+  const fragment = starterTemplate(catalog, { kind: 'action', endpoint: '/inspect', adapter: 'action_fields',
+    projectFiles: [{ name: 'robot.urdf', kind: 'robot-description' }] });
+  assert.equal(connectionTemplateSchema.safeParse(fragment).success, true);
+  const urdf = Buffer.from('<robot name="inspector"><link name="base"/></robot>');
+  const facts = [{ id: 'robot-description', kind: 'file_sha256' as const, path: 'files/robot.urdf',
+    expected: createHash('sha256').update(urdf).digest('hex') }];
+  const input = { catalog, fragments: [fragment], robot: { id: 'inspector', deviceId: 'inspector-1', model: 'inspector',
+    controller: 'inspection-server', jointOrder: [], maxObservationAgeMs: 30000 }, facts,
+    decisions: [{ pathId: 'path-1', endpoint: '/inspect', mapping: { rulesJson: JSON.stringify(rules) },
+      goal: { target: 'part-a', threshold: 2 }, confirmed: true }] };
+  const connection = await buildAssistedConnection(input);
+  assert.equal(connection.profile.paths[0]?.adapter, 'action_fields');
+  const approval = approveProfile(connection.profile, 'local-operator', new Date(Date.now() + 60000).toISOString());
+  const observation = { schemaVersion: 1, profileId: connection.profile.id, observedAt, collector: 'fixture/v1',
+    environment: catalog.environment, facts: facts.map(fact => ({ id: fact.id, kind: fact.kind, value: fact.expected, observedAt })),
+    paths: [{ id: 'path-1', endpoint: '/inspect', actionType, interfaceSha256: fingerprint, serverCount: 1 }] };
+  const report = await evaluateProfile({ profile: connection.profile, approval, observation, proposals: connection.proposals });
+  assert.equal(report.decision, 'WOULD_ALLOW');
+  assert.equal(report.hardwareSignalSent, false);
+  assert.equal(report.controllerGoalsAttempted, 0);
+  await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, goal: { target: 'part-a', threshold: 6 } }] }), /action_field_out_of_bounds/);
+  await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, goal: { target: 'part-b', threshold: 2 } }] }), /action_field_not_allowlisted/);
+  await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, mapping: {
+    rulesJson: JSON.stringify([{ pointer: '/unknown', type: 'string', meaning: 'unknown', unit: 'identifier' }]) } }] }), /Field is absent/);
+});
+
 test('local project inspection suggests only structural facts', () => {
   const robot = inspectProjectFile('robot.urdf', Buffer.from('<robot name="sample"><joint name="axis" type="revolute"/></robot>').toString('base64'));
   assert.equal(robot.model, 'sample');
