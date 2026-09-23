@@ -322,13 +322,14 @@ function renderSavedFolderChoices(){
 }
 $('projectFolder').onchange=async event=>{try{
   const entries=[...event.target.files],ignored=/(?:^|\\/)(?:\\.git|node_modules|build|install|log|dist)(?:\\/|$)/i;
+  projectFiles=[];inspections=[];catalog=null;catalogOrigin='none';workspace=null;folderCandidates=[];folderCatalogFiles=[];folderTemplateFiles=[];renderFinish();render('projectList',[]);$('folderChoices').replaceChildren();$('folderSavedChoices').replaceChildren();show('projectStatus','New folder selected. Inspect the actual files.');renderInterfaceChoices();show('catalogStatus','No catalog loaded for this folder. Discover this ROS graph or import one.');$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';
   const catalogFiles=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/^(?:catalog|interface-catalog|rlsok-interface-catalog)\\.json$/i.test(file.name)&&file.size<=2*1024*1024);
   const templateFiles=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/^(?:template|rlsok-connection-template|connection-template|fragment(?:-[A-Za-z0-9._-]+)?)\\.json$/i.test(file.name)&&file.size<=2*1024*1024);
   folderCatalogFiles=catalogFiles;folderTemplateFiles=templateFiles;
   folderCandidates=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/\\.(?:urdf|json|ya?ml)$/i.test(file.name)&&/^[A-Za-z0-9_. -]+$/.test(file.name)&&file.size<=8*1024*1024&&!catalogFiles.includes(file)&&!templateFiles.includes(file));
   const xacro=entries.filter(file=>/\\.xacro$/i.test(file.name)).length;
   if(folderCandidates.length>256)throw new Error('This folder has more than 256 candidate files. Choose the relevant files individually.');
-  projectFiles=[];inspections=[];catalog=null;catalogOrigin='none';workspace=null;renderFinish();render('projectList',[]);show('projectStatus','New folder selected. Inspect the actual files.');renderInterfaceChoices();renderSavedFolderChoices();show('catalogStatus','No catalog loaded for this folder. Discover this ROS graph or import one.');$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';
+  renderSavedFolderChoices();
   let catalogNote='';
   if(catalogFiles.length===1){try{const candidate=JSON.parse(await catalogFiles[0].text());if(candidate.kind==='RlsokInterfaceCatalog'){useCatalog(await api('source',{plugin:'saved-ros2-catalog/v1',catalog:candidate}),'this project folder');catalogNote=' Valid saved interface catalog loaded.'}}catch(error){catalogNote=' Saved catalog could not be validated: '+(error.message||String(error))+'. Choose a valid catalog here or discover the live graph.'}}
   else if(catalogFiles.length>1)catalogNote=' Several saved catalogs found; choose the intended catalog explicitly.';
