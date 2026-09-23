@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build native-CPU Mac payloads from the exact released Local Check payload.
+"""Build native-CPU Mac payloads from an exact hashed Local Check payload.
 
 This is packaging only. macOS execution and Apple signing are separate steps.
 No Linux executable, installer, or GNU-only launcher is presented as a Mac build.
@@ -7,6 +7,7 @@ No Linux executable, installer, or GNU-only launcher is presented as a Mac build
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path, PurePosixPath
 import shutil
 import struct
@@ -16,9 +17,9 @@ import tempfile
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '1.5.12'
-SOURCE = '747142754713401c0d3d022a125e3e8a661c2e82'
-LINUX_SHA = '813239aa26ee500a2e8606a30852292db739979aec66adaa56c731b352be43bf'
+BASELINE_VERSION = '1.5.12'
+BASELINE_SOURCE = '747142754713401c0d3d022a125e3e8a661c2e82'
+BASELINE_LINUX_SHA = '813239aa26ee500a2e8606a30852292db739979aec66adaa56c731b352be43bf'
 NODE = {
     'x64': ('5ea50c9d6dea3dfa3abb66b2656f7a4e1c8cef23432b558d45fb538c7b5dedce', 0x01000007),
     'arm64': ('5ed4db0fcf1eaf84d91ad12462631d73bf4576c1377e192d222e48026a902640', 0x0100000c),
@@ -37,8 +38,17 @@ def main():
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--node-cache', required=True, type=Path)
     parser.add_argument('--arch', choices=tuple(NODE), help='Build one native CPU payload; omit to build both')
+    parser.add_argument('--version', default=BASELINE_VERSION)
+    parser.add_argument('--source-commit', default=BASELINE_SOURCE)
+    parser.add_argument('--linux-sha256', default=BASELINE_LINUX_SHA)
     args = parser.parse_args()
-    if sha(args.linux_bundle) != LINUX_SHA:
+    if not re.fullmatch(r'\d+\.\d+\.\d+', args.version):
+        raise SystemExit('numbered_local_check_version_required')
+    if not re.fullmatch(r'[a-f0-9]{40}', args.source_commit) or not re.fullmatch(r'[a-f0-9]{64}', args.linux_sha256):
+        raise SystemExit('invalid_source_commit_or_linux_checksum')
+    if args.version != BASELINE_VERSION and (args.source_commit == BASELINE_SOURCE or args.linux_sha256 == BASELINE_LINUX_SHA):
+        raise SystemExit('new_version_requires_new_source_and_payload_checksum')
+    if sha(args.linux_bundle) != args.linux_sha256:
         raise SystemExit('released_linux_payload_checksum_mismatch')
     if args.output.exists():
         raise SystemExit('choose_a_new_output_directory')
@@ -51,7 +61,7 @@ def main():
         temporary = Path(temporary)
         base = temporary/'base'
         base.mkdir()
-        prefix = f'rlsok-local-check-{VERSION}'
+        prefix = f'rlsok-local-check-{args.version}'
         with tarfile.open(args.linux_bundle, 'r:gz') as archive:
             for member in archive:
                 name = PurePosixPath(member.name)
@@ -65,7 +75,7 @@ def main():
                     with archive.extractfile(member) as src, target.open('wb') as dst:
                         shutil.copyfileobj(src, dst)
         original = base/prefix
-        if (original/'VERSION').read_text().strip()!=VERSION or (original/'SOURCE_COMMIT').read_text().strip()!=SOURCE:
+        if (original/'VERSION').read_text().strip()!=args.version or (original/'SOURCE_COMMIT').read_text().strip()!=args.source_commit:
             raise RuntimeError('released_source_identity_mismatch')
         assets=[]
         selected = NODE.items() if args.arch is None else [(args.arch, NODE[args.arch])]
@@ -95,12 +105,12 @@ def main():
             guide = (ROOT/'packaging/macos/README.md').read_text(encoding='utf-8')
             if guide.count('__RLSOK_VERSION__') != 4:
                 raise RuntimeError('macos_guide_version_tokens_invalid')
-            (stage/'START-HERE.md').write_text(guide.replace('__RLSOK_VERSION__', VERSION), encoding='utf-8')
+            (stage/'START-HERE.md').write_text(guide.replace('__RLSOK_VERSION__', args.version), encoding='utf-8')
             (stage/'PLATFORM').write_text(f'darwin-{arch}\n')
             manifest=json.loads((stage/'BUILD-MANIFEST.json').read_text())
             manifest.update(platform=f'darwin-{arch}',packagingSourceCommit=packaging_source,
                 node={'version':'22.22.0','url':node_url,'archiveSha256':digest},
-                payloadSource={'version':VERSION,'commit':SOURCE,'linuxArchiveSha256':LINUX_SHA})
+                payloadSource={'version':args.version,'commit':args.source_commit,'linuxArchiveSha256':args.linux_sha256})
             manifest['validation'].update(installedBundle='not_run_on_macos',nativeMachOArchitecture='verified',
                 appleDeveloperIdSigning='not_performed',appleNotarization='not_performed')
             write_json(stage/'BUILD-MANIFEST.json',manifest)
@@ -117,7 +127,7 @@ def main():
                         with p.open('rb') as content:archive.addfile(info,content)
                     else:archive.addfile(info)
             assets.append({'name':name,'sizeBytes':output.stat().st_size,'sha256':sha(output),'platform':f'darwin-{arch}'})
-        write_json(args.output/'macos-build.json',{'version':VERSION,'sourceCommit':SOURCE,'packagingSourceCommit':packaging_source,
+        write_json(args.output/'macos-build.json',{'version':args.version,'sourceCommit':args.source_commit,'packagingSourceCommit':packaging_source,
             'assets':assets,'nativeInstaller':'build-pkg.sh must execute on macOS','published':False})
         (args.output/'SHA256SUMS').write_text(''.join(f'{a["sha256"]}  {a["name"]}\n' for a in assets))
         print(json.dumps(assets))
