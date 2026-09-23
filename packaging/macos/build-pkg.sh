@@ -7,7 +7,14 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 [[ ! -e $1 && ! -L $1 ]] || { echo 'Output already exists.' >&2; exit 1; }
 VERSION=$(cat "$ROOT/VERSION")
 PLATFORM=$(cat "$ROOT/PLATFORM")
-[[ $VERSION == 1.5.12 && $PLATFORM =~ ^darwin-(x64|arm64)$ ]] || { echo 'Unexpected payload identity.' >&2; exit 1; }
+[[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && $PLATFORM =~ ^darwin-(x64|arm64)$ ]] || { echo 'Unexpected payload identity.' >&2; exit 1; }
+python3 - "$ROOT/BUILD-MANIFEST.json" "$VERSION" "$PLATFORM" "$ROOT/SOURCE_COMMIT" <<'CHECK'
+import json, pathlib, sys
+manifest = json.loads(pathlib.Path(sys.argv[1]).read_text())
+source = pathlib.Path(sys.argv[4]).read_text().strip()
+if manifest.get('version') != sys.argv[2] or manifest.get('platform') != sys.argv[3] or manifest.get('sourceCommit') != source:
+    raise SystemExit('payload_manifest_identity_mismatch')
+CHECK
 ARCH=${PLATFORM#darwin-}
 OUT=$1
 mkdir "$OUT"
