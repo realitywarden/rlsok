@@ -2,6 +2,7 @@
 from types import SimpleNamespace
 import inspect
 import unittest
+from unittest.mock import patch
 import rebot_status
 
 CHECKOUT = {'commit': '4' * 40, 'dirty': False, 'checkoutName': 'rebot',
@@ -50,6 +51,31 @@ class ReBotStatusTests(unittest.TestCase):
             state_machine='IDLE', error_codes=[])
         with self.assertRaisesRegex(rebot_status.CollectionError, 'joint_mapping'):
             rebot_status.build_observation(self.reader(status=bad), CHECKOUT)
+
+    def test_waits_for_jazzy_publisher_name(self):
+        unknown = value(node_namespace='_NODE_NAMESPACE_UNKNOWN_', node_name='_NODE_NAME_UNKNOWN_',
+                        topic_type=rebot_status.JOINT_TYPE, endpoint_gid=bytes([1]))
+        resolved = value(node_namespace='/', node_name='reBotArmController',
+                         topic_type=rebot_status.JOINT_TYPE, endpoint_gid=bytes([1]))
+        observations = iter([[unknown], [resolved]])
+        spins = []
+        reader = rebot_status.Reader.__new__(rebot_status.Reader)
+        reader.node = value(get_publishers_info_by_topic=lambda _topic: next(observations))
+        reader.executor = value(spin_once=lambda timeout_sec: spins.append(timeout_sec))
+        rows = reader.publishers(rebot_status.JOINT_TOPIC)
+        self.assertEqual(rows, [{'node': rebot_status.HARDWARE_NODE,
+                                 'type': rebot_status.JOINT_TYPE, 'gid': '01'}])
+        self.assertEqual(spins, [0.1])
+
+    def test_unresolved_publisher_still_fails_closed(self):
+        unknown = value(node_namespace='_NODE_NAMESPACE_UNKNOWN_', node_name='_NODE_NAME_UNKNOWN_',
+                        topic_type=rebot_status.JOINT_TYPE, endpoint_gid=bytes([1]))
+        reader = rebot_status.Reader.__new__(rebot_status.Reader)
+        reader.node = value(get_publishers_info_by_topic=lambda _topic: [unknown])
+        reader.executor = value(spin_once=lambda timeout_sec: None)
+        with patch.object(rebot_status.time, 'monotonic', side_effect=[0, 0, 21]):
+            with self.assertRaisesRegex(rebot_status.CollectionError, 'hardware_publisher'):
+                rebot_status.endpoint(reader, rebot_status.JOINT_TOPIC, rebot_status.JOINT_TYPE)
 
     def test_reader_has_no_command_service_or_can_surface(self):
         source = inspect.getsource(rebot_status.Reader)
