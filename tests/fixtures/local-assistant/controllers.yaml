@@ -1,0 +1,3 @@
+arm_controller:
+  type: JointTrajectoryController
+  joints: [axis1]

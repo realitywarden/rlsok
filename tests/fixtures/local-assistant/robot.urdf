@@ -1,0 +1,11 @@
+<robot name="demo_bot">
+  <link name="base" />
+  <link name="arm" />
+  <joint name="axis1" type="revolute">
+    <parent link="base" />
+    <child link="arm" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
+    <limit lower="-1" upper="1" effort="1" velocity="1" />
+  </joint>
+</robot>

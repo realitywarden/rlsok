@@ -161,6 +161,15 @@ wizard matches exact interface types, prefers an endpoint hint, and otherwise
 requires one unambiguous candidate. The user must still provide real goals,
 files and device values and reconfirm meanings, units, frames and limits.
 
+For reuse across machines, choose the separate cross-machine template export
+in the web wizard, or name and version the reusable template in the local
+assistant. It keeps checked interface types, field pointers and common check
+descriptors, but leaves endpoint, receiving node, command/expected frame,
+robot identity, joint order and actual source files to the next machine.
+The original same-machine private template export remains available unchanged.
+Version labels are user-managed; saving a new revision does not modify an
+older template or a running robot.
+
 The CLI can inspect the same contract and show what a fresh catalog matches:
 
 ```sh

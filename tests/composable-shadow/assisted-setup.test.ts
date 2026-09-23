@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
+import { Script } from 'node:vm';
 import { buildAssistedConnection } from '../../packages/composable-shadow/assisted-setup';
 import { buildSetupWorkspace } from '../../apps/cli/setup-workspace';
 import { inspectProjectFile } from '../../apps/cli/setup-project';
-import { starterTemplate } from '../../apps/cli/setup-assistant';
+import { page, starterTemplate } from '../../apps/cli/setup-assistant';
 import { readCatalog } from '../../packages/composable-shadow/onboarding';
 import { composeConnectionTemplates, planConnectionTemplate } from '../../packages/composable-shadow/templates';
 
@@ -13,6 +14,15 @@ function canonical(value: unknown): string {
   if (value && typeof value === 'object') return `{${Object.keys(value).sort().map(key => `${canonical(key)}:${canonical((value as Record<string, unknown>)[key])}`).join(',')}}`;
   return JSON.stringify(value);
 }
+
+test('local assistant serves syntactically valid browser logic with reusable template controls', () => {
+  const html = page('a'.repeat(48));
+  const script = html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  assert.ok(script);
+  assert.doesNotThrow(() => new Script(script));
+  assert.match(html, /id="templateVersion"/);
+  assert.match(html, /id="missingStatus"/);
+});
 
 test('local project inspection suggests only structural facts', () => {
   const robot = inspectProjectFile('robot.urdf', Buffer.from('<robot name="sample"><joint name="axis" type="revolute"/></robot>').toString('base64'));
@@ -63,5 +73,7 @@ test('confirmed discovered interface yields a validated portable workspace witho
   assert.equal(archive.readUInt32LE(0), 0x04034b50);
   assert.ok(archive.includes(Buffer.from('template.json')));
   assert.ok(archive.includes(urdf));
+  assert.ok(archive.includes(Buffer.from('rlsok profile capture --profile profile.json --output observation.json')));
+  assert.ok(archive.includes(Buffer.from('rlsok profile shadow --profile profile.json --approval approval.json')));
   await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, confirmed: false }] }), /confirm_meaning_units_and_frame/);
 });

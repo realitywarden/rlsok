@@ -82,7 +82,20 @@ export async function buildSetupWorkspace(connectionInput: unknown, fileInputs: 
   const entries = [
     { name: 'connection.json', bytes: json(connection) }, { name: 'profile.json', bytes: json(connection.profile) },
     { name: 'proposals.json', bytes: json(connection.proposals) }, { name: 'catalog.json', bytes: json(connection.catalog) },
-    { name: 'README.md', bytes: Buffer.from('# RLSOK local check workspace\n\nThese are your private selected inputs. Review profile.json and proposals.json. No approval, observation or robot command was generated.\n\nFrom this extracted directory with the installed CLI and ROS workspace sourced:\n\n1. `rlsok profile inspect-connection --input connection.json` checks the saved interface and example-goal configuration.\n2. Review all mappings, real units, frames, limits, selected files and intended receiver. Follow `docs/interface-onboarding.md` to create a local Shadow approval and capture a fresh read-only observation before evaluation.\n3. Evaluate only after that approval and fresh capture. This ZIP alone is not a compatibility certificate or permission to dispatch motion.\n\nThe included template.json, when present, is a versioned private fragment that can be reimported into the setup assistant. File hashes do not prove these files are active on a physical controller.\n') },
+    { name: 'README.md', bytes: Buffer.from(`# RLSOK local check workspace
+
+These are your private selected inputs. Review profile.json, proposals.json and every file under files/. No approval, observation or robot command was generated. This workspace does not send a command.
+
+From this extracted directory with the installed CLI and ROS workspace sourced:
+
+1. Run \`rlsok profile inspect-connection --input connection.json\` to validate the saved interface and example-goal configuration.
+2. Confirm the selected receiver, field meanings, units, frames, limits, file provenance and whether these files are active in the target system. A matching name or hash alone cannot establish active controller state.
+3. In an isolated simulator or other deliberately safe environment, set an operator name and a future RFC3339 expiry, then run \`rlsok profile approve --profile profile.json --actor "OPERATOR_NAME" --expires-at "2030-01-01T00:00:00Z" --output approval.json\`. Replace both example values; never use the example expiry unchanged.
+4. Run \`rlsok profile capture --profile profile.json --output observation.json\` to collect a fresh read-only observation.
+5. Run \`rlsok profile shadow --profile profile.json --approval approval.json --observation observation.json --proposals proposals.json --output result\` and read result/report.md. WOULD_ALLOW means these declared inputs passed the checks, not that motion is safe or authorized.
+
+Capture and assessment require the correct local ROS environment and a current observation; a saved catalog is only a discovery snapshot. The optional versioned template.json can be reimported into the setup assistant with a fresh catalog for another machine. Supply and reconfirm that machine's endpoint, receiver, frame, robot identity, goal and actual files. No customer or physical-robot compatibility is certified by this ZIP.
+`) },
     ...[...supplied].map(([name, bytes]) => ({ name, bytes }))
   ];
   if (templateInput !== undefined) {

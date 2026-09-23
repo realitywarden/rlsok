@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "kind": "RlsokInterfaceCatalog",
+  "collector": "ros2-read-only/v1",
+  "observedAt": "2026-09-23T00:00:00.000Z",
+  "environment": {
+    "rosDistro": "humble",
+    "rmwImplementation": "rmw_fastrtps_cpp",
+    "domainId": 12
+  },
+  "actions": [
+    {
+      "endpoint": "/run_program",
+      "actionType": "example_interfaces/action/RunProgram",
+      "serverCount": 1,
+      "interfaceSha256": "61ed6f80ee81efc40924e51d729f2a85d73b252366952ac1b917b5176688bd4e",
+      "typeTree": {
+        "algorithm": "rosidl-action-fields-tree/v1",
+        "actionType": "example_interfaces/action/RunProgram",
+        "components": {
+          "Goal": { "kind": "message", "name": "Goal" },
+          "Result": { "kind": "message", "name": "Result" },
+          "Feedback": { "kind": "message", "name": "Feedback" }
+        },
+        "definitions": {
+          "Goal": { "fields": [{ "name": "program_name", "type": { "kind": "string", "maximumSize": null } }] },
+          "Result": { "fields": [] },
+          "Feedback": { "fields": [] }
+        }
+      }
+    }
+  ],
+  "topics": [],
+  "limitations": []
+}
