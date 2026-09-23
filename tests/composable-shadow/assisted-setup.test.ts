@@ -22,6 +22,10 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.doesNotThrow(() => new Script(script));
   assert.match(html, /id="templateVersion"/);
   assert.match(html, /id="missingStatus"/);
+  assert.match(html, /id="projectFolder"[^>]*webkitdirectory/);
+  assert.match(html, /id="inspectFolder"/);
+  assert.match(html, /function updateNextStep\(/);
+  assert.match(html, /Valid saved interface catalog loaded/);
 });
 
 test('local project inspection suggests only structural facts', () => {
@@ -76,4 +80,5 @@ test('confirmed discovered interface yields a validated portable workspace witho
   assert.ok(archive.includes(Buffer.from('rlsok profile capture --profile profile.json --output observation.json')));
   assert.ok(archive.includes(Buffer.from('rlsok profile shadow --profile profile.json --approval approval.json')));
   await assert.rejects(buildAssistedConnection({ ...input, decisions: [{ ...input.decisions[0]!, confirmed: false }] }), /confirm_meaning_units_and_frame/);
+  await assert.rejects(buildAssistedConnection({ ...input, fragments: [{ ...fragment, compatibility: { ...fragment.compatibility, rosDistro: 'jazzy' } }] }), /template_ros_distro_mismatch/);
 });

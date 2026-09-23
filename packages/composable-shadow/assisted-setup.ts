@@ -39,6 +39,8 @@ function fields(adapter: string, mapping: Record<string, string>): unknown {
 export async function buildAssistedConnection(input: AssistedSetupInput): Promise<Connection> {
   const catalog = await readCatalog(input.catalog);
   const template = composeConnectionTemplates(input.fragments);
+  if (template.compatibility.rosDistro && template.compatibility.rosDistro !== catalog.environment.rosDistro)
+    throw new Error(`template_ros_distro_mismatch:${template.compatibility.rosDistro}:${catalog.environment.rosDistro}`);
   if (input.decisions.length !== template.paths.length || new Set(input.decisions.map(item => item.pathId)).size !== input.decisions.length)
     throw new Error('one_confirmed_decision_required_per_template_path');
   const available = catalogInterfaces(catalog).filter(item => !item.unavailable);

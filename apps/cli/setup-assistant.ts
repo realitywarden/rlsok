@@ -107,7 +107,7 @@ export function page(token: string): string {
 <div class="notice"><strong>Read-only setup:</strong> discovery reads the visible ROS 2 graph and interface definitions. This assistant never publishes a topic, sends an action goal, or grants execution permission.</div>
 <div class="steps"><div class="step"><b>1 · Discover</b>Read a live graph or import a catalog.</div><div class="step"><b>2 · Compose</b>Combine reusable template fragments.</div><div class="step"><b>3 · Match</b>Resolve interfaces and show gaps.</div><div class="step"><b>4 · Export</b>Save the local setup workspace.</div></div>
 <div class="grid"><section>
-<div class="card"><h2>Project inputs</h2><p>Read an expanded URDF and existing JSON/YAML controller configuration locally. Suggested model, controller and joint order still need review; units and physical meaning cannot be inferred.</p><label class="button secondary" for="projectFiles">Read project files</label><input id="projectFiles" type="file" accept=".urdf,.json,.yaml,.yml" multiple><div id="projectStatus" class="status">No project files inspected.</div><div id="projectList" class="list"></div></div>
+<div class="card"><h2>Project inputs</h2><p>Open a project folder to find robot descriptions and configuration candidates, or choose individual files. Nothing is uploaded to a cloud service. Review the selected files before inspection; units and physical meaning cannot be inferred.</p><label class="button" for="projectFolder">Open project folder</label><input id="projectFolder" type="file" webkitdirectory multiple><label class="button secondary" for="projectFiles">Choose individual files</label><input id="projectFiles" type="file" accept=".urdf,.json,.yaml,.yml" multiple><div id="folderStatus" class="status"></div><div id="folderChoices" class="list"></div><button id="inspectFolder" class="secondary" hidden>Inspect selected project files</button><div id="projectStatus" class="status">No project files inspected.</div><div id="projectList" class="list"></div></div>
 <div class="card"><h2>1. Interface discovery</h2><p>Use the ROS environment sourced in the terminal that started this assistant, or import a previously discovered catalog.</p><button id="discover">Discover this ROS graph</button><label class="button secondary" for="catalog">Import catalog JSON</label><input id="catalog" type="file" accept="application/json,.json"><div id="catalogStatus" class="status">No catalog loaded.</div></div>
 <div class="card"><h2>2. Start from discovery or reuse fragments</h2><p>Choose one discovered command boundary, or add up to 16 private template fragments to combine reusable mappings and checks.</p><label class="field">Discovered interface<select id="starterInterface"><option value="">Choose an interface</option></select></label><label class="field">Command meaning<select id="starterAdapter"><option value="">Choose the documented meaning</option></select></label><label class="button" for="fragments">Add template fragments</label><input id="fragments" type="file" accept="application/json,.json" multiple><button id="clear" class="secondary">Clear</button><div id="fragmentList" class="list"></div></div>
 <div class="card"><h2>3. Generate and match</h2><p>The generated plan chooses a unique or explicitly hinted endpoint. Units, frames, and physical meaning still require your confirmation.</p><button id="generate">Prepare from selected interface or fragments</button><div id="planStatus" class="status">Waiting for a catalog and an interface choice or fragments.</div></div>
@@ -115,7 +115,7 @@ export function page(token: string): string {
 <div class="card"><h2>Adapter registry</h2><p>Data source, parser, and safety checks stay separate so integrations remain reusable.</p><div id="adapters" class="list"></div></div>
 <div class="card"><h2>4. Review the plan</h2><p>The plan shows recognized interfaces and gaps. The workspace ZIP below includes validated configuration and actual files after you confirm the remaining inputs.</p><div class="two"><label class="field">Reusable template ID<input id="templateId" value="local-project"></label><label class="field">Template version<input id="templateVersion" value="1.0.0"></label></div><label class="field">Reusable template name<input id="templateName" value="Local project rules"></label><p>Save after mapping fields to reuse them. Machine endpoint, receiver and frame remain parameters for the next project.</p><button id="download" disabled>Download plan JSON</button><button id="templateDownload" disabled class="secondary">Save reusable template</button><div id="summary" class="status">Next: read project files and discover interfaces.</div><div id="missingStatus" class="status"></div><details><summary>Advanced plan JSON</summary><pre id="preview">Nothing generated yet.</pre></details></div>
 </aside></div><section id="finish" class="card" hidden><h2>Finish the check workspace</h2><p>Review detected paths, attach actual files and provide a real example message or goal for each path. Confirm units and meaning from your interface documentation.</p><div id="finishFields"></div><button id="complete">Validate and download workspace ZIP</button><div id="completeStatus" class="status"></div></section></main><script>
-const token=${safeToken};let catalog=null,fragments=[],workspace=null,formControls=null,projectFiles=[],inspections=[];
+const token=${safeToken};let catalog=null,fragments=[],workspace=null,formControls=null,projectFiles=[],inspections=[],folderCandidates=[];
 const $=id=>document.getElementById(id);const show=(id,text,kind='')=>{const el=$(id);el.textContent=text;el.className='status '+kind};const render=(target,items)=>{const root=$(target);root.replaceChildren(...items.map(item=>{const row=document.createElement('div'),title=document.createElement('strong'),detail=document.createElement('small');row.className='item';title.textContent=item.title;detail.textContent=item.detail;row.append(title,detail);return row}))};
 async function api(path,payload){const response=await fetch('/'+token+'/api/'+path,{method:'POST',headers:{'content-type':'application/json','x-rlsok-session':token},body:JSON.stringify(payload||{})});const value=await response.json();if(!response.ok)throw new Error(value.error||'Request failed');return value}
 async function files(input){return Promise.all([...input.files].map(file=>file.text().then(JSON.parse)))}
@@ -133,8 +133,12 @@ function projectSuggestions(){
   const orders=new Map();for(const order of [...configs.flatMap(item=>item.jointOrderCandidates),...(robot?.movableJoints?.length?[robot.movableJoints]:[])])orders.set(JSON.stringify(order),order);
   return {robot,model:robot?.model||'',controllers:[...new Set(configs.flatMap(item=>item.controllerCandidates))],orders:[...orders.values()]};
 }
+function updateNextStep(){if(workspace)return;
+  const next=!inspections.length?(folderCandidates.length?'Click Inspect selected project files.':'Open a project folder or choose project files.'):!catalog?'Import a catalog or click Discover this ROS graph.':'Choose a discovered interface or reusable fragments, then click Prepare.';
+  show('summary','Next: '+next);
+}
 function showProject(){const suggestion=projectSuggestions();render('projectList',inspections.map(item=>({title:item.name+' · '+item.kind,detail:[item.model&&'model '+item.model,item.movableJoints?.length&&item.movableJoints.length+' movable joints',item.controllerCandidates.length&&item.controllerCandidates.length+' controller candidates',...item.warnings].filter(Boolean).join(' · ')||'File recognized; no safe configuration assumption.'})));
-  show('projectStatus',inspections.length+' files inspected. '+(suggestion.robot?'Expanded robot description recognized.':'Expanded URDF still needed.')+' '+(suggestion.orders.length?'Joint-order candidates found; confirm command order.':'Command joint order still needed.'),suggestion.robot?'good':'bad');}
+  show('projectStatus',inspections.length+' files inspected. '+(suggestion.robot?'Expanded robot description recognized.':'Expanded URDF still needed.')+' '+(suggestion.orders.length?'Joint-order candidates found; confirm command order.':'Command joint order still needed.'),suggestion.robot?'good':'bad');updateNextStep()}
 function fieldPointers(tree){if(!tree)return[];const output=[],root=tree.components.Goal||tree.components.Message;function walk(node,path,seen,depth){if(!node||output.length>=512||depth>16)return;if(path)output.push(path);if(node.kind==='message'&&!seen.includes(node.name))for(const field of tree.definitions[node.name]?.fields||[])walk(field.type,path+'/'+field.name,[...seen,node.name],depth+1);else if(node.kind==='array'||node.kind==='sequence')walk(node.element,path+'/0',seen,depth+1)}walk(root,'',[],0);return output}
 function updateMissing(){if(!workspace||!formControls){$('missingStatus').textContent='';return}const missing=[],robot=formControls.robot;
   for(const [key,label] of [['id','configuration ID'],['deviceId','device ID'],['model','robot model'],['controller','controller implementation']])if(!robot[key].value.trim())missing.push(label);
@@ -157,7 +161,7 @@ function renderInterfaceChoices(){
     if(item.kind==='topic'&&!['geometry_msgs/msg/Twist','geometry_msgs/msg/TwistStamped'].includes(item.type))continue;
     option(select,item.kind+'|'+item.endpoint,item.endpoint+' · '+item.type);
   }
-  renderAdapterChoices();
+  renderAdapterChoices();updateNextStep();
 }
 function renderAdapterChoices(){
   const select=$('starterAdapter');select.replaceChildren();option(select,'','Choose the documented meaning');
@@ -168,7 +172,10 @@ function renderAdapterChoices(){
   else if(action?.actionType==='control_msgs/action/FollowJointTrajectory'){option(select,'joint_trajectory','Standard joint trajectory');select.value='joint_trajectory'}
   else for(const [id,label] of [['cartesian_pose','Absolute XYZ meters / quaternion'],['cartesian_delta','Relative XYZ mm / WPR degrees'],['cartesian_absolute_wpr','Absolute XYZ mm / WPR degrees'],['tp_program','Allowlisted program selector']])option(select,id,label);
 }
-$('starterInterface').onchange=renderAdapterChoices;
+function invalidatePlan(){if(!workspace)return;workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';updateNextStep()}
+$('starterInterface').onchange=()=>{renderAdapterChoices();invalidatePlan()};
+$('starterAdapter').onchange=invalidatePlan;
+function useCatalog(value,origin){catalog=value;workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';renderInterfaceChoices();show('catalogStatus',(catalog.actions.length+(catalog.topics||[]).length)+' interfaces loaded from '+origin+'. Confirm the intended endpoint and meaning; a saved catalog is not live-state proof.','good')}
 function renderFinish(){
   const root=$('finishFields');root.replaceChildren();formControls={robot:{},paths:[],files:new Map()};
   if(!workspace){$('finish').hidden=true;updateMissing();return}
@@ -239,11 +246,42 @@ async function finish(){
 }
 fetch('/'+token+'/api/adapters',{headers:{'x-rlsok-session':token}}).then(r=>r.json()).then(items=>render('adapters',items.map(a=>({title:a.id,detail:a.source+' · '+a.purpose}))));
 $('finishFields').addEventListener('input',updateMissing);$('finishFields').addEventListener('change',updateMissing);
-$('projectFiles').onchange=async event=>{try{const selected=[...event.target.files];if(selected.length>16)throw new Error('Maximum 16 project files');if(selected.reduce((total,file)=>total+file.size,0)>24*1024*1024)throw new Error('Project files exceed 24 MiB');if(new Set(selected.map(file=>file.name)).size!==selected.length)throw new Error('Project files need distinct names');const next=[];for(const file of selected){if(file.size>8*1024*1024)throw new Error(file.name+' exceeds 8 MiB');const inspection=await api('inspect-project',{name:file.name,base64:base64(new Uint8Array(await file.arrayBuffer()))});next.push(inspection)}projectFiles=selected;inspections=next;showProject();if(workspace){workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;show('summary','Project files changed. Next: generate again so the saved template binds the selected files.','bad')}}catch(error){show('projectStatus',error.message||String(error),'bad')}};
-$('discover').onclick=async()=>{show('catalogStatus','Discovering…');try{catalog=await api('discover',{});renderInterfaceChoices();show('catalogStatus',(catalog.actions.length+(catalog.topics||[]).length)+' interfaces discovered.','good')}catch(e){show('catalogStatus',e.message,'bad')}};
-$('catalog').onchange=async e=>{try{catalog=(await files(e.target))[0];renderInterfaceChoices();show('catalogStatus',((catalog.actions||[]).length+(catalog.topics||[]).length)+' interfaces imported.','good')}catch(e){show('catalogStatus','Invalid catalog: '+e.message,'bad')}};
-$('fragments').onchange=async e=>{try{const added=await files(e.target);if(fragments.length+added.length>16)throw new Error('Maximum 16 fragments');fragments.push(...added);render('fragmentList',fragments.map((f,i)=>({title:f.metadata?.name||'Fragment '+(i+1),detail:(f.metadata?.id||'unknown')+'@'+(f.metadata?.version||'?')})))}catch(e){show('planStatus','Invalid fragment: '+e.message,'bad')}};
-$('clear').onclick=()=>{fragments=[];$('fragmentList').replaceChildren();workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.'};
+async function inspectProjectSelection(selected){
+  if(!selected.length)throw new Error('Choose at least one robot description or configuration file.');
+  if(selected.length>16)throw new Error('Maximum 16 project files. Select the files used by this robot.');
+  if(selected.reduce((total,file)=>total+file.size,0)>24*1024*1024)throw new Error('Project files exceed 24 MiB.');
+  if(new Set(selected.map(file=>file.name)).size!==selected.length)throw new Error('Selected project files have duplicate names. Choose one copy of each filename.');
+  const next=[];for(const file of selected){if(file.size>8*1024*1024)throw new Error(file.name+' exceeds 8 MiB');next.push(await api('inspect-project',{name:file.name,base64:base64(new Uint8Array(await file.arrayBuffer()))}))}
+  projectFiles=selected;inspections=next;showProject();
+  if(workspace){workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;show('summary','Project files changed. Next: generate again so the saved template binds the selected files.','bad')}
+}
+$('projectFiles').onchange=async event=>{try{await inspectProjectSelection([...event.target.files])}catch(error){show('projectStatus',error.message||String(error),'bad')}};
+$('projectFolder').onchange=async event=>{try{
+  const entries=[...event.target.files],ignored=/(?:^|\\/)(?:\\.git|node_modules|build|install|log|dist)(?:\\/|$)/i;
+  const catalogFiles=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/^(?:catalog|interface-catalog|rlsok-interface-catalog)\\.json$/i.test(file.name)&&file.size<=2*1024*1024);
+  folderCandidates=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/\\.(?:urdf|json|ya?ml)$/i.test(file.name)&&/^[A-Za-z0-9_. -]+$/.test(file.name)&&file.size<=8*1024*1024);
+  const xacro=entries.filter(file=>/\\.xacro$/i.test(file.name)).length;
+  if(folderCandidates.length>256)throw new Error('This folder has more than 256 candidate files. Choose the relevant files individually.');
+  projectFiles=[];inspections=[];catalog=null;workspace=null;renderFinish();render('projectList',[]);show('projectStatus','New folder selected. Inspect the actual files.');renderInterfaceChoices();show('catalogStatus','No catalog loaded for this folder. Discover this ROS graph or import one.');$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';
+  let catalogNote='',importedCatalog=null;
+  if(catalogFiles.length===1){try{const candidate=JSON.parse(await catalogFiles[0].text());if(candidate.kind==='RlsokInterfaceCatalog'){useCatalog(await api('validate-catalog',{catalog:candidate}),'this project folder');importedCatalog=catalogFiles[0];catalogNote=' Valid saved interface catalog loaded.'}}catch(error){catalogNote=' Saved catalog could not be validated: '+(error.message||String(error))+'. Import a valid catalog or discover the live graph.'}}
+  else if(catalogFiles.length>1)catalogNote=' Several saved catalogs found; choose the intended catalog explicitly.';
+  if(importedCatalog)folderCandidates=folderCandidates.filter(file=>file!==importedCatalog);
+  const root=$('folderChoices');root.replaceChildren();
+  for(const [index,file] of folderCandidates.entries()){
+    const label=document.createElement('label'),check=document.createElement('input'),text=document.createElement('span');
+    label.className='item';check.type='checkbox';check.dataset.index=String(index);
+    check.checked=folderCandidates.filter(item=>/\\.urdf$/i.test(item.name)).length===1&&/\\.urdf$/i.test(file.name)||/controller/i.test(file.name)&&/\\.(?:json|ya?ml)$/i.test(file.name);
+    text.textContent=' '+(file.webkitRelativePath||file.name)+' ('+Math.ceil(file.size/1024)+' KiB)';label.append(check,text);root.append(label);
+  }
+  $('inspectFolder').hidden=!folderCandidates.length;
+  show('folderStatus',folderCandidates.length+' project candidates found'+(xacro?'; '+xacro+' Xacro sources need an expanded URDF before joint names can be trusted':'')+'. Select the actual robot and controller files, then inspect. Files stay local.'+catalogNote,folderCandidates.length?'good':'bad');updateNextStep();
+}catch(error){folderCandidates=[];$('folderChoices').replaceChildren();$('inspectFolder').hidden=true;show('folderStatus',error.message||String(error),'bad')}};
+$('inspectFolder').onclick=async()=>{try{const selected=[...$('folderChoices').querySelectorAll('input:checked')].map(input=>folderCandidates[Number(input.dataset.index)]);await inspectProjectSelection(selected)}catch(error){show('projectStatus',error.message||String(error),'bad')}};
+$('discover').onclick=async()=>{show('catalogStatus','Discovering…');try{useCatalog(await api('discover',{}),'this ROS graph')}catch(e){show('catalogStatus',e.message,'bad')}};
+$('catalog').onchange=async e=>{try{useCatalog(await api('validate-catalog',{catalog:(await files(e.target))[0]}),'the selected catalog')}catch(e){show('catalogStatus','Invalid catalog: '+e.message,'bad')}};
+$('fragments').onchange=async e=>{try{const added=await files(e.target);if(fragments.length+added.length>16)throw new Error('Maximum 16 fragments');fragments.push(...added);render('fragmentList',fragments.map((f,i)=>({title:f.metadata?.name||'Fragment '+(i+1),detail:(f.metadata?.id||'unknown')+'@'+(f.metadata?.version||'?')})));invalidatePlan()}catch(e){show('planStatus','Invalid fragment: '+e.message,'bad')}};
+$('clear').onclick=()=>{fragments=[];$('fragmentList').replaceChildren();workspace=null;renderFinish();$('download').disabled=true;$('templateDownload').disabled=true;$('preview').textContent='Nothing generated yet.';updateNextStep()};
 $('generate').onclick=async()=>{if(!catalog||(!fragments.length&&!$('starterInterface').value)){show('planStatus','Load a catalog and choose an interface or fragments.','bad');return}show('planStatus','Generating…');try{const [kind,endpoint]=$('starterInterface').value.split('|');const result=await api('generate',{catalog,fragments,starter:{kind,endpoint,adapter:$('starterAdapter').value,projectFiles:inspections.map(item=>({name:item.name,kind:item.kind}))}});workspace=result;$('preview').textContent=JSON.stringify(result,null,2);const ready=result.plan.readyForConfiguration;show('planStatus',ready?'All declared interfaces matched. Confirm semantics and finish required inputs.':'Plan generated with missing or ambiguous interfaces. Review the preview. ',ready?'good':'bad');show('summary',result.plan.paths.filter(path=>path.status==='MATCHED').length+' of '+result.plan.paths.length+' interfaces recognized; '+result.plan.paths.filter(path=>path.status!=='MATCHED').length+' need selection or discovery.',ready?'good':'bad');$('download').disabled=false;$('templateDownload').disabled=false;renderFinish()}catch(e){show('planStatus',e.message,'bad')}};
 $('download').onclick=()=>{if(!workspace)return;const blob=new Blob([JSON.stringify(workspace,null,2)+'\\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rlsok-local-setup-workspace.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
 $('templateDownload').onclick=()=>{try{const template=reusableTemplate(),blob=new Blob([JSON.stringify(template,null,2)+'\\n'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rlsok-connection-template.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);show('planStatus','Versioned private template downloaded. Re-import it and supply machine-specific parameters on the next project.','good')}catch(error){show('planStatus',error.message||String(error),'bad')}};
@@ -279,6 +317,10 @@ export async function runSetupAssistant(args: string[]): Promise<number> {
       }
       if (request.headers['x-rlsok-session'] !== token) { json(response, 403, { error: 'invalid_session' }); return; }
       if (url.pathname === `${base}/api/adapters` && request.method === 'GET') { json(response, 200, ADAPTERS); return; }
+      if (url.pathname === `${base}/api/validate-catalog` && request.method === 'POST') {
+        const input = await body(request) as { catalog?: unknown };
+        json(response, 200, await readCatalog(input.catalog)); return;
+      }
       if (url.pathname === `${base}/api/inspect-project` && request.method === 'POST') {
         const input = await body(request, 12 * 1024 * 1024) as { name?: string; base64?: string };
         json(response, 200, inspectProjectFile(input.name ?? '', input.base64 ?? '')); return;
