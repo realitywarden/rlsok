@@ -1,0 +1,159 @@
+name: Verify Mac Local Check candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Numbered version in an existing same-source draft release
+        required: true
+        type: string
+      linux_sha256:
+        description: Exact SHA-256 of the draft Linux Local Check archive
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verify-macos-local-check-${{ inputs.version }}
+  cancel-in-progress: false
+
+env:
+  GH_REPO: ${{ github.repository }}
+  VERSION: ${{ inputs.version }}
+  LINUX_SHA256: ${{ inputs.linux_sha256 }}
+
+jobs:
+  validate-input:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Require an exact same-source draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$LINUX_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          test "$(node -p 'require("./package.json").version')" = "$VERSION"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(gh release view "v$VERSION" --json isDraft --jq .isDraft)" = true
+          test "$(gh release view "v$VERSION" --json targetCommitish --jq .targetCommitish)" = "$GITHUB_SHA"
+
+  build-install-run:
+    needs: validate-input
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            arch: arm64
+            uname_arch: arm64
+          - runner: macos-15-intel
+            arch: x64
+            uname_arch: x86_64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Fetch the exact draft Linux payload
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(uname -s)" = Darwin
+          test "$(uname -m)" = "${{ matrix.uname_arch }}"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          mkdir "$RUNNER_TEMP/release-input"
+          archive="rlsok-local-check-$VERSION-linux-x64.tar.gz"
+          gh release download "v$VERSION" --pattern "$archive" --dir "$RUNNER_TEMP/release-input"
+          actual="$(shasum -a 256 "$RUNNER_TEMP/release-input/$archive" | awk '{print $1}')"
+          test "$actual" = "$LINUX_SHA256"
+      - name: Build, install and execute the native candidate
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/release-input/rlsok-local-check-$VERSION-linux-x64.tar.gz"
+          python3 scripts/build-macos-local-check.py \
+            --arch "${{ matrix.arch }}" --version "$VERSION" \
+            --source-commit "$GITHUB_SHA" --linux-sha256 "$LINUX_SHA256" \
+            --linux-bundle "$archive" --node-cache "$RUNNER_TEMP/node-cache" \
+            --output "$RUNNER_TEMP/macos-payload"
+          native_tar="$RUNNER_TEMP/macos-payload/rlsok-local-check-$VERSION-macos-${{ matrix.arch }}.tar.gz"
+          mkdir "$RUNNER_TEMP/extracted"
+          tar -xzf "$native_tar" -C "$RUNNER_TEMP/extracted"
+          "$RUNNER_TEMP/extracted/rlsok-local-check-$VERSION/build-pkg.sh" "$RUNNER_TEMP/native-installer"
+          pkg="$RUNNER_TEMP/native-installer/RLSOK-Local-Check-$VERSION-macos-${{ matrix.arch }}.pkg"
+          sudo /usr/sbin/installer -pkg "$pkg" -target /
+          app="/Applications/RLSOK Local Check $VERSION.app"
+          bundle="$app/Contents/Resources/local-check"
+          test "$(cat "$bundle/VERSION")" = "$VERSION"
+          test "$(cat "$bundle/SOURCE_COMMIT")" = "$GITHUB_SHA"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist")" = "$VERSION"
+          /usr/bin/file "$app/Contents/MacOS/RLSOKLocalCheck" | grep -q "${{ matrix.uname_arch }}"
+          "$app/Contents/MacOS/RLSOKLocalCheck" --self-check | grep -Fx "RLSOK_MAC_UI_SELF_CHECK_OK version=$VERSION"
+          /usr/bin/file "$bundle/bin/node" | grep -q "${{ matrix.uname_arch }}"
+          test "$("$bundle/bin/rlsok" --version)" = "RLSOK $VERSION"
+          test -f "$bundle/docs/local-data-self-service.md"
+          "$bundle/bin/rlsok" profile help | grep -q 'check-local-data'
+          "$bundle/bin/rlsok" setup-assistant --help | grep -q 'usage: rlsok setup-assistant'
+      - name: Upload checksums and verification to the draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          arch="${{ matrix.arch }}"
+          native_tar="$RUNNER_TEMP/macos-payload/rlsok-local-check-$VERSION-macos-$arch.tar.gz"
+          pkg="$RUNNER_TEMP/native-installer/RLSOK-Local-Check-$VERSION-macos-$arch.pkg"
+          (cd "$(dirname "$native_tar")" && shasum -a 256 "$(basename "$native_tar")" > "$(basename "$native_tar").sha256")
+          (cd "$(dirname "$pkg")" && shasum -a 256 "$(basename "$pkg")" > "$(basename "$pkg").sha256")
+          python3 - "$arch" "$native_tar" "$pkg" "$RUNNER_TEMP/macos-$arch-verification.json" <<'PY'
+          import hashlib, json, os, pathlib, platform, subprocess, sys
+          arch, tar_name, pkg_name, output = sys.argv[1:]
+          digest = lambda name: hashlib.sha256(pathlib.Path(name).read_bytes()).hexdigest()
+          record = {
+              "schema": "rlsok.io/macos-local-check-verification/v1",
+              "version": os.environ["VERSION"],
+              "sourceCommit": os.environ["GITHUB_SHA"],
+              "packagingSourceCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+              "runnerArchitecture": platform.machine(),
+              "payloadArchitecture": arch,
+              "payload": {"name": pathlib.Path(tar_name).name, "sha256": digest(tar_name)},
+              "installer": {"name": pathlib.Path(pkg_name).name, "sha256": digest(pkg_name)},
+              "nativeInstall": "passed",
+              "nativeConsoleSelfCheck": "passed",
+              "nativeCliVersion": "RLSOK " + os.environ["VERSION"],
+              "localDataCliPresent": True,
+              "developerIdSigned": False,
+              "notarized": False,
+              "hardwareDispatch": False,
+          }
+          pathlib.Path(output).write_text(json.dumps(record, indent=2) + "\n")
+          PY
+          gh release upload "v$VERSION" \
+            "$native_tar" "$native_tar.sha256" "$pkg" "$pkg.sha256" \
+            "$RUNNER_TEMP/macos-$arch-verification.json"
+
+  verify-draft:
+    needs: build-install-run
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check Mac draft assets without publishing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir release-assets
+          gh release download "v$VERSION" --pattern '*macos-*' --dir release-assets
+          for arch in arm64 x64; do
+            test -f "release-assets/RLSOK-Local-Check-$VERSION-macos-$arch.pkg"
+            test -f "release-assets/RLSOK-Local-Check-$VERSION-macos-$arch.pkg.sha256"
+            test -f "release-assets/rlsok-local-check-$VERSION-macos-$arch.tar.gz"
+            test -f "release-assets/rlsok-local-check-$VERSION-macos-$arch.tar.gz.sha256"
+            test -f "release-assets/macos-$arch-verification.json"
+            jq -e --arg version "$VERSION" --arg source "$GITHUB_SHA" \
+              '.version == $version and .sourceCommit == $source and .nativeInstall == "passed" and .nativeConsoleSelfCheck == "passed" and .localDataCliPresent == true and .developerIdSigned == false and .notarized == false' \
+              "release-assets/macos-$arch-verification.json" >/dev/null
+          done
+          (cd release-assets && sha256sum -c ./*.sha256)
+          test "$(gh release view "v$VERSION" --json isDraft --jq .isDraft)" = true
