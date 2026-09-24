@@ -418,7 +418,7 @@ $('projectFolder').onchange=async event=>{try{
   folderXacroFiles=folderXacroResources.filter(item=>/\\.xacro$/i.test(item.path));renderXacroChoices();
   const interfaceFiles=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&/\\.(?:msg|action|srv|idl)$/i.test(file.name)&&/^[A-Za-z0-9_. -]+$/.test(file.name)&&file.size<=1024*1024);
   folderInterfaceFiles=interfaceFiles.slice(0,4096);renderProjectDeclarationChoices(interfaceFiles.length);
-  const allCandidates=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&!/^\./.test(file.name)&&/\\.(?:urdf|srdf|json|ya?ml)$/i.test(file.name)&&/^[A-Za-z0-9_. -]+$/.test(file.name)&&file.size<=8*1024*1024&&!catalogFiles.includes(file)&&!templateFiles.includes(file));
+  const allCandidates=entries.filter(file=>!ignored.test(file.webkitRelativePath||file.name)&&!/^\\./.test(file.name)&&/\\.(?:urdf|srdf|json|ya?ml)$/i.test(file.name)&&/^[A-Za-z0-9_. -]+$/.test(file.name)&&file.size<=8*1024*1024&&!catalogFiles.includes(file)&&!templateFiles.includes(file));
   localDataProjectCandidates=allCandidates.filter(file=>/\\.(?:json|ya?ml)$/i.test(file.name)).slice(0,256);
   const localChoices=$('localDataProjectFile');localChoices.replaceChildren();option(localChoices,'',localDataProjectCandidates.length?'Choose a project data file':'No JSON/YAML data candidates found');
   localDataProjectCandidates.forEach((file,index)=>option(localChoices,String(index),file.webkitRelativePath||file.name));

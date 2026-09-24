@@ -47,6 +47,7 @@ test('local assistant serves syntactically valid browser logic with reusable tem
   assert.match(html, /id="localDataSaveTemplate"/);
   assert.match(html, /id="localDataProjectFile"/);
   assert.match(html, /localDataProjectCandidates=allCandidates/);
+  assert.ok(script.includes('!/^\\./.test(file.name)'), 'ordinary project filenames must not be filtered as hidden');
   assert.match(html, /api\/local-data-workspace/);
 });
 
